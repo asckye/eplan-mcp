@@ -11,6 +11,9 @@ namespace EplanMcp.Host.Safety;
 internal sealed record ApprovalResult(string? Channel, ApprovalDecision Decision)
 {
     public IApprovalOutcome? Outcome { get; init; }
+
+    /// <summary>The engineer started this write in the Workbench (ADR-0065 decision 5); for the audit.</summary>
+    public bool StartedInWorkbench { get; init; }
 }
 
 /// <summary>
@@ -105,7 +108,7 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
                     answer.Outcome?.Dispose();
                 }
 
-                return new ApprovalResult(channel.Name, decision) { Outcome = shows ? answer.Outcome : null };
+                return new ApprovalResult(channel.Name, decision) { Outcome = shows ? answer.Outcome : null, StartedInWorkbench = answer.StartedInWorkbench };
             }
         }
 

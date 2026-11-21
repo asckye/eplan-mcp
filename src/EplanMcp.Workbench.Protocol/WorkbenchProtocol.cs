@@ -6,8 +6,11 @@ namespace EplanMcp.Workbench.Protocol;
 /// </summary>
 public static class WorkbenchProtocol
 {
-    /// <summary>The protocol version this build speaks. Bumped on any incompatible change.</summary>
-    public const int CurrentVersion = 1;
+    /// <summary>
+    /// The protocol version this build speaks. Bumped on any incompatible change. Version 2 (ADR-0064, ADR-0065) adds
+    /// optional fields: the question's target and action, the answer's <see cref="ApprovalAskResult.InitiatedBy"/>.
+    /// </summary>
+    public const int CurrentVersion = 2;
 
     /// <summary>The oldest version still spoken: N-1 once there is a version 2.</summary>
     public const int MinimumSupportedVersion = 1;
@@ -32,6 +35,9 @@ public static class WorkbenchProtocol
 
     /// <summary>Notification after the write (<see cref="ApprovalOutcomeParams"/>): updates what the Workbench shows, approves nothing.</summary>
     public const string ApprovalOutcomeMethod = "approval.outcome";
+
+    /// <summary>The value of <see cref="ApprovalAskResult.InitiatedBy"/> for a write the engineer started in the Workbench.</summary>
+    public const string InitiatedByWorkbench = "workbench";
 
     /// <summary>JSON-RPC error code of a handshake whose version range the Workbench does not speak.</summary>
     public const int UnsupportedVersionErrorCode = -32001;

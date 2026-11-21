@@ -122,7 +122,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         Released(await Channel().AskAsync(question, Token));
 
         WorkbenchHandshake hello = Assert.Single(_workbench.Handshakes);
-        Assert.Equal((1, 1, HostInfo.Version, Environment.ProcessId), (hello.ProtocolVersion, hello.MinProtocolVersion, hello.HostVersion, hello.HostProcessId));
+        Assert.Equal((2, 1, HostInfo.Version, Environment.ProcessId), (hello.ProtocolVersion, hello.MinProtocolVersion, hello.HostVersion, hello.HostProcessId));
         ApprovalAskParams ask = Assert.Single(_workbench.Asks);
         Assert.Equal(("r1", QuestionKind.Approval, "eplan_page_create", QuestionTier.Write), (ask.RequestId, ask.Kind, ask.Tool, ask.Tier));
         Assert.Equal(new ProjectInfo("Line1", @"D:\Projects\Line1"), ask.Project);

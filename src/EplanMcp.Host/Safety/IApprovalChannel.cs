@@ -57,6 +57,12 @@ internal sealed record ApprovalAnswer(string RequestId, string Fingerprint, stri
     /// <see cref="ApprovalService"/> passes it on when the grant counts, and disposes it otherwise.
     /// </summary>
     public IApprovalOutcome? Outcome { get; init; }
+
+    /// <summary>
+    /// The Workbench answered for a write the engineer started there (ADR-0065 decision 3, protocol 2); recorded in the
+    /// audit only, the decision counts as any other.
+    /// </summary>
+    public bool StartedInWorkbench { get; init; }
 }
 
 /// <summary>

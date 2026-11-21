@@ -134,7 +134,8 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
                 WorkbenchDecision.Rejected => ApprovalDecision.Denied,
                 WorkbenchDecision.Expired => ApprovalDecision.Expired,
                 _ => ApprovalDecision.Cancelled,
-            });
+            })
+            { StartedInWorkbench = result.InitiatedBy == WorkbenchProtocol.InitiatedByWorkbench };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

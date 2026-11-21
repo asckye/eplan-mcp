@@ -40,6 +40,18 @@ public sealed class WritePipelineTests : IDisposable
     public void Dispose() => Directory.Delete(_locations.Root, recursive: true);
 
     [Fact]
+    public void HashArguments_IsTheWorkbenchsToo_SoItRecognisesTheWritesItStarts()
+    {
+        // ADR-0065: the Workbench hashes the same Contracts argument object; the Host's JSON settings must not drift apart.
+        var args = new CheckRunArgs { Project = "Line1", Pages = ["=A1&EFS1/1"], Scheme = "Ölwanne" };
+
+        Assert.Equal(Workbench.Protocol.ArgumentsHash.Of(args), WritePipeline.HashArguments(args));
+        Assert.Equal(
+            System.Text.Json.JsonSerializer.Serialize(args, HostJson.Options),
+            System.Text.Json.JsonSerializer.Serialize(args, Workbench.Protocol.ArgumentsHash.Options));
+    }
+
+    [Fact]
     public void HashArguments_DependsOnEveryValue()
     {
         Assert.Equal(WritePipeline.HashArguments(new { a = 1, b = "x" }), WritePipeline.HashArguments(new { a = 1, b = "x" }));

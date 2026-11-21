@@ -467,7 +467,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         await using NamedPipeClientStream pipe = await ConnectAsync();
 
-        await SendAsync(pipe, WorkbenchJson.Request(1, WorkbenchProtocol.HandshakeMethod, new WorkbenchHandshake(3, 2, "9.0.0", Environment.ProcessId)));
+        await SendAsync(pipe, WorkbenchJson.Request(1, WorkbenchProtocol.HandshakeMethod, new WorkbenchHandshake(4, 3, "9.0.0", Environment.ProcessId)));
 
         Assert.Equal(WorkbenchProtocol.UnsupportedVersionErrorCode, (await ReceiveAsync(pipe))!.Error!.Code);
         Assert.Null(await ReceiveOrEndAsync(pipe));

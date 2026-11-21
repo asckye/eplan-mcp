@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
@@ -454,8 +453,8 @@ internal sealed partial class WritePipeline(
 
     /// <summary>The SHA-256 of the arguments as the tool serializes them, so the approval binds to exactly these.</summary>
     // SEC-20: hash original arguments to preserve exact approval binding; AuditLog redacts only the stored copy.
-    internal static string HashArguments<TArgs>(TArgs args) =>
-        Convert.ToHexStringLower(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(args, HostJson.Options)));
+    // ADR-0065: the Workbench computes the same hash for a write it sends itself, so both use one implementation.
+    internal static string HashArguments<TArgs>(TArgs args) => Workbench.Protocol.ArgumentsHash.Of(args);
 
     /// <summary>The change list as one line per change, for the audit, the suspension and the approval form.</summary>
     internal static IEnumerable<string> ChangeLines(WritePlan plan) => WriteChangeLines.For(plan);
@@ -569,6 +568,10 @@ internal sealed partial class WritePipeline(
     {
         record["channel"] = approval.Channel;
         record["decision"] = JsonNamingPolicy.SnakeCaseLower.ConvertName(approval.Decision.ToString());
+        if (approval.StartedInWorkbench)
+        {
+            record["initiatedBy"] = "engineer.workbench"; // ADR-0065 decision 5: an optional field, old records unchanged
+        }
         if (approval.Decision != ApprovalDecision.Granted)
         {
             await AppendQuietlyAsync(record).ConfigureAwait(false);

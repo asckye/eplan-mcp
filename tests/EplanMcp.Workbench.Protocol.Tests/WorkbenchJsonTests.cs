@@ -42,6 +42,22 @@ public sealed class WorkbenchJsonTests
     }
 
     [Fact]
+    public void Protocol2Fields_GoOnTheWireOnlyWhenSet_SoAVersion1PeerReadsEverythingElse()
+    {
+        // ADR-0064 and ADR-0065: optional fields; a version 1 peer refuses unknown ones, so an unset field is not sent.
+        ApprovalAskParams targeted = _ask with { Target = new ApprovalTarget("page", "=A1&EFS1/5", 1), Action = "delete" };
+        JsonNode ask = JsonNode.Parse(WorkbenchJson.Request(7, WorkbenchProtocol.ApprovalAskMethod, targeted))!;
+        Assert.True(JsonNode.DeepEquals(JsonNode.Parse("""{"kind":"page","id":"=A1&EFS1/5","count":1}"""), ask["params"]!["target"]));
+        Assert.Equal("delete", ask["params"]!["action"]!.GetValue<string>());
+        ApprovalAskParams read = WorkbenchJson.As<ApprovalAskParams>(WorkbenchJson.Read(WorkbenchJson.Request(7, WorkbenchProtocol.ApprovalAskMethod, targeted)).Params);
+        Assert.Equal(targeted, read with { Changes = targeted.Changes });
+
+        JsonNode plain = JsonNode.Parse(WorkbenchJson.Result(7, new ApprovalAskResult("r1", "f1", "h1", WorkbenchDecision.Approved)))!;
+        Assert.True(JsonNode.DeepEquals(JsonNode.Parse("""{"requestId":"r1","fingerprint":"f1","argumentsHash":"h1","decision":"approved"}"""), plain["result"]));
+        var started = new ApprovalAskResult("r1", "f1", "h1", WorkbenchDecision.Approved, WorkbenchProtocol.InitiatedByWorkbench);
+        Assert.Equal(started, WorkbenchJson.As<ApprovalAskResult>(WorkbenchJson.Read(WorkbenchJson.Result(7, started)).Result));
+    }
+    [Fact]
     public void EveryMessage_ReadsBackAsWritten()
     {
         var release = _ask with

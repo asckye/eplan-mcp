@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace EplanMcp.Workbench.Protocol;
 
 /// <summary>
@@ -21,6 +23,11 @@ namespace EplanMcp.Workbench.Protocol;
 /// <param name="Fingerprint">The fingerprint of the plan the change list shows.</param>
 /// <param name="ArgumentsHash">The SHA-256 of the write's arguments.</param>
 /// <param name="DeadlineUnixMs">When the question expires, in Unix milliseconds (UTC).</param>
+/// <param name="Target">Protocol 2 (ADR-0064): what the write is about; null when the Host does not say.</param>
+/// <param name="Action">
+/// Protocol 2 (ADR-0064): <c>delete</c>, <c>renumber</c>, <c>overwrite</c>, <c>import</c> or <c>other</c>, for the
+/// Workbench's own button words; null when the Host does not say. A value the Workbench does not know reads as <c>other</c>.
+/// </param>
 public sealed record ApprovalAskParams(
     string RequestId,
     QuestionKind Kind,
@@ -34,4 +41,6 @@ public sealed record ApprovalAskParams(
     SuspensionRecord? Suspension,
     string Fingerprint,
     string ArgumentsHash,
-    long DeadlineUnixMs);
+    long DeadlineUnixMs,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ApprovalTarget? Target = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Action = null);
