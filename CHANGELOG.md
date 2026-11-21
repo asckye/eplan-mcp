@@ -18,10 +18,12 @@
 - Workbench 按新的界面设计稿改版：随软件附带 Inter 和 JetBrains Mono 字体（SIL OFL 1.1，ADR-0034 第 3 条修订），正文字号改为 12.5；审批页的待审队列和已处理同时显示，操作区改为一行；检查、日志、审计页改用设计稿的卡片、标签和等宽字体。
 - Workbench 外壳按新的界面设计调整：标题栏、导航栏、状态栏的尺寸、图标和颜色。
 - Workbench 改版：页面改为项目工作区、协作与审批、MCP 服务、AI 客户端、环境检查、审计记录、运行日志、偏好与安全八页；设置由抽屉改为独立的一页；新增命令面板（Ctrl+K）和第二种强调色。客户端配置在“AI 客户端”页，虚拟机连接在“MCP 服务”页。
+- 开发工具：`EplanMcp.Catalog diff` 比较两个版本的 API 目录并标出插件用到的成员；仓库里新增 EPLAN 2025.0.3.23616 的 API 目录和与 2026 的对比结果（外部贡献，ADR-0060 后续行动第 1 步，api-notes B20）。
 - `eplan_api_try`（默认关闭）开放部件库对象的删除（ADR-0059 部件库一档的第一段，25 组）：部件上的各类位置（`MDPart.Remove…Position`）、部件库里的附件清单、附件布置、连接点信息、钻孔图、客户、制造商及它们的位置（`MDPartsDatabase.Remove…` 等）。和已开放的 `Add…` 一样按主数据写入处理：EPLAN 当前配置的部件库必须是 scratch 根目录下的文件副本，每次都要审批，先备份；没有撤销步骤。系统符号库的删除、`ImportParts`、对话框和注册类成员仍不开放。
 
 ### 修复
 
+- `install-addin`、`eplan_session_close` 和 `eplan_session_restart` 不再被 EPLAN 的系统消息窗口卡住（[#664](https://github.com/asckye/eplan-mcp/issues/664)，外部贡献）：请求 EPLAN 关闭之前，先关掉启动时弹出的系统消息窗口（按窗口布局识别，不看标题；只关这一种窗口，其他窗口一律不动，也从不强制结束 EPLAN），其中的消息保留在 EPLAN 的系统日志 `EplLog.eldb` 里。被别的窗口挡住时，`install-addin` 报告新的 `eplan_not_closed` 并写明是哪个窗口，不再误报 `path_mismatch`；两个会话工具的结果新增 `closedWindows`，超时时说明挡住的窗口（api-notes A172）。
 - 按名称查找功能的两处不再漏看：把未放置的功能分配给已放置功能（`eplan_device_update` 分配部件、`eplan_device_place` 的 `join_device`、`eplan_plc_rack`）时，EPLAN 按名称过滤会漏掉一部分已放置的功能，它们因此得不到分配；放置 PLC 点时找所属卡件和总览里的对应点也受同样影响，漏掉对应点时新点会用符号默认的输入定义。现在与完整读取合并，或在找不到时改按页读取（A170）。
 - 查重、改名和重编号不再漏看一部分设备：EPLAN 不带条件读取功能时会漏掉一部分已放置的功能（A170），此前这几处都用这种读法。受影响的是 `eplan_device_update` 改名前的“新标识是否已被占用”、`eplan_device_place` 和 `eplan_plc_rack` 新建时的查重、改名时“目标是否已有主功能”的判断、整个项目的 `eplan_device_renumber`、新建端子排时的同名检查、`eplan_connection_create` 电缆定义的名称清单，以及设备放置后的数量核对。漏看时改名或新建可能落到一个已存在的标识上，EPLAN 会把两个设备合并而不提示。现在都改用完整的读取（每次多约 0.1 秒）。
 - `eplan_project_get` 的设备计数与 `eplan_device_list` 一致了：此前它只用 EPLAN 不带条件的读取，会漏掉一部分功能（示例项目上报 504 个，列表是 507 个）。现在同样合并逐页读取，并按设备标识计数（A170）。
