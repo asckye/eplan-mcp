@@ -71,3 +71,5 @@
 | [0062](0062-vm-http-without-shared-key.md) | 虚拟机 HTTP 不再用共享密钥，由只放行宿主机的防火墙规则加 Host 头和 Origin 校验把关（修订 ADR-0018） | Accepted | 单向门 |
 | [0063](0063-eplan-window-watch.md) | Host 看守 EPLAN 的窗口：名单内的无害窗口自动关闭，其余如实报告 | Proposed（2026-11-20 提出，等项目负责人确认） | 单向门 |
 | [0064](0064-approval-target-fields.md) | 审批问题带上结构化的目标和动作，破坏性确认改为输入目标标识（落实 ADR-0035 第 2 条） | Proposed（2026-11-20 提出，等项目负责人确认） | 双向门 |
+| [0065](0065-workbench-as-host-client.md) | Workbench 作为 Host 的一个客户端，读取项目数据并执行工程师发起的操作 | Proposed（2026-11-20 提出，等项目负责人确认） | 双向门 |
+| [0066](0066-manual-update-check.md) | Workbench 只在工程师点击时检查更新，只读版本号，不下载 | Proposed（2026-11-20 提出，等项目负责人确认） | 双向门 |
