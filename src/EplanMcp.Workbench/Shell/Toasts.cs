@@ -18,7 +18,7 @@ internal enum ToastTone
 }
 
 /// <summary>
-/// Short messages in the window's corner (the 2026-11-20 design, section 5.3): what just happened, in words, with a dot in
+/// Short messages at the bottom centre of the window (the Workbench 4.0 design): what just happened, in words, with a dot in
 /// its tone. A toast takes no input and goes away by itself after <see cref="Lifetime"/>; screen readers hear it through a
 /// polite live region. Anything that needs an answer or must stay (a question, an error to act on) is not a toast.
 /// </summary>

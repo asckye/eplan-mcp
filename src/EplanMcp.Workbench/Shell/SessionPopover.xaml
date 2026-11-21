@@ -1,0 +1,35 @@
+<UserControl
+    x:Class="EplanMcp.Workbench.Shell.SessionPopover"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
+    Width="372" KeyboardNavigation.TabNavigation="Cycle" PreviewKeyDown="OnPreviewKeyDown">
+  <!-- The Workbench 4.0 design's session popover: the approval pipe and the EPLAN the last question came from. -->
+  <Border Style="{StaticResource Workbench.Popover}" AutomationProperties.IsDialog="True" AutomationProperties.Name="{l:Tr Session.Title}">
+    <StackPanel>
+      <DockPanel>
+        <Border x:Name="StateTag" DockPanel.Dock="Right" Style="{StaticResource Workbench.Tag.Success}">
+          <TextBlock x:Name="StateText" VerticalAlignment="Center" />
+        </Border>
+        <TextBlock x:Name="Heading" Text="{l:Tr Session.Title}" Style="{StaticResource Workbench.PopoverTitle}" Focusable="True" />
+      </DockPanel>
+
+      <TextBlock Text="{l:Tr Session.Last}" Style="{StaticResource Workbench.PopoverCaption}" />
+      <Border x:Name="LastTile" Style="{StaticResource Workbench.PopoverTile}">
+        <StackPanel>
+          <DockPanel>
+            <TextBlock x:Name="ProcessText" DockPanel.Dock="Right" Style="{StaticResource Workbench.StatusMono}" />
+            <TextBlock x:Name="EplanText" Style="{StaticResource Workbench.StatusEnv}" TextTrimming="CharacterEllipsis" />
+          </DockPanel>
+          <TextBlock x:Name="DetailText" Style="{StaticResource Workbench.StatusMuted}" TextTrimming="CharacterEllipsis" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+        </StackPanel>
+      </Border>
+      <TextBlock x:Name="NoneText" Text="{l:Tr Session.None}" Style="{StaticResource Workbench.RowHelp}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+
+      <UniformGrid Columns="2" Margin="{StaticResource Ui.Gap.Top.Normal}">
+        <Button x:Name="ChecksButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Session.Checks}" Margin="{StaticResource Ui.Gap.Right.XXS}" Click="OnChecks" />
+        <Button x:Name="CloseButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Shell.Close}" Margin="{StaticResource Ui.Gap.Left.XXS}" Click="OnClose" />
+      </UniformGrid>
+    </StackPanel>
+  </Border>
+</UserControl>

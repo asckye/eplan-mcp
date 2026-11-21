@@ -236,7 +236,7 @@
   </Style>
 
   <Style x:Key="Workbench.TitleBar" TargetType="Border">
-    <Setter Property="Height" Value="40" />
+    <Setter Property="Height" Value="38" />
     <Setter Property="Background" Value="{DynamicResource Workbench.sidebarBg}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
     <Setter Property="BorderThickness" Value="0,0,0,1" />
@@ -256,9 +256,9 @@
   <Geometry x:Key="Workbench.Icon.Approvals">M12,22 C12,22 20,18 20,12 V5 L12,2 L4,5 V12 C4,18 12,22 12,22 Z M9,12 L11,14 L15,10</Geometry>
   <Geometry x:Key="Workbench.Icon.Mcp">M4,2 H20 A2,2 0 0 1 22,4 V8 A2,2 0 0 1 20,10 H4 A2,2 0 0 1 2,8 V4 A2,2 0 0 1 4,2 Z M4,14 H20 A2,2 0 0 1 22,16 V20 A2,2 0 0 1 20,22 H4 A2,2 0 0 1 2,20 V16 A2,2 0 0 1 4,14 Z M6,6 H6.01 M6,18 H6.01</Geometry>
   <Geometry x:Key="Workbench.Icon.Clients">M4,3 H20 A2,2 0 0 1 22,5 V15 A2,2 0 0 1 20,17 H4 A2,2 0 0 1 2,15 V5 A2,2 0 0 1 4,3 Z M8,21 H16 M12,17 V21</Geometry>
-  <Geometry x:Key="Workbench.Icon.Checks">M9,11 L12,14 L22,4 M21,12 V19 A2,2 0 0 1 19,21 H5 A2,2 0 0 1 3,19 V5 A2,2 0 0 1 5,3 H16</Geometry>
-  <Geometry x:Key="Workbench.Icon.Audit">M14,2 H6 A2,2 0 0 0 4,4 V20 A2,2 0 0 0 6,22 H18 A2,2 0 0 0 20,20 V8 Z M14,2 V8 H20 M16,13 H8 M16,17 H8</Geometry>
-  <Geometry x:Key="Workbench.Icon.Logs">M4,17 L10,11 L4,5 M12,19 H20</Geometry>
+  <Geometry x:Key="Workbench.Icon.Checks">M22,12 L18,12 L15,21 L9,3 L6,12 L2,12</Geometry>
+  <Geometry x:Key="Workbench.Icon.Audit">M14,2 H6 A2,2 0 0 0 4,4 V20 A2,2 0 0 0 6,22 H18 A2,2 0 0 0 20,20 V8 Z M14,2 V8 H20 M9,15 L11,17 L15,13</Geometry>
+  <Geometry x:Key="Workbench.Icon.Logs">M4,6 H20 M4,12 H20 M4,18 H14</Geometry>
   <Geometry x:Key="Workbench.Icon.Settings">M15,12 A3,3 0 1 1 9,12 A3,3 0 1 1 15,12 M19.4,15 A1.65,1.65 0 0 0 19.73,16.82 L19.79,16.88 A2,2 0 1 1 16.96,19.71 L16.9,19.65 A1.65,1.65 0 0 0 15.08,19.32 A1.65,1.65 0 0 0 14.08,20.83 V21 A2,2 0 0 1 10.08,21 V20.91 A1.65,1.65 0 0 0 9,19.4 A1.65,1.65 0 0 0 7.18,19.73 L7.12,19.79 A2,2 0 1 1 4.29,16.96 L4.35,16.9 A1.65,1.65 0 0 0 4.68,15.08 A1.65,1.65 0 0 0 3.17,14.08 H3 A2,2 0 0 1 3,10.08 H3.09 A1.65,1.65 0 0 0 4.6,9 A1.65,1.65 0 0 0 4.27,7.18 L4.21,7.12 A2,2 0 1 1 7.04,4.29 L7.1,4.35 A1.65,1.65 0 0 0 8.92,4.68 H9 A1.65,1.65 0 0 0 10,3.17 V3 A2,2 0 0 1 14,3 V3.09 A1.65,1.65 0 0 0 15,4.6 A1.65,1.65 0 0 0 16.82,4.27 L16.88,4.21 A2,2 0 1 1 19.71,7.04 L19.65,7.1 A1.65,1.65 0 0 0 19.32,8.92 V9 A1.65,1.65 0 0 0 20.83,10 H21 A2,2 0 0 1 21,14 H20.91 A1.65,1.65 0 0 0 19.4,15 Z</Geometry>
   <!-- Settings (2026-11-20 design): the navigation row, the heading and intro of a category, a row's title and help. -->
   <Geometry x:Key="Workbench.Icon.Sun">M16,12 A4,4 0 1 1 8,12 A4,4 0 1 1 16,12 M12,2 V4 M12,20 V22 M4.93,4.93 L6.34,6.34 M17.66,17.66 L19.07,19.07 M2,12 H4 M20,12 H22 M4.93,19.07 L6.34,17.66 M17.66,6.34 L19.07,4.93</Geometry>
@@ -705,31 +705,30 @@
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.Kbd}" />
     <Setter Property="CornerRadius" Value="4" />
     <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
-    <Setter Property="BorderThickness" Value="1" />
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
   <Style x:Key="Workbench.KbdText" TargetType="TextBlock">
     <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
-    <Setter Property="FontSize" Value="10.5" />
-    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
   </Style>
 
   <Style x:Key="Workbench.CommandButton" TargetType="Button">
+    <Setter Property="Width" Value="350" />
     <Setter Property="Height" Value="26" />
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.CommandButton}" />
     <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
     <Setter Property="FontSize" Value="11.5" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="Button">
-          <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-            <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="False" />
+          <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch" RecognizesAccessKey="False" />
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
@@ -742,8 +741,8 @@
   </Style>
 
   <Style x:Key="Workbench.TitleButton" TargetType="Button">
-    <Setter Property="Width" Value="28" />
-    <Setter Property="Height" Value="28" />
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
@@ -790,7 +789,7 @@
     <Setter Property="FontWeight" Value="Medium" />
   </Style>
   <Style x:Key="Workbench.WindowButton" TargetType="Button" BasedOn="{StaticResource Workbench.TitleButton}">
-    <Setter Property="Width" Value="34" />
+    <Setter Property="Width" Value="24" />
   </Style>
   <Style x:Key="Workbench.CloseButton" TargetType="Button" BasedOn="{StaticResource Workbench.WindowButton}">
     <Setter Property="Template">
@@ -941,31 +940,121 @@
   <Style x:Key="Workbench.Toast" TargetType="Border">
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.Toast}" />
     <Setter Property="Margin" Value="{StaticResource Ui.Gap.Toast}" />
-    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="CornerRadius" Value="9" />
     <!-- Every toast has the same size (owner, 2026-11-20): one width, a longer message wraps; one minimum height. -->
     <Setter Property="Width" Value="360" />
     <Setter Property="MinHeight" Value="36" />
-    <Setter Property="HorizontalAlignment" Value="Right" />
-    <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Elevated}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Effect">
       <Setter.Value>
-        <DropShadowEffect BlurRadius="30" ShadowDepth="10" Direction="270" Opacity="0.16" />
+        <DropShadowEffect BlurRadius="42" ShadowDepth="16" Direction="270" Opacity="0.16" />
       </Setter.Value>
     </Setter>
   </Style>
   <Style x:Key="Workbench.ToastText" TargetType="TextBlock" BasedOn="{StaticResource Primer.Text}">
-    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="Medium" />
     <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
-  </Style>  <!-- The title bar's environment pill: mono text with a dot, on the elevated surface with a thin border. -->
-  <Style x:Key="Workbench.EnvPill" TargetType="Border">
-    <Setter Property="Height" Value="22" />
-    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Horizontal.XS}" />
-    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
-    <Setter Property="CornerRadius" Value="5" />
+  </Style>
+
+  <!-- ===== Workbench 4.0 shell: brand, crumb, divider, status bar texts ===== -->
+  <Style x:Key="Workbench.BrandMark" TargetType="Border">
+    <Setter Property="Width" Value="20" />
+    <Setter Property="Height" Value="20" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Background" Value="{DynamicResource Accent.Button}" />
     <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
+  </Style>
+  <Style x:Key="Workbench.TitleBrand" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
+  </Style>
+  <Style x:Key="Workbench.TitleSlash" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
+  </Style>
+  <Style x:Key="Workbench.TitleCrumb" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
+  </Style>
+  <Style x:Key="Workbench.TitleDivider" TargetType="Border">
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="1,0,0,0" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.TitleDivider}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.TitleDivider.Outer}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.StatusMuted" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.StatusMono" TargetType="TextBlock" BasedOn="{StaticResource Workbench.StatusMuted}">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+  </Style>
+  <Style x:Key="Workbench.StatusGlyph" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource State.Success.Text}" />
+  </Style>
+  <Style x:Key="Workbench.StatusEnv" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.StatusProject" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="MaxWidth" Value="165" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <!-- ===== Workbench 4.0 popovers (session popover): elevated surface, 12 px radius, the design's float shadow ===== -->
+  <Style x:Key="Workbench.Popover" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Surface.Elevated}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
     <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Popover}" />
+    <Setter Property="Effect">
+      <Setter.Value>
+        <DropShadowEffect BlurRadius="42" ShadowDepth="16" Direction="270" Opacity="0.16" />
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.PopoverTitle" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+  </Style>
+  <Style x:Key="Workbench.PopoverCaption" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Top.SM}" />
+  </Style>
+  <Style x:Key="Workbench.PopoverTile" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Surface.Elevated}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.PopoverTile}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Top.XS}" />
   </Style></ResourceDictionary>

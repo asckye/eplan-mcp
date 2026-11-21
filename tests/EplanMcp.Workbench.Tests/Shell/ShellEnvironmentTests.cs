@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Workbench.Approvals;
+using EplanMcp.Workbench.Shell;
 using EplanMcp.Workbench.Tests.Approvals;
 using TiaOpenness.Gui.Localization;
 using static EplanMcp.Workbench.Tests.Shell.TestWindows;
@@ -9,8 +10,8 @@ using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 namespace EplanMcp.Workbench.Tests.Shell;
 
 /// <summary>
-/// The title bar and the status bar name the project and the EPLAN of the last question (the 2026-11-20 design); before
-/// any question the title bar names the page, and no environment shows.
+/// The title bar and the status bar name the project and the EPLAN of the last question (the Workbench 4.0 design); before
+/// any question the status bar says no request has come yet.
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Medium")]
@@ -21,9 +22,10 @@ public sealed class ShellEnvironmentTests(WpfContext wpf)
     {
         wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
         {
-            Assert.Equal("/ 协作与审批", ((TextBlock)window.FindName("CurrentPageText")).Text);
-            Assert.False(((FrameworkElement)window.FindName("EnvPill")).IsVisible);
-            Assert.False(((FrameworkElement)window.FindName("EnvStatusText")).IsVisible);
+            Assert.Equal("AI 协作与审批", ((TextBlock)window.FindName("CurrentPageText")).Text);
+            Assert.Equal("EPLAN", ((TextBlock)window.FindName("EnvStatusText")).Text);
+            Assert.Equal("尚无请求", ((TextBlock)window.FindName("ProjectStatusText")).Text);
+            Assert.False(((FrameworkElement)window.FindName("ClientStatusText")).IsVisible);
         }));
     }
 
@@ -41,11 +43,14 @@ public sealed class ShellEnvironmentTests(WpfContext wpf)
             queue.Add(Asks.Write("r1"));
             WpfContext.Drain();
 
-            Assert.Equal("/ Line1", ((TextBlock)window.FindName("CurrentPageText")).Text);
-            Assert.True(((FrameworkElement)window.FindName("EnvPill")).IsVisible);
-            Assert.Equal("EPLAN 2026.0.3.25421 · Pro Panel", ((TextBlock)window.FindName("EnvText")).Text);
-            Assert.Equal("EPLAN 2026.0.3.25421 · Pro Panel  Line1", ((TextBlock)window.FindName("EnvStatusText")).Text);
+            Assert.Equal("AI 协作与审批", ((TextBlock)window.FindName("CurrentPageText")).Text);
+            Assert.Equal("EPLAN 2026.0.3.25421 · Pro Panel", ((TextBlock)window.FindName("EnvStatusText")).Text);
+            Assert.Equal("Line1", ((TextBlock)window.FindName("ProjectStatusText")).Text);
+            Assert.EndsWith(" · PID 4242", ((TextBlock)window.FindName("ClientStatusText")).Text, StringComparison.Ordinal);
             Assert.StartsWith("协作与审批", window.Title, StringComparison.Ordinal); // the window title still names the page
+
+            window.Navigate(WorkbenchPage.Project, NavigationOrigin.Menu);
+            Assert.Equal("项目 · Line1", ((TextBlock)window.FindName("CurrentPageText")).Text);
         }));
     }
 }

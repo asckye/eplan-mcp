@@ -63,6 +63,7 @@ public partial class MainWindow : Window
     private IInputElement? _commandOpener;
     private WindowState _lastState = WindowState.Normal;
     private PaletteEntry[] _paletteAll = [];
+    private AuditView? _audit;
 
     public MainWindow()
     {
@@ -82,7 +83,7 @@ public partial class MainWindow : Window
         string version = typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.8.0";
         Brand.ToolTip = "EplanMcp " + version;
         VersionStatusText.Text = "v" + version;
-        CommandKeyText.Text = "Ctrl+K";
+        CommandKeyText.Text = "Ctrl K";
 
         ProjectPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
         McpPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
@@ -119,6 +120,7 @@ public partial class MainWindow : Window
         Activated += (_, _) => Dispatcher.BeginInvoke(() => Refocus(), System.Windows.Threading.DispatcherPriority.Input);
         Loaded += (_, _) => Navigate(WorkbenchPage.Approvals, NavigationOrigin.Startup);
         ApplyWindowState();
+        ApplyStatus();
         Navigate(WorkbenchPage.Approvals, NavigationOrigin.Menu);
     }
 
@@ -195,6 +197,16 @@ public partial class MainWindow : Window
     {
         AuditPage.Attach(view, shell);
         AuditPage.RecordOpened += OpenRecord;
+        // The status bar names the length of the chain once it is read (Workbench 4.0: "Audit #" and the count).
+        _audit = view;
+        view.PropertyChanged += (_, _) => Dispatcher.BeginInvoke(ShowAuditCount);
+        ShowAuditCount();
+    }
+
+    private void ShowAuditCount()
+    {
+        bool known = _audit is { State: AuditState.Ready, Total: > 0 };
+        AuditStatusText.Text = known ? Loc.Current.T("Shell.AuditCount", _audit!.Total) : Loc.Current["Rail.Audit"];
     }
 
     internal void AttachLogs(LogsView view, IShellOpen? shell = null) => LogsPage.Attach(view, shell);
@@ -379,16 +391,17 @@ public partial class MainWindow : Window
     private void OnToast(string text, ToastTone tone) => Dispatcher.BeginInvoke(() => Toasts.Add(ToastLayer, ToastAnnouncer, text, tone));
 
     /// <summary>
-    /// The project and the EPLAN of the last question, for the title bar and the status bar (the 2026-11-20 design). The
-    /// Workbench learns them only from questions; texts from the Host are project data, made plain first.
+    /// The EPLAN, project and client of the last question, for the title bar, the status bar and the session popover
+    /// (Workbench 4.0 design). The Workbench learns them only from questions; texts from the Host are project data, made
+    /// plain first.
     /// </summary>
-    internal (string Project, string Eplan)? EplanEnvironment { get; private set; }
+    internal SessionFacts? LastSession { get; private set; }
 
     private void OnArrived(QuestionItem item)
     {
         EplanInstance eplan = item.Question.Ask.Eplan;
         string variant = eplan.Variant is { Length: > 0 } name ? " · " + ProjectText.Line(name) : string.Empty;
-        EplanEnvironment = (item.ProjectName, "EPLAN " + ProjectText.Line(eplan.Version) + variant);
+        LastSession = new SessionFacts("EPLAN " + ProjectText.Line(eplan.Version) + variant, eplan.ProcessId, item.ProjectName, item.Client);
         Dispatcher.BeginInvoke(ApplyTexts);
         Reminder reminder = ReminderFor(IsVisible, WindowState == WindowState.Minimized, IsActive);
         if (reminder.HasFlag(Reminder.Flash) && new WindowInteropHelper(this).Handle is var handle && handle != IntPtr.Zero)
@@ -414,7 +427,7 @@ public partial class MainWindow : Window
         var regions = new List<(UIElement Region, Action Focus)>
         {
             (Sider, () => Keyboard.Focus(_pages[(int)CurrentPage].Item)),
-            (Header, () => Keyboard.Focus(PendingBadge.IsVisible ? PendingBadge : MinimizeButton)),
+            (Header, () => Keyboard.Focus(CommandPaletteButton)),
         };
         if (CurrentPage == WorkbenchPage.Approvals)
         {
@@ -467,7 +480,6 @@ public partial class MainWindow : Window
 
     private void Cycle(int step) => Navigate((WorkbenchPage)(((int)CurrentPage + step + _pages.Length) % _pages.Length), NavigationOrigin.Shortcut);
 
-    private void OnPendingBadge(object sender, RoutedEventArgs e) => Navigate(WorkbenchPage.Approvals, NavigationOrigin.Reminder);
 
     private void OnTogglePane(object sender, RoutedEventArgs e) => ToggleLeftPane();
 
@@ -506,6 +518,23 @@ public partial class MainWindow : Window
         };
         PipeText.Text = loc.T(text, ApprovalQueue.DefaultCapacity);
         PipeIcon.SetResourceReference(StyleProperty, icon);
+        // While questions are taken the session button's check says so; otherwise where they go is said in words (STS-11).
+        bool taking = _channel == ApprovalChannelState.Accepting;
+        PipeText.Visibility = taking ? Visibility.Collapsed : Visibility.Visible;
+        PipeIcon.Visibility = PipeText.Visibility;
+        (string glyph, string tone) = _channel switch
+        {
+            ApprovalChannelState.Accepting => ("✓", "State.Success.Text"),
+            ApprovalChannelState.Full => ("!", "State.Warning.Text"),
+            _ => ("✕", "State.Error.Text"),
+        };
+        SessionGlyph.Text = glyph;
+        SessionGlyph.SetResourceReference(TextBlock.ForegroundProperty, tone);
+        AutomationProperties.SetName(SessionButton, loc["Shell.SessionHint"] + ": " + PipeText.Text);
+        if (SessionLayer.Visibility == Visibility.Visible)
+        {
+            SessionPane.Show(_channel, LastSession);
+        }
         PipeText.ToolTip = help.Length == 0 ? PipeText.Text : PipeText.Text + Environment.NewLine + loc[help];
         AutomationProperties.SetHelpText(PipeText, help.Length == 0 ? string.Empty : loc[help]);
 
@@ -519,10 +548,6 @@ public partial class MainWindow : Window
         ApprovalStatusText.FontWeight = manual ? FontWeights.Normal : FontWeights.SemiBold;
 
         string pending = loc.T("Tray.Pending", _pending);
-        PendingBadge.Visibility = _pending > 0 ? Visibility.Visible : Visibility.Collapsed;
-        PendingBadge.Content = _pending.ToString(CultureInfo.CurrentCulture);
-        PendingBadge.ToolTip = pending;
-        AutomationProperties.SetName(PendingBadge, pending);
         ApprovalsItem.Tag = _pending > 0 ? _pending.ToString(CultureInfo.CurrentCulture) : null;
         AutomationProperties.SetHelpText(ApprovalsItem, _pending > 0 ? pending : string.Empty);
     }
@@ -571,17 +596,21 @@ public partial class MainWindow : Window
         Language = System.Windows.Markup.XmlLanguage.GetLanguage(loc.Language == AppLanguage.Chinese ? "zh-CN" : "en-US");
         string page = loc[_pages[(int)CurrentPage].Key];
         Title = loc.T("Shell.WindowTitle", page);
-        // The design names the project after the app; before any question names one, the page.
-        CurrentPageText.Text = "/ " + (EplanEnvironment is { Project.Length: > 0 } known ? known.Project : page);
-        EnvPill.Visibility = EplanEnvironment is null ? Visibility.Collapsed : Visibility.Visible;
-        EnvText.Text = EplanEnvironment?.Eplan ?? string.Empty;
-        EnvStatusText.Visibility = EnvPill.Visibility;
-        EnvStatusText.Text = EplanEnvironment is { } env ? env.Eplan + "  " + env.Project : string.Empty;
+        // The crumb names the page as the Workbench 4.0 design does; the project page adds the project once a question named one.
+        CurrentPageText.Text = CurrentPage == WorkbenchPage.Project && LastSession is { Project.Length: > 0 } known
+            ? loc.T("Crumb.ProjectOf", known.Project)
+            : loc["Crumb." + CurrentPage];
+        EnvStatusText.Text = LastSession?.Eplan ?? loc["Shell.NoEplan"];
+        ProjectStatusText.Text = LastSession is { Project.Length: > 0 } last ? last.Project : loc["Shell.NoRequest"];
+        ClientStatusText.Text = LastSession is { } session ? loc.T("Shell.ClientPid", session.Client, session.ProcessId) : string.Empty;
+        ClientStatusText.Visibility = LastSession is null ? Visibility.Collapsed : Visibility.Visible;
+        ClientSeparator.Visibility = ClientStatusText.Visibility;
+        ShowAuditCount();
         LangToggleButton.Content = loc[loc.Language == AppLanguage.Chinese ? "Settings.Chinese" : "Settings.English"];
-        // A moon while the theme is light (the click goes dark), a sun while it is dark.
+        // The Workbench 4.0 design shows the current theme: a sun while light, a moon while dark.
         ThemeGlyph.Data = Geometry.Parse(ThemeManager.Current.EffectivelyDark
-            ? "M17,12 A5,5 0 1 1 7,12 A5,5 0 1 1 17,12 M12,1 V3 M12,21 V23 M4.22,4.22 L5.64,5.64 M18.36,18.36 L19.78,19.78 M1,12 H3 M21,12 H23 M4.22,19.78 L5.64,18.36 M18.36,5.64 L19.78,4.22"
-            : "M21,12.79 A9,9 0 1 1 11.21,3 A7,7 0 0 0 21,12.79 Z");
+            ? "M21,12.79 A9,9 0 1 1 11.21,3 A7,7 0 0 0 21,12.79 Z"
+            : "M17,12 A5,5 0 1 1 7,12 A5,5 0 1 1 17,12 M12,1 V3 M12,21 V23 M1,12 H3 M21,12 H23");
         foreach ((_, string key, string shortcut, RadioButton item, _) in _pages)
         {
             item.ToolTip = loc.T("Shell.Shortcut", loc[key], shortcut);
@@ -624,4 +653,34 @@ public partial class MainWindow : Window
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool FlashWindowEx(ref FlashInfo info);
+
+    private void OnSessionButton(object sender, RoutedEventArgs e)
+    {
+        if (SessionLayer.Visibility == Visibility.Visible)
+        {
+            CloseSession();
+            return;
+        }
+
+        SessionPane.Show(_channel, LastSession);
+        SessionLayer.Visibility = Visibility.Visible;
+        UpdateLayout();
+        SessionPane.FocusHeading();
+    }
+
+    private void OnSessionScrim(object sender, MouseButtonEventArgs e) => CloseSession();
+
+    private void OnSessionClosed(object? sender, EventArgs e) => CloseSession();
+
+    private void OnSessionChecks(object? sender, EventArgs e)
+    {
+        SessionLayer.Visibility = Visibility.Collapsed;
+        Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
+    }
+
+    private void CloseSession()
+    {
+        SessionLayer.Visibility = Visibility.Collapsed;
+        Keyboard.Focus(SessionButton);
+    }
 }

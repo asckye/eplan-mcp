@@ -17,7 +17,7 @@ namespace EplanMcp.Workbench.Tests.Shell;
 public sealed class ToastsTests(WpfContext wpf)
 {
     [Fact]
-    public void AToast_ShowsInTheCorner_TakesNoInput_AndIsAnnounced()
+    public void AToast_ShowsAtTheBottomCentre_TakesNoInput_AndIsAnnounced()
     {
         wpf.Run(() => With(window =>
         {
@@ -29,7 +29,7 @@ public sealed class ToastsTests(WpfContext wpf)
             Border toast = Assert.IsType<Border>(Assert.Single(layer.Children.Cast<UIElement>()));
             Assert.Contains("saved", Descendants(toast).OfType<TextBlock>().Select(t => t.Text));
             Assert.False(layer.IsHitTestVisible);
-            Assert.Equal((HorizontalAlignment.Right, VerticalAlignment.Bottom), (layer.HorizontalAlignment, layer.VerticalAlignment));
+            Assert.Equal((HorizontalAlignment.Center, VerticalAlignment.Bottom), (layer.HorizontalAlignment, layer.VerticalAlignment));
             Assert.Equal("saved", announcer.Text);
 
             // One size for every toast: a short and a long message are equally wide, the long one wraps.

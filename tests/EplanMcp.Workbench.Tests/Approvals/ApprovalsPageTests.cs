@@ -150,7 +150,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Assert.Equal("r2", _view!.Shown!.RequestId);
             Assert.Same(page.FindName("QuestionTitle"), Focused(window));
             Assert.False(approve.IsEnabled);
-            Assert.Equal("1", ((Button)window.FindName("PendingBadge")).Content); // the Header followed
+            Assert.Equal("1", ((RadioButton)window.FindName("ApprovalsItem")).Tag); // the rail's count followed
         }));
     }
 
@@ -494,10 +494,10 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
                 stops.Add(Focused(window));
             }
 
-            // The Header's stop is the waiting count, shown as a question waits.
+            // The Header's stop is the search box (Workbench 4.0: the waiting count moved to the rail).
             var list = (ListBox)page.FindName("Questions");
             Assert.Equal(
-                [window.FindName("PendingBadge"), list.ItemContainerGenerator.ContainerFromIndex(0), page.FindName("QuestionTitle"), window.FindName("ApprovalsItem"), window.FindName("PendingBadge")],
+                [window.FindName("CommandPaletteButton"), list.ItemContainerGenerator.ContainerFromIndex(0), page.FindName("QuestionTitle"), window.FindName("ApprovalsItem"), window.FindName("CommandPaletteButton")],
                 stops);
             MoveRegion("-1");
             Assert.Same(window.FindName("ApprovalsItem"), Focused(window));

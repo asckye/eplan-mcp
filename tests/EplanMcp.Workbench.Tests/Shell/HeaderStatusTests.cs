@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
-using System.Windows.Input;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Shell;
 using TiaOpenness.Gui.Localization;
@@ -61,22 +60,40 @@ public sealed class HeaderStatusTests(WpfContext wpf)
     }
 
     [Fact]
-    public void TheWaitingCount_IsNamedInFull_AndOpensTheQueueWithFocusOnItsTitle()
+    public void TheWaitingCount_ShowsOnTheRail_NamedInFull_AndTheRailOpensTheQueue()
     {
         wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
         {
-            var badge = (Button)window.FindName("PendingBadge");
+            var item = (RadioButton)window.FindName("ApprovalsItem");
             window.ShowApprovals(ApprovalChannelState.Accepting, 0);
-            Assert.Equal(Visibility.Collapsed, badge.Visibility);
+            Assert.Null(item.Tag);
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Menu);
 
             window.ShowApprovals(ApprovalChannelState.Accepting, 3);
-            Click(badge);
+            Click(item);
 
-            Assert.Equal(Visibility.Visible, badge.Visibility);
-            Assert.Equal("3 个问题等待审批", AutomationProperties.GetName(badge));
+            Assert.Equal("3", item.Tag);
+            Assert.Equal("3 个问题等待审批", AutomationProperties.GetHelpText(item));
             Assert.Equal(WorkbenchPage.Approvals, window.CurrentPage);
-            Assert.Same(((IWorkbenchPage)window.FindName("ApprovalsPage")).Heading, Keyboard.FocusedElement);
+        }));
+    }
+
+    [Fact]
+    public void WhileQuestionsAreTaken_TheSessionButtonSaysSo_AndTheWordsShowOnlyWhenTheyAreNot()
+    {
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
+        {
+            var glyph = (TextBlock)window.FindName("SessionGlyph");
+            var status = (TextBlock)window.FindName("PipeText");
+
+            window.ShowApprovals(ApprovalChannelState.Accepting, 0);
+            Assert.Equal("✓", glyph.Text);
+            Assert.Equal(Visibility.Collapsed, status.Visibility);
+
+            window.ShowApprovals(ApprovalChannelState.NameTaken, 0);
+            Assert.Equal("✕", glyph.Text);
+            Assert.Equal(Visibility.Visible, status.Visibility);
+            Assert.StartsWith("不接收审批问题", AutomationProperties.GetName((Button)window.FindName("SessionButton")).Split(": ")[1], StringComparison.Ordinal);
         }));
     }
 }

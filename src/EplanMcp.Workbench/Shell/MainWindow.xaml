@@ -17,7 +17,7 @@
     Width="1240" Height="800" MinWidth="800" MinHeight="640" WindowStartupLocation="CenterScreen"
     WindowStyle="None" ResizeMode="CanResize" Style="{StaticResource Workbench.Window}">
   <chrome:WindowChrome.WindowChrome>
-    <chrome:WindowChrome CaptionHeight="40" ResizeBorderThickness="6" GlassFrameThickness="0,0,0,1" CornerRadius="8" UseAeroCaptionButtons="False" />
+    <chrome:WindowChrome CaptionHeight="38" ResizeBorderThickness="6" GlassFrameThickness="0,0,0,1" CornerRadius="8" UseAeroCaptionButtons="False" />
   </chrome:WindowChrome.WindowChrome>
   <Window.InputBindings>
     <KeyBinding Key="D1" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Project}" />
@@ -45,67 +45,65 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <!-- ============ TOP 40px NATIVE DESKTOP TITLEBAR ============ -->
+    <!-- ============ TOP 38px NATIVE DESKTOP TITLEBAR (Workbench 4.0 design) ============ -->
     <Border x:Name="Header" Grid.Row="0" Style="{StaticResource Workbench.TitleBar}" AutomationProperties.Name="{l:Tr Shell.Header}">
       <Grid>
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" />
           <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" MinWidth="12" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" MinWidth="12" />
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
-          <Button x:Name="PaneToggleButton" Style="{StaticResource Workbench.TitleButton}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnTogglePane" ToolTip="{l:Tr Shell.Collapse}" AutomationProperties.Name="{l:Tr Shell.Collapse}">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+          <Border Style="{StaticResource Workbench.BrandMark}">
+            <Path Width="{StaticResource Ui.IconSize.Emblem}" Height="{StaticResource Ui.IconSize.Emblem}" Stretch="Uniform" Stroke="{DynamicResource Text.OnAccent}" StrokeThickness="2.5" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                  Data="M4,6 H20 M4,12 H14 M4,18 H20 M20.2,12 A2.2,2.2 0 1 1 15.8,12 A2.2,2.2 0 1 1 20.2,12" />
+          </Border>
+          <TextBlock x:Name="Brand" Text="{l:Tr App.Name}" Style="{StaticResource Workbench.TitleBrand}" />
+          <TextBlock Text="{l:Tr Shell.CrumbSeparator}" Style="{StaticResource Workbench.TitleSlash}" />
+          <TextBlock x:Name="CurrentPageText" Style="{StaticResource Workbench.TitleCrumb}" />
+        </StackPanel>
+
+        <Button x:Name="CommandPaletteButton" Grid.Column="2" Style="{StaticResource Workbench.CommandButton}" chrome:WindowChrome.IsHitTestVisibleInChrome="True"
+                AutomationProperties.Name="{l:Tr Shell.CommandPalette}" AutomationProperties.AcceleratorKey="Ctrl+K" ToolTip="{l:Tr Shell.CommandPaletteHint}" Click="OnOpenCommandPalette">
+          <DockPanel>
+            <Border DockPanel.Dock="Right" Style="{StaticResource Workbench.Kbd}">
+              <TextBlock x:Name="CommandKeyText" Style="{StaticResource Workbench.KbdText}" />
+            </Border>
+            <StackPanel Orientation="Horizontal">
+              <Path Width="{StaticResource Ui.IconSize.Caption}" Height="{StaticResource Ui.IconSize.Caption}" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center"
+                    Data="M11.5,7 A4.5,4.5 0 1 1 2.5,7 A4.5,4.5 0 1 1 11.5,7 M10.5,10.5 L14,14" />
+              <TextBlock Text="{l:Tr Shell.QuickJump}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+            </StackPanel>
+          </DockPanel>
+        </Button>
+
+        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+          <Button x:Name="PaneToggleButton" Style="{StaticResource Workbench.TitleButton}" Click="OnTogglePane" ToolTip="{l:Tr Shell.Collapse}" AutomationProperties.Name="{l:Tr Shell.Collapse}" AutomationProperties.AcceleratorKey="Ctrl+B">
             <Path Width="{StaticResource Ui.IconSize.Pane}" Height="{StaticResource Ui.IconSize.Pane}" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeLineJoin="Round" Data="M5,3 H19 A2,2 0 0 1 21,5 V19 A2,2 0 0 1 19,21 H5 A2,2 0 0 1 3,19 V5 A2,2 0 0 1 5,3 Z M9,3 V21" />
           </Button>
-          <Border Width="24" Height="24" CornerRadius="6" Background="{DynamicResource Accent.Button}" Margin="{StaticResource Ui.Gap.Right.XS}">
-            <Path Width="{StaticResource Ui.IconSize.Emblem}" Height="{StaticResource Ui.IconSize.Emblem}" Stretch="Uniform" Stroke="{DynamicResource Text.OnAccent}" StrokeThickness="2.3" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                  Data="M4,6 H20 M4,12 H14 M4,18 H20 M19.2,12 A2.2,2.2 0 1 1 14.8,12 A2.2,2.2 0 1 1 19.2,12" />
-          </Border>
-          <TextBlock x:Name="Brand" Text="{l:Tr App.Name}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" VerticalAlignment="Center" />
-          <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Muted}" FontSize="12" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XS}" />
-          <!-- The EPLAN the last question came from (the 2026-11-20 design's environment pill); hidden until one is known. -->
-          <Border x:Name="EnvPill" Visibility="Collapsed" Style="{StaticResource Workbench.EnvPill}">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-              <Ellipse Style="{StaticResource Workbench.StatusDot}" />
-              <TextBlock x:Name="EnvText" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.Dot}" />
-            </StackPanel>
-          </Border>
-        </StackPanel>
-
-        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
-          <Button x:Name="CommandPaletteButton" Style="{StaticResource Workbench.CommandButton}" AutomationProperties.Name="{l:Tr Shell.CommandPalette}" AutomationProperties.AcceleratorKey="Ctrl+K" Margin="{StaticResource Ui.Gap.Right.Title}" Click="OnOpenCommandPalette">
-            <StackPanel Orientation="Horizontal">
-              <Path Width="{StaticResource Ui.IconSize.Caption}" Height="{StaticResource Ui.IconSize.Caption}" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center"
-                    Data="M18,11 A7,7 0 1 1 4,11 A7,7 0 1 1 18,11 M16,16 L21,21" />
-              <TextBlock Text="{l:Tr Shell.QuickJump}" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XS}" />
-              <Border Style="{StaticResource Workbench.Kbd}" Margin="{StaticResource Ui.Gap.Left.XS}">
-                <TextBlock x:Name="CommandKeyText" Style="{StaticResource Workbench.KbdText}" />
-              </Border>
-            </StackPanel>
-          </Button>
-          <Button x:Name="ThemeToggleButton" Style="{StaticResource Workbench.TitleButton}" Margin="{StaticResource Ui.Gap.Right.Title}" Click="OnQuickTheme" ToolTip="{l:Tr Shell.ThemeToggle}" AutomationProperties.Name="{l:Tr Shell.ThemeToggle}">
+          <Button x:Name="ThemeToggleButton" Style="{StaticResource Workbench.TitleButton}" Margin="{StaticResource Ui.Gap.Left.XXS}" Click="OnQuickTheme" ToolTip="{l:Tr Shell.ThemeToggle}" AutomationProperties.Name="{l:Tr Shell.ThemeToggle}">
             <Path x:Name="ThemeGlyph" Width="{StaticResource Ui.IconSize.Theme}" Height="{StaticResource Ui.IconSize.Theme}" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
           </Button>
-          <Button x:Name="LangToggleButton" Style="{StaticResource Workbench.TitleTextButton}" Click="OnQuickLang" ToolTip="{l:Tr Shell.LangToggle}" AutomationProperties.Name="{l:Tr Shell.LangToggle}" />
-          <Button x:Name="PendingBadge" Style="{StaticResource Primer.PendingBadge}" Visibility="Collapsed" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnPendingBadge" />
-          <Border Width="1" Height="16" Background="{DynamicResource Border.Strong}" Margin="{StaticResource Ui.Gap.TitleDivider}" />
-        </StackPanel>
-
-        <StackPanel x:Name="WindowButtons" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
-          <Button x:Name="MinimizeButton" Style="{StaticResource Workbench.WindowButton}" Click="OnMinimize">
-            <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0,5 L10,5" />
-          </Button>
-          <Button x:Name="MaximizeButton" Style="{StaticResource Workbench.WindowButton}" Click="OnMaximize">
-            <Path x:Name="MaximizeGlyph" Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 H9.5 V9.5 H0.5 Z" />
-          </Button>
-          <Button x:Name="CloseButton" Style="{StaticResource Workbench.CloseButton}" Click="OnClose">
-            <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 L9.5,9.5 M9.5,0.5 L0.5,9.5" />
-          </Button>
+          <Button x:Name="LangToggleButton" Style="{StaticResource Workbench.TitleTextButton}" Margin="{StaticResource Ui.Gap.Left.XXS}" Click="OnQuickLang" ToolTip="{l:Tr Shell.LangToggle}" AutomationProperties.Name="{l:Tr Shell.LangToggle}" />
+          <Border Style="{StaticResource Workbench.TitleDivider}">
+            <StackPanel x:Name="WindowButtons" Orientation="Horizontal">
+              <Button x:Name="MinimizeButton" Style="{StaticResource Workbench.WindowButton}" Click="OnMinimize">
+                <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0,5 L10,5" />
+              </Button>
+              <Button x:Name="MaximizeButton" Style="{StaticResource Workbench.WindowButton}" Click="OnMaximize">
+                <Path x:Name="MaximizeGlyph" Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 H9.5 V9.5 H0.5 Z" />
+              </Button>
+              <Button x:Name="CloseButton" Style="{StaticResource Workbench.CloseButton}" Click="OnClose">
+                <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 L9.5,9.5 M9.5,0.5 L0.5,9.5" />
+              </Button>
+            </StackPanel>
+          </Border>
         </StackPanel>
       </Grid>
     </Border>
-
     <!-- ============ MAIN BODY: 60px FAR-LEFT ACTIVITY RAIL + 8-PAGE CANVAS ============ -->
     <Grid Grid.Row="1">
       <Grid.ColumnDefinitions>
@@ -172,29 +170,46 @@
       </Grid>
     </Grid>
 
-    <!-- ============ BOTTOM 26px STATUS BAR ============ -->
+    <!-- ============ BOTTOM 26px STATUS BAR (Workbench 4.0 design) ============ -->
     <Border Grid.Row="2" Style="{StaticResource Workbench.StatusBar}" AutomationProperties.Name="{l:Tr Shell.StatusBar}">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-          <Button x:Name="ApprovalStatusButton" Style="{StaticResource Workbench.StatusPill}" Margin="{StaticResource Ui.Gap.Right.XS}" ToolTip="{l:Tr Shell.StatusApprovalHint}" Click="OnStatusApprovalToggle">
+          <Button x:Name="ApprovalStatusButton" Style="{StaticResource Workbench.StatusPill}" ToolTip="{l:Tr Shell.StatusApprovalHint}" Click="OnStatusApprovalToggle">
             <StackPanel Orientation="Horizontal">
               <Ellipse x:Name="ApprovalStatusDot" Style="{StaticResource Workbench.StatusDot}" />
-              <TextBlock x:Name="ApprovalStatusText" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+              <TextBlock x:Name="ApprovalStatusText" VerticalAlignment="Center" FontWeight="Medium" Margin="{StaticResource Ui.Gap.Left.Dot}" />
             </StackPanel>
           </Button>
-          <Button x:Name="AuditStatusButton" Style="{StaticResource Workbench.StatusPill}" FontFamily="{DynamicResource Ui.FontMono}" Content="{l:Tr Rail.Audit}" AutomationProperties.Name="{l:Tr Page.Audit}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnStatusAuditClick" />
-          <TextBlock x:Name="VersionStatusText" Style="{StaticResource Primer.Mono.textMuted}" FontSize="10.5" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XXS}" />
+          <Button x:Name="AuditStatusButton" Style="{StaticResource Workbench.StatusPill}" FontFamily="{DynamicResource Ui.FontMono}" AutomationProperties.Name="{l:Tr Page.Audit}" Margin="{StaticResource Ui.Gap.Left.XXS}" Click="OnStatusAuditClick">
+            <TextBlock x:Name="AuditStatusText" />
+          </Button>
+          <TextBlock x:Name="VersionStatusText" Style="{StaticResource Workbench.StatusMono}" Margin="{StaticResource Ui.Gap.Left.XS}" />
         </StackPanel>
-        <DockPanel VerticalAlignment="Center">
-          <TextBlock x:Name="EnvStatusText" DockPanel.Dock="Left" Visibility="Collapsed" Style="{StaticResource Primer.Mono.text}" FontSize="11" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.Status}" />
-          <Path x:Name="PipeIcon" DockPanel.Dock="Left" Width="{StaticResource Ui.IconSize.Status}" Height="{StaticResource Ui.IconSize.Status}" Margin="{StaticResource Ui.Gap.Right.XS}" VerticalAlignment="Center" />
-          <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Muted}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
-        </DockPanel>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Button x:Name="SessionButton" Style="{StaticResource Workbench.StatusPill}" Click="OnSessionButton" ToolTip="{l:Tr Shell.SessionHint}">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock x:Name="SessionGlyph" Style="{StaticResource Workbench.StatusGlyph}" />
+              <TextBlock x:Name="EnvStatusText" Style="{StaticResource Workbench.StatusEnv}" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+              <TextBlock x:Name="ProjectStatusText" Style="{StaticResource Workbench.StatusProject}" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+            </StackPanel>
+          </Button>
+          <TextBlock x:Name="ClientSeparator" Text="{l:Tr Shell.StatusSeparator}" Style="{StaticResource Workbench.StatusMuted}" Margin="{StaticResource Ui.Gap.Horizontal.XS}" />
+          <TextBlock x:Name="ClientStatusText" Style="{StaticResource Workbench.StatusMuted}" TextTrimming="CharacterEllipsis" />
+          <!-- Shown only while questions are not taken: where they go instead, in words (STS-11). -->
+          <Path x:Name="PipeIcon" Width="{StaticResource Ui.IconSize.Status}" Height="{StaticResource Ui.IconSize.Status}" Margin="{StaticResource Ui.Gap.Horizontal.XS}" VerticalAlignment="Center" />
+          <TextBlock x:Name="PipeText" Style="{StaticResource Workbench.StatusMuted}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
       </DockPanel>
     </Border>
 
-    <!-- ============ TOASTS: bottom right, above the status bar; they take no input ============ -->
-    <StackPanel x:Name="ToastLayer" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="{StaticResource Ui.Gap.ToastLayer}" IsHitTestVisible="False" />
+    <!-- ============ SESSION POPOVER: the EPLAN and the approval pipe, above the status bar ============ -->
+    <Grid x:Name="SessionLayer" Grid.RowSpan="3" Visibility="Collapsed">
+      <Border Background="Transparent" MouseLeftButtonUp="OnSessionScrim" />
+      <shell:SessionPopover x:Name="SessionPane" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="{StaticResource Ui.Gap.SessionPopover}"
+                            CloseRequested="OnSessionClosed" ChecksRequested="OnSessionChecks" />
+    </Grid>
+    <!-- ============ TOASTS: bottom centre, above the status bar; they take no input ============ -->
+    <StackPanel x:Name="ToastLayer" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="{StaticResource Ui.Gap.ToastLayer}" IsHitTestVisible="False" />
     <TextBlock x:Name="ToastAnnouncer" Grid.Row="1" Height="1" Opacity="0" Visibility="Collapsed" VerticalAlignment="Top" AutomationProperties.LiveSetting="Polite" />
 
     <!-- ============ COMMAND PALETTE OVERLAY (Ctrl+K) ============ -->
