@@ -413,7 +413,8 @@
         "type": "Project",
         "dependencies": {
           "EplanMcp.Workbench.Protocol": "[1.0.0, )",
-          "Microsoft.Extensions.Logging.Abstractions": "[10.0.14, )"
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.14, )",
+          "ModelContextProtocol": "[2.4.0, )"
         }
       },
       "eplanmcp.workbench.protocol": {

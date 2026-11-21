@@ -14,6 +14,8 @@
   <ItemGroup>
     <!-- The Host commands' JSON contract (architecture 5.2): the Workbench reads the very snapshots the Host is tested against. -->
     <EmbeddedResource Include="..\Contracts.Snapshots\*-json.verified.json" LogicalName="Snapshots/%(Filename)%(Extension)" WithCulture="false" />
+    <!-- ADR-0065: the project page's tools must all be read-only in the Host's published contract. -->
+    <EmbeddedResource Include="..\Contracts.Snapshots\server-contract.verified.json" LogicalName="Snapshots/server-contract.verified.json" WithCulture="false" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\EplanMcp.Workbench\EplanMcp.Workbench.csproj" />
