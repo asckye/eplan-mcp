@@ -22,12 +22,7 @@ internal static class McpServerSetup
     {
         services.AddSingleton<IBridgeDiscovery>(_ => new PipeBridgeDiscovery());
         services.AddSingleton<IBridgeConnector, PipeBridgeConnector>();
-        services.AddSingleton<BridgeClient>();
-
-        // ADR-0063: every Bridge call passes the EPLAN window watch, which looks once when EPLAN is busy behind a window.
-        services.AddSingleton<IBridgeClient>(provider => new WatchingBridgeClient(provider.GetRequiredService<BridgeClient>(), provider.GetRequiredService<Addin.WindowWatch>()));
-        services.TryAddSingleton<Addin.IEplanProcesses, Addin.EplanProcesses>();
-        services.TryAddSingleton<Addin.WindowWatch>();
+        AddWatchedBridge(services);
 
         // serve registers the locations it loaded the configuration from; tests get the environment's.
         services.TryAddSingleton(_ => HostDataLocations.FromEnvironment());
@@ -101,10 +96,7 @@ internal static class McpServerSetup
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ApiTrySchema.Configure(options, config.ApiTry == ActionRunSwitch.On && profile.Profile != ToolProfile.Core));
         services.TryAddSingleton<ToolRegistry>();
         // HTTP mode registers HttpCaller first: that Host serves one EPLAN process and must not start another (ADR-0018).
-        services.TryAddSingleton(sp => Addin.EplanLifecycle.ForMachine(
-            pinned: sp.GetService<EplanMcp.Host.Http.HttpCaller>() is not null,
-            closeHarmless: sp.GetRequiredService<HostConfig>().EplanWindowWatch == EplanWindowWatch.Close,
-            watch: sp.GetRequiredService<Addin.WindowWatch>()));
+        services.TryAddSingleton(Lifecycle);
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice, ToolRegistry>((options, choice, registry) =>
         {
             registry.Apply(options.ToolCollection ?? [], choice.Profile);
@@ -231,4 +223,19 @@ internal static class McpServerSetup
             .WithMessageFilters(filters => filters.AddIncomingFilter(PlanApplyTools.CancelApply))
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));
     }
+
+    /// <summary>ADR-0063: every Bridge call passes the EPLAN window watch, which looks once when EPLAN is busy behind a window.</summary>
+    private static void AddWatchedBridge(IServiceCollection services)
+    {
+        services.AddSingleton<BridgeClient>();
+        services.AddSingleton<IBridgeClient>(provider => new WatchingBridgeClient(provider.GetRequiredService<BridgeClient>(), provider.GetRequiredService<Addin.WindowWatch>()));
+        services.TryAddSingleton<Addin.IEplanProcesses, Addin.EplanProcesses>();
+        services.TryAddSingleton<Addin.WindowWatch>();
+    }
+
+    /// <summary>Starting and closing EPLAN (ADR-0058) with the window watch's setting and audit (ADR-0063).</summary>
+    private static Addin.EplanLifecycle Lifecycle(IServiceProvider services) => Addin.EplanLifecycle.ForMachine(
+        pinned: services.GetService<HttpCaller>() is not null,
+        closeHarmless: services.GetRequiredService<HostConfig>().EplanWindowWatch == EplanWindowWatch.Close,
+        watch: services.GetRequiredService<Addin.WindowWatch>());
 }
