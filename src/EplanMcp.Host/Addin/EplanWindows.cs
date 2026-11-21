@@ -11,8 +11,18 @@ internal sealed record EplanControl(int Id, string ClassName);
 /// </summary>
 internal sealed record EplanWindow(nint Handle, string ClassName, string Title, bool Enabled, nint Owner, IReadOnlyList<EplanControl> Controls)
 {
-    /// <summary>How the window is named to the engineer: its title and class.</summary>
-    public override string ToString() => $"'{Title}' ({ClassName})";
+    /// <summary>The most characters of a title that are shown; a title is EPLAN's text and can be anything.</summary>
+    internal const int MaxTitleLength = 80;
+
+    /// <summary>
+    /// How the window is named to the engineer and the AI client: its title and class. The title is data from EPLAN, so
+    /// control and format characters are escaped and a long title is cut, as for other project text in results.
+    /// </summary>
+    public override string ToString()
+    {
+        string title = EplanMcp.Host.Plans.PlanDiffPreview.Escape(Title);
+        return $"'{(title.Length > MaxTitleLength ? title[..MaxTitleLength] + "…" : title)}' ({EplanMcp.Host.Plans.PlanDiffPreview.Escape(ClassName)})";
+    }
 }
 
 /// <summary>The Windows API behind <see cref="IStartedEplan.Windows"/> and <see cref="IStartedEplan.CloseWindow"/>. Never used by tests.</summary>

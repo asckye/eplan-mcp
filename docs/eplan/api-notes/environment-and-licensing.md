@@ -22,9 +22,16 @@
 - **工具行为：** 没有改动。是否为它加回退（按类型名反射取 `PropertyPlacements`），与 [ADR-0060](../../adr/0060-per-version-bridge-builds.md) 的决定一起定。
 - **未验证：** 23406 与 23616 之间的其他差异；2025 上任何运行时行为（本机没有可运行的 2025）。
 
-### B20. The 2025.0.3.23616 catalog in the repository; members the add-in uses that it does not have (2026-11-20, `catalog/eplan-2025.0.3` from EPLAN 2025.0.3.23616; reporter of #664)
-- **Source:** `catalog/eplan-2025.0.3`, extracted with the unchanged `EplanMcp.Catalog extract` from the `Platform\Bin` of an EPLAN 2025.0.3.23616 installation (`assemblies.json` records the file versions). It is compared with `catalog/eplan-2026.0.3` by `EplanMcp.Catalog diff`, which unfolds enum values and data dictionary properties and marks the IDs `catalog/mapping/bridge-usage.json` lists. Result: `catalog/mapping/eplan-2026.0.3-vs-2025.0.3.g.tsv`. Unlike the 23406 catalog of B19, this one is in the repository, so the comparison can be repeated.
-- **Result:** 3,187 IDs exist only in 2026.0.3 and the add-in uses 2,374 of them; 96 exist only in 2025.0.3 and the add-in uses none. The counts include enum values and data dictionary properties, so they are not comparable item by item with B19. All but four are used only by the generated `ApiTryDispatch.g.cs`. The four:
+### B20. 仓库里的 2025.0.3.23616 目录；插件用到而它没有的成员（2026-11-20，`catalog/eplan-2025.0.3` 取自 EPLAN 2025.0.3.23616；#664 的报告人）
+- **来源：** `catalog/eplan-2025.0.3` 用未改动的 `EplanMcp.Catalog extract` 从一套 EPLAN 2025.0.3.23616 安装的 `Platform\Bin` 提取（`assemblies.json` 记有文件版本）。`EplanMcp.Catalog diff` 把它与 `catalog/eplan-2026.0.3` 比较：先展开枚举值和属性字典条目，再标出 `catalog/mapping/bridge-usage.json` 列出的标识。结果在 `catalog/mapping/eplan-2026.0.3-vs-2025.0.3.g.tsv`。与 B19 的 23406 目录不同，这一份在仓库里，比较可以重做。
+- **结果：** 只在 2026.0.3 有的标识 3187 个，插件用到其中 2374 个；只在 2025.0.3 有的 96 个，插件一个都不用。这些数字含枚举值和属性字典条目，所以不能和 B19 逐项对照。除四个之外，其余都只经生成的 `ApiTryDispatch.g.cs` 用到。这四个是：
+  - `PathMap.SubstitutePath(String, String)`，在 `EplanPaths.cs`（B17）。
+  - `PropertyPlacement.GetBoundingBox(Boolean)`，在 `EplanTextBounds.cs`（B18）。
+  - `MDPartsDatabase.ImportMode.ReplaceAndAppend`，在 `EplanPartsDatabaseWriter.cs`（B18、B19）。
+  - `InstallationSpace.Connection3Ds`，在 `EplanConnectionRouter.cs` 和生成的 `ObjectKindDispatch.g.cs`。2025 的 `InstallationSpace` 上没有这个成员，按 2025 编译时代码会不报错地绑定到继承来的 `Placement3D.Connection3Ds`。在 EPLAN 示例项目的副本上，这个成员一个安装空间的 3D 连接都列不出：按 2025 编译的布线器在 A1 里找到 0 条，而按空间里的放置收集连接得到 A1 176 条、A2 332 条，与 A141 的数字一致。按 2026 编译的插件在 2025 上这里会怎样，未验证。
+- **印证 B19：** `Eplan.EplApi.DataModel.IPropertyPlacementsContainer` 在这份目录里（`types.jsonl`），所以 23616 有 23406 缺的这个接口，它也不在差异清单里。
+- **已验证：** 四个成员是把 `6d14f7ec` 的插件按 2025.0.3.23616 的程序集编译得到的（2781 处不同的错误，其中 2778 处在 `ApiTryDispatch.g.cs`）；3D 连接数在 EPLAN Electric P8 2025.0.3.23616 上实测。2026 上没有验证，也没有对照 2024。
+- 原文由报告人用英文写成，2026-11-20 合并时译为中文。
   - `PathMap.SubstitutePath(String, String)` in `EplanPaths.cs` (B17).
   - `PropertyPlacement.GetBoundingBox(Boolean)` in `EplanTextBounds.cs` (B18).
   - `MDPartsDatabase.ImportMode.ReplaceAndAppend` in `EplanPartsDatabaseWriter.cs` (B18, B19).
@@ -151,11 +158,12 @@
 - **结论：** 会话启动工具检查已有进程；已有实例运行时拒绝启动第二个。
 - **证据：** `src/EplanMcp.Host/Addin/EplanLifecycle.cs` 的 `EplanLifecycle.StartAsync`（类注释）。
 
-### A172. The system messages window at start-up: how to recognise it, and why EPLAN does not close behind it (2026-11-20, EPLAN Electric P8 2025.0.3.23616, Spanish user interface; reporter of #664)
-- **Situation:** two `S046001` errors at every start (a script that another EPLAN tool registered and later deleted) make EPLAN open its system messages window right after the licence selection.
-- **Window:** a dialog of class `#32770`, title localized ("Mensajes del sistema"), owned by EPLAN's main frame (class `AfxMDIFrame140u`). Its child controls: the messages grid `1011` (class `BCGPGridCtrl:` followed by addresses that change between starts), the detail box `1076` (`Edit`), "show all sessions" `1112`, "file" `1012` and "close" `2` (`Button`). The licence selection dialog is also a `#32770`, but it is owned by the splash screen (`SplashWnd`) and has none of `1011`, `1076` or `1112`.
-- **Modal:** while it is open the main frame is disabled. `Process.CloseMainWindow` then returns `false` and sends nothing, so asking EPLAN to close does nothing for as long as the window stays (watched for 200 s).
-- **Closing it:** `WM_CLOSE` to the dialog closes it, as its close button does; the main frame is enabled again at once, and `CloseMainWindow` then closed EPLAN within about 1 s. Nothing else was asked.
-- **Its content:** the grid is not exposed to UI Automation (a `Pane` without items) and the detail box is empty until a message is selected, so the messages cannot be read from the window. They are in `EplLog.eldb` (A1): `TSysSession_v100.ProcessId` gives the session of an EPLAN process, and that session's rows in `TSysMsg_v100` with `ErrorLevel` 4 (`MessageLevel.Error`) are the two `S046001` messages.
-- **Tool behaviour:** the closer of `install-addin`, `eplan_session_close` and `eplan_session_restart` closes this window, and only windows on the same list, before asking EPLAN to close (`HarmlessWindows`, ADR-0063); it says it did, and points to `EplLog.eldb`. Any other window is left open and named.
-- **Verified:** live on 2025.0.3.23616 in two starts. Not checked on 2026; whether 2026 shows the same layout is not verified.
+### A172. 启动时的系统消息窗口：怎样识别它，为什么 EPLAN 在它后面关不掉（2026-11-20，EPLAN Electric P8 2025.0.3.23616，西班牙语界面；#664 的报告人）
+- **情形：** 每次启动都有两条 `S046001` 错误（另一个 EPLAN 工具注册过、后来删掉的脚本），EPLAN 在授权选择之后立即打开系统消息窗口。
+- **窗口：** 类为 `#32770` 的对话框，标题随界面语言变化（“Mensajes del sistema”），属于 EPLAN 主窗口（类 `AfxMDIFrame140u`）。子控件：消息表格 `1011`（类为 `BCGPGridCtrl:` 加一串每次启动都会变的地址）、详情框 `1076`（`Edit`）、“显示所有会话” `1112`、“文件” `1012` 和“关闭” `2`（都是 `Button`）。授权选择对话框也是 `#32770`，但属于启动画面（`SplashWnd`），而且没有 `1011`、`1076`、`1112` 中的任何一个。
+- **模态：** 它开着时主窗口被禁用。`Process.CloseMainWindow` 这时返回 `false`，什么也不发送，所以只要它不关，请求 EPLAN 关闭就没有作用（观察了 200 秒）。
+- **关掉它：** 给对话框发 `WM_CLOSE` 就会关掉它，和点它的关闭按钮一样；主窗口立即恢复可用，之后 `CloseMainWindow` 在约 1 秒内关闭了 EPLAN。没有任何其他询问。
+- **它的内容：** 表格没有向 UI Automation 公开（是一个没有子项的 `Pane`），详情框在选中一条消息之前是空的，所以无法从窗口读出消息。消息在 `EplLog.eldb`（A1）里：`TSysSession_v100.ProcessId` 给出一个 EPLAN 进程的会话，该会话在 `TSysMsg_v100` 中 `ErrorLevel` 为 4（`MessageLevel.Error`）的行就是这两条 `S046001`。
+- **工具行为：** `install-addin`、`eplan_session_close` 和 `eplan_session_restart` 的关闭逻辑在请求 EPLAN 关闭之前关掉这个窗口，而且只关同一名单里的窗口（`HarmlessWindows`，ADR-0063）；结果里会说明关过它，并指向 `EplLog.eldb`。其他窗口一律不动，只报告它的名字。
+- **已验证：** 在 2025.0.3.23616 上实测两次启动。2026 上没有核对；2026 是否是同样的布局，未验证。
+- 原文由报告人用英文写成，2026-11-20 合并时译为中文。

@@ -180,7 +180,7 @@
 | A158 | 已放置的端子排定义可以没有符号变体 | 2026-11-01 | [symbols-and-layout](api-notes/symbols-and-layout.md#a158-已放置的端子排定义可以没有符号变体2026-11-01eplan-202603绘图读取中的端子排定义) |
 | A159 | 安装板上 MoveRelative 的位移按父对象坐标轴解释 | 2026-11-12 | [symbols-and-layout](api-notes/symbols-and-layout.md#a159-安装板上-moverelative-的位移按父对象坐标轴解释2026-11-12eplan-2026033d-安装板) |
 | A171 | 通过 eplan_api_try 删除部件库对象：加一个再删掉，集合数量恢复；句柄约十分钟后过期 | 2026-11-20 | [master-data-and-parts](api-notes/master-data-and-parts.md) |
-| A172 | The system messages window at start-up: how to recognise it, and why EPLAN does not close behind it | 2026-11-20 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
+| A172 | 启动时的系统消息窗口：怎样识别它，为什么 EPLAN 在它后面关不掉 | 2026-11-20 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
 | A170 | GetFunctions(null) 不返回项目的全部功能；按名称过滤也找不到被漏掉的那些 | 2026-11-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md) |
 | A169 | 大量连续读取时 EPLAN 偶发退出（ucrtbase.dll 0xc0000409）：未能重现，原因未知 | 2026-11-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md) |
 | A168 | 页面读取慢在属性文字的外框和重复读取图形连接，不在连接扫描 | 2026-11-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md) |
@@ -195,7 +195,7 @@
 | B17 | PathMap.SubstitutePath(String, String) 从 EPLAN 2026 才有；2025 上调用它的方法整个无法编译 | 2026-11-19 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
 | B18 | PropertyPlacement.GetBoundingBox(Boolean) 也是 EPLAN 2026 才有 | 2026-11-19 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
 | B19 | 2025 与 2026 的 API 差异实测；IPropertyPlacementsContainer 在 2025.0.3 的两个补丁构建之间才出现 | 2026-11-20 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
-| B20 | The 2025.0.3.23616 catalog in the repository; members the add-in uses that it does not have | 2026-11-20 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
+| B20 | 仓库里的 2025.0.3.23616 目录；插件用到而它没有的成员 | 2026-11-20 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
 | B1 | 程序集与目标框架 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b1-程序集与目标框架) |
 | B2 | 插件 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b2-插件add-in) |
 | B3 | 自定义 Action | 2026-10-12（原章节） | [actions](api-notes/actions.md#b3-自定义-action) |
