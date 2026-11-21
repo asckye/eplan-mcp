@@ -61,6 +61,17 @@ internal sealed class ClientCard(string name) : IAccessibleItem
     public string Subtitle => Loc.Current[Detected ? "Clients.Detected" : "Clients.NotDetected"]
         + (Preview?.Before is not null ? Loc.Current["Clients.Configured"] : string.Empty);
 
+    /// <summary>
+    /// The tile's second line (Workbench 4.0 design): the configuration file the last dry run named, the home folder
+    /// written as "~"; before that, whether the client was found.
+    /// </summary>
+    public string PathLine => Preview?.File is { Length: > 0 } file ? ProjectText.Line(Home(file)) : Subtitle;
+
+    private static string Home(string file)
+    {
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return home.Length > 0 && file.StartsWith(home, StringComparison.OrdinalIgnoreCase) ? "~" + file[home.Length..] : file;
+    }
     /// <summary>Why the client cannot be configured now, from the last dry run.</summary>
     public string? Problem => Preview?.Problem is { } problem ? ClientsView.Text(problem) : null;
 

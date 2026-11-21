@@ -86,7 +86,7 @@ internal static class Catalogue
         ("Addin.Result.Failed", "Failed", "失败"),
         ("Addin.Result.Refused", "Refused", "已拒绝"),
         ("Addin.Result.Skipped", "Skipped", "已跳过"),
-        ("Clients.GeneratePlugin", "Generate local marketplace", "生成本地市场"),
+        ("Clients.GeneratePlugin", "Generate / update marketplace", "生成 / 更新市场"),
         ("Clients.GenerateTitle", "Generate the local marketplace?", "生成本地市场？"),
         ("Clients.GenerateMessage", "The marketplace is copied into the data root with the Host path shown below. An existing .mcp.json is backed up beside it; other template files are updated. Then install the plugin using the displayed commands.", "市场将复制到数据目录，使用下方显示的 Host 路径。已有 .mcp.json 先在原处备份，其他模板文件更新。随后用显示的命令安装插件。"),
         ("Clients.GenerateConfirm", "_Generate marketplace", "生成市场(_G)"),
@@ -270,11 +270,16 @@ internal static class Catalogue
         ("Mcp.PlatformHelp", "Faded years are not installed here; the add-in is built for 2026 until ADR-0060 lands.", "虚线项为本机未安装；在 ADR-0060 完成前插件按 2026 构建。"),
 
         // AI Clients page additions (Ctrl+4)
+        ("Clients.Title", "AI clients", "AI 客户端配置"),
+        ("Clients.Edit", "Edit", "修改"),
+        ("Clients.SelectedSummary", "{0} clients chosen · each file is backed up (.bak) before writing", "已选 {0} 个客户端 · 写入前自动生成 .bak 备份"),
+        ("Clients.WriteCount", "Back up and write ({0})…", "备份并写入 ({0})…"),
+        ("Clients.PluginTitle", "Claude Code local marketplace (EPLAN skills and packs)", "Claude Code 本地插件市场 (EPLAN Skills & Packs)"),
         ("Clients.SelectDetected", "Select detected", "全选已装"),
         ("Clients.ClearSelection", "Clear", "清空"),
         ("Clients.EditMcp", "Edit MCP transport", "修改连接方式"),
-        ("Clients.TransportStdio", "Mode: Local STDIO", "当前模式：本机 STDIO"),
-        ("Clients.TransportHttp", "Mode: VM HTTP", "当前模式：虚拟机 HTTP"),
+        ("Clients.TransportStdio", "Local STDIO", "本机 STDIO"),
+        ("Clients.TransportHttp", "VM HTTP", "虚拟机 HTTP"),
 
         // Checks page summary stats (Ctrl+5)
 

@@ -5,47 +5,37 @@
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
     Focusable="False">
   <!--
-    AI clients (2026-11-20 design): the bar, the client tiles three to a row, the marketplace card, the action bar.
-    VM server hosting lives on the dedicated McpPage; shared keys are removed.
+    AI clients (Workbench 4.0 design): the title, the transport and "Edit" in the bar, the local/VM switch and selection
+    tools on the right; the client tiles three to a row; the write box; the Claude Code marketplace box.
   -->
   <DockPanel>
-    <!-- Unified IDE Top Bar -->
     <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-          <Button x:Name="SelectDetectedButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Clients.SelectDetected}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnSelectDetected" />
-          <Button x:Name="ClearSelectionButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Clients.ClearSelection}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnClearSelection" />
-          <Button x:Name="RefreshButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Clients.Refresh}" AutomationProperties.AcceleratorKey="F5" Click="OnRefresh" />
+          <Border Style="{StaticResource Workbench.Segment}" Margin="{StaticResource Ui.Gap.Right.XS}">
+            <StackPanel Orientation="Horizontal" KeyboardNavigation.TabNavigation="Once">
+              <RadioButton x:Name="LocalChoice" GroupName="ClientConnection" Content="{l:Tr VmHost.Local}" Style="{StaticResource Workbench.SegmentItem}" IsChecked="True" Checked="OnMode" />
+              <RadioButton x:Name="VmChoice" GroupName="ClientConnection" Content="{l:Tr VmHost.Remote}" Style="{StaticResource Workbench.SegmentItem}" Checked="OnMode" />
+            </StackPanel>
+          </Border>
+          <Button x:Name="SelectDetectedButton" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Clients.SelectDetected}" Click="OnSelectDetected" />
+          <Button x:Name="ClearSelectionButton" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Clients.ClearSelection}" Click="OnClearSelection" />
+          <Button x:Name="RefreshButton" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Clients.Refresh}" AutomationProperties.AcceleratorKey="F5" Click="OnRefresh" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Clients}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="13" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.SM}"
+          <TextBlock x:Name="PageTitle" Text="{l:Tr Clients.Title}" Style="{StaticResource Workbench.BarTitle}"
                      AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
-          <Button x:Name="EditMcpButton" Style="{StaticResource Workbench.StatusPill}" Click="OnEditMcp" ToolTip="{l:Tr Clients.EditMcp}">
-            <TextBlock x:Name="TransportBadge" Style="{StaticResource Primer.Mono.textMuted}" />
-          </Button>
+          <TextBlock x:Name="TransportBadge" Style="{StaticResource Workbench.CellMono}" Margin="{StaticResource Ui.Gap.Left.XS}" />
+          <Button x:Name="EditMcpButton" Style="{StaticResource Workbench.LinkButton}" Content="{l:Tr Clients.Edit}" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnEditMcp" ToolTip="{l:Tr Clients.EditMcp}" AutomationProperties.Name="{l:Tr Clients.EditMcp}" />
         </StackPanel>
       </DockPanel>
     </Border>
 
-    <ProgressBar x:Name="Working" DockPanel.Dock="Top" Style="{StaticResource Primer.Progress}" IsIndeterminate="True"
+    <ProgressBar x:Name="Working" DockPanel.Dock="Top" Style="{StaticResource Primer.Progress}" IsIndeterminate="True" Height="2"
                  AutomationProperties.Name="{Binding Text, ElementName=StatusText}" Visibility="Collapsed" />
 
-    <!-- Unified Bottom Action Bar (Exact TIA Pattern: single primary Write button) -->
-    <Border DockPanel.Dock="Bottom" Padding="{StaticResource Ui.Inset.ActionBar}" Background="{DynamicResource Surface.Layer}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,1,0,0">
-      <DockPanel>
-        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-          <Button x:Name="RemoveButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Clients.Remove}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnRemove" />
-          <Button x:Name="WriteButton" Style="{StaticResource Primer.Primary}" Content="{l:Tr Clients.Write}" Click="OnWrite" />
-        </StackPanel>
-        <TextBlock x:Name="StatusText" Visibility="Collapsed" Style="{StaticResource Primer.Muted}" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="None"
-                   AutomationProperties.LiveSetting="Polite" />
-      </DockPanel>
-    </Border>
-
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-      <StackPanel Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="920">
-        <TextBlock x:Name="PageCaption" Text="{l:Tr Clients.Caption}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Bottom.SM}" />
-
+      <StackPanel Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="880">
         <Border x:Name="ErrorBanner" Margin="{StaticResource Ui.Gap.Bottom.SM}" Style="{StaticResource Primer.Alert.Error}" Visibility="Collapsed">
           <DockPanel>
             <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Error}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
@@ -56,46 +46,30 @@
           </DockPanel>
         </Border>
 
-        <!-- Transport Mode Switcher & Key-Free Remote VM Endpoint -->
-        <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+        <!-- For a VM: where the clients on this host reach it. -->
+        <Border x:Name="VmHost" Visibility="Collapsed" Style="{StaticResource Workbench.Box}" Padding="{StaticResource Ui.Inset.SettingsBox}" Margin="{StaticResource Ui.Gap.Bottom.Normal}">
           <StackPanel>
-            <WrapPanel KeyboardNavigation.TabNavigation="Once">
-              <RadioButton x:Name="LocalChoice" GroupName="ClientConnection" Content="{l:Tr VmHost.Local}" Style="{StaticResource Primer.Radio}" IsChecked="True" Checked="OnMode" Margin="{StaticResource Ui.Gap.Right.SM}" />
-              <RadioButton x:Name="VmChoice" GroupName="ClientConnection" Content="{l:Tr VmHost.Remote}" Style="{StaticResource Primer.Radio}" Checked="OnMode" />
+            <TextBlock Text="{l:Tr VmHost.Caption}" Style="{StaticResource Workbench.SettingHelp}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
+            <WrapPanel>
+              <StackPanel Margin="{StaticResource Ui.Gap.Wrap.XS}">
+                <Label x:Name="VmAddressLabel" Content="{l:Tr VmHost.Address}" Target="{Binding ElementName=VmAddress}" Style="{StaticResource Workbench.FieldLabel}" />
+                <TextBox x:Name="VmAddress" Width="150" Style="{StaticResource Primer.Input}" FontFamily="{DynamicResource Ui.FontMono}" AutomationProperties.LabeledBy="{Binding ElementName=VmAddressLabel}" TextChanged="OnVmInput" />
+                <TextBlock x:Name="VmAddressError" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" MaxWidth="150" AutomationProperties.LiveSetting="Polite" />
+              </StackPanel>
+              <StackPanel Margin="{StaticResource Ui.Gap.Wrap.XS}">
+                <Label x:Name="VmPortLabel" Content="{l:Tr VmHost.Port}" Target="{Binding ElementName=VmPort}" Style="{StaticResource Workbench.FieldLabel}" />
+                <TextBox x:Name="VmPort" Width="72" Style="{StaticResource Primer.Input}" FontFamily="{DynamicResource Ui.FontMono}" AutomationProperties.LabeledBy="{Binding ElementName=VmPortLabel}" TextChanged="OnVmInput" />
+                <TextBlock x:Name="VmPortError" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" MaxWidth="72" AutomationProperties.LiveSetting="Polite" />
+              </StackPanel>
+              <Button x:Name="TestVm" VerticalAlignment="Top" Content="{l:Tr VmHost.Test}" Style="{StaticResource Workbench.ButtonMd}" Margin="{StaticResource Ui.Gap.VmButton}" Click="OnTestVm" />
             </WrapPanel>
-
-            <StackPanel x:Name="VmHost" Visibility="Collapsed" Margin="{StaticResource Ui.Gap.Top.SM}">
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*" />
-                  <ColumnDefinition Width="12" />
-                  <ColumnDefinition Width="140" />
-                  <ColumnDefinition Width="12" />
-                  <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                  <Label x:Name="VmAddressLabel" Content="{l:Tr VmHost.Address}" Target="{Binding ElementName=VmAddress}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-                  <TextBox x:Name="VmAddress" Style="{StaticResource Primer.Input}" AutomationProperties.LabeledBy="{Binding ElementName=VmAddressLabel}" TextChanged="OnVmInput" />
-                  <TextBlock x:Name="VmAddressError" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-                </StackPanel>
-                <StackPanel Grid.Column="2">
-                  <Label x:Name="VmPortLabel" Content="{l:Tr VmHost.Port}" Target="{Binding ElementName=VmPort}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-                  <TextBox x:Name="VmPort" Style="{StaticResource Primer.Input}" AutomationProperties.LabeledBy="{Binding ElementName=VmPortLabel}" TextChanged="OnVmInput" />
-                  <TextBlock x:Name="VmPortError" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-                </StackPanel>
-                <Button x:Name="TestVm" Grid.Column="4" VerticalAlignment="Bottom" Content="{l:Tr VmHost.Test}" Style="{StaticResource Primer.Secondary}" Click="OnTestVm" />
-              </Grid>
-              <TextBlock x:Name="VmTestStatus" Visibility="Collapsed" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LiveSetting="Polite" />
-              <Border Style="{StaticResource Primer.Alert.Info}" Margin="{StaticResource Ui.Gap.Top.XS}">
-                <TextBlock Text="{l:Tr VmHost.Plaintext}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" />
-              </Border>
-            </StackPanel>
+            <TextBlock x:Name="VmTestStatus" Visibility="Collapsed" Style="{StaticResource Workbench.CellText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+            <TextBlock Text="{l:Tr VmHost.Plaintext}" Style="{StaticResource Workbench.SettingHelp}" />
           </StackPanel>
         </Border>
 
-        <!-- 11 AI Client Cards -->
-        <ItemsControl x:Name="Cards" Focusable="False" AutomationProperties.Name="{l:Tr Clients.List}">
-          <!-- The design's client grid: three tiles to a row; a chosen tile has the accent outline on the accent tint. -->
+        <!-- The client tiles, three to a row; a chosen one has the accent outline and the check. -->
+        <ItemsControl x:Name="Cards" Focusable="False" AutomationProperties.Name="{l:Tr Clients.List}" Margin="{StaticResource Ui.Gap.ClientGrid}">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
               <UniformGrid Columns="3" />
@@ -103,20 +77,21 @@
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <CheckBox Style="{StaticResource Workbench.ClientTile}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Margin="{StaticResource Ui.Gap.Wrap.XS}"
+              <CheckBox x:Name="Tile" Style="{StaticResource Workbench.ClientTile}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Margin="{StaticResource Ui.Gap.ClientTile}"
                         AutomationProperties.Name="{Binding AccessibleName}" AutomationProperties.HelpText="{Binding Problem}">
                 <DockPanel>
-                  <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="7" Background="{DynamicResource State.Info.Background}" Margin="{StaticResource Ui.Gap.Right.SM}" VerticalAlignment="Top">
-                    <TextBlock Text="{Binding Code}" Style="{StaticResource Workbench.MonoStrong}" FontSize="11" Foreground="{DynamicResource Accent.Text}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <Border DockPanel.Dock="Left" Style="{StaticResource Workbench.ClientCode}">
+                    <TextBlock Text="{Binding Code}" Style="{StaticResource Workbench.ClientCodeText}" />
                   </Border>
-                  <StackPanel>
-                    <DockPanel>
-                      <TextBlock x:Name="Found" DockPanel.Dock="Right" Text="{l:Tr Clients.Found}" Style="{StaticResource Primer.Muted}" FontSize="10" Foreground="{DynamicResource State.Success.Text}" />
-                      <TextBlock Text="{Binding Title}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" TextTrimming="CharacterEllipsis" />
-                    </DockPanel>
-                    <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Primer.Muted}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+                  <TextBlock x:Name="Check" DockPanel.Dock="Right" Style="{StaticResource Workbench.ClientCheck}" />
+                  <StackPanel Margin="{StaticResource Ui.Gap.Horizontal.XS}">
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Text="{Binding Title}" Style="{StaticResource Workbench.CheckTitle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                      <Ellipse x:Name="Found" Style="{StaticResource Workbench.StatusDot}" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding PathLine}" Style="{StaticResource Workbench.CellMono}" FontSize="11" />
                     <TextBlock x:Name="ProblemLine" Text="{Binding Problem}" Style="{StaticResource Primer.Text.warn}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" />
-                    <TextBlock x:Name="ResultLine" Text="{Binding ResultText}" Style="{StaticResource Primer.Text}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" />
+                    <TextBlock x:Name="ResultLine" Text="{Binding ResultText}" Style="{StaticResource Workbench.CellText}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" />
                   </StackPanel>
                 </DockPanel>
               </CheckBox>
@@ -128,20 +103,38 @@
                   <Setter TargetName="ResultLine" Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Detected}" Value="False">
-                  <Setter TargetName="Found" Property="Text" Value="{l:Tr Clients.None}" />
-                  <Setter TargetName="Found" Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                  <Setter TargetName="Found" Property="Visibility" Value="Collapsed" />
+                  <Setter TargetName="Tile" Property="Opacity" Value="0.62" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                  <Setter TargetName="Tile" Property="Opacity" Value="1" />
                 </DataTrigger>
               </DataTemplate.Triggers>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <!-- Compact Claude Code Local Marketplace Card -->
-        <Border x:Name="LocalPlugin" Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Top.SM}">
+        <!-- What the write does, and the two actions. -->
+        <Border Style="{StaticResource Workbench.Box}" Padding="{StaticResource Ui.Inset.SettingsBoxRow}" Margin="{StaticResource Ui.Gap.Bottom.Normal}">
           <DockPanel>
-            <Button x:Name="GeneratePluginButton" DockPanel.Dock="Right" VerticalAlignment="Top" Content="{l:Tr Clients.GeneratePlugin}" Style="{StaticResource Primer.Secondary}" Margin="{StaticResource Ui.Gap.Left.Normal}" Click="OnGeneratePlugin" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+              <Button x:Name="RemoveButton" Style="{StaticResource Workbench.ButtonSm}" Content="{l:Tr Clients.Remove}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnRemove" />
+              <Button x:Name="WriteButton" Style="{StaticResource Workbench.ButtonSmPrimary}" Content="{l:Tr Clients.Write}" Click="OnWrite" />
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock x:Name="SelectedSummary" Style="{StaticResource Workbench.CellText}" Foreground="{DynamicResource Text.Primary}" TextWrapping="Wrap" />
+              <TextBlock x:Name="StatusText" Visibility="Collapsed" Style="{StaticResource Workbench.CellText}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+
+        <!-- Claude Code's local marketplace. -->
+        <Border x:Name="LocalPlugin" Style="{StaticResource Workbench.Box}" Padding="{StaticResource Ui.Inset.SettingsBoxRow}">
+          <DockPanel>
+            <Button x:Name="GeneratePluginButton" DockPanel.Dock="Right" VerticalAlignment="Top" Content="{l:Tr Clients.GeneratePlugin}" Style="{StaticResource Workbench.ButtonSm}" Margin="{StaticResource Ui.Gap.Left.Normal}" Click="OnGeneratePlugin" />
             <StackPanel>
-              <TextBlock x:Name="PluginText" Text="{l:Tr Clients.Plugin}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
+              <TextBlock Text="{l:Tr Clients.PluginTitle}" Style="{StaticResource Workbench.CheckTitle}" />
+              <TextBlock x:Name="PluginText" Text="{l:Tr Clients.Plugin}" Style="{StaticResource Workbench.SettingHelp}" />
               <TextBox x:Name="MarketplaceCommand" Style="{StaticResource Workbench.CodeValue}" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LabeledBy="{Binding ElementName=PluginText}" />
               <TextBox x:Name="InstallCommand" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.LabeledBy="{Binding ElementName=PluginText}" />
             </StackPanel>

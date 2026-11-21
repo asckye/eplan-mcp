@@ -106,6 +106,9 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
         ErrorText.Text = errorText;
         ErrorDetails.Text = view.ErrorDetails ?? string.Empty;
         ErrorDetails.Visibility = view.ErrorDetails is null ? Visibility.Collapsed : Visibility.Visible;
+        // The write box says how many are chosen; the button counts the files it will write (Workbench 4.0 design).
+        SelectedSummary.Text = loc.T("Clients.SelectedSummary", view.Selected.Count);
+        WriteButton.Content = loc.T("Clients.WriteCount", view.ToWrite.Count);
         Cards.ItemsSource = null;
         Cards.ItemsSource = view.Cards;
         (MarketplaceCommand.Text, InstallCommand.Text) = (view.PluginCommands[0], view.PluginCommands[1]);

@@ -920,16 +920,15 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="CheckBox">
-          <Border x:Name="Bd" Background="{DynamicResource Surface.Layer}" BorderBrush="{DynamicResource Border.Strong}" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}">
+          <Border x:Name="Bd" Background="{DynamicResource Surface.Elevated}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="1" CornerRadius="10" Padding="{TemplateBinding Padding}">
             <ContentPresenter RecognizesAccessKey="False" />
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+              <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
-              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource State.Info.Background}" />
-              <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent.Button}" />
+              <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent.Graphic}" />
               <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
             </Trigger>
           </ControlTemplate.Triggers>
@@ -1647,4 +1646,35 @@
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
     <Setter Property="Background" Value="{DynamicResource Surface.Pane}" />
     <Setter Property="Opacity" Value="0.62" />
+  </Style>
+
+  <!-- ===== Workbench 4.0 AI clients: the tile's code box and check ===== -->
+  <Style x:Key="Workbench.ClientCode" TargetType="Border">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Background" Value="{DynamicResource State.Info.Background}" />
+  </Style>
+  <Style x:Key="Workbench.ClientCodeText" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <!-- ✓ when the tile is chosen, ○ when not, read from the tile's CheckBox. -->
+  <Style x:Key="Workbench.ClientCheck" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Text" Value="○" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=CheckBox}}" Value="True">
+        <Setter Property="Text" Value="✓" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
+      </DataTrigger>
+    </Style.Triggers>
   </Style></ResourceDictionary>

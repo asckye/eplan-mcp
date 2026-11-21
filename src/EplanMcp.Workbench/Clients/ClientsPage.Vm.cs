@@ -72,7 +72,6 @@ public partial class ClientsPage
         LocalChoice.IsChecked = !view.VmMode;
         VmChoice.IsChecked = view.VmMode;
         TransportBadge.Text = Loc.Current[view.VmMode ? "Clients.TransportHttp" : "Clients.TransportStdio"];
-        PageCaption.Text = Loc.Current[view.VmMode ? "VmHost.Caption" : "Clients.Caption"];
         VmHost.Visibility = view.VmMode ? Visibility.Visible : Visibility.Collapsed;
         LocalPlugin.Visibility = view.VmMode ? Visibility.Collapsed : Visibility.Visible;
         foreach (Control control in new Control[] { LocalChoice, VmChoice, VmAddress, VmPort })
