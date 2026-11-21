@@ -1369,7 +1369,7 @@
       "dependencies": 44,
       "actions": 1,
       "spec": "docs/tools/eplan_device_renumber.md",
-      "small": 2,
+      "small": 3,
       "medium": 1,
       "large": 1,
       "apiNotes": [
@@ -2147,7 +2147,7 @@
       "dependencies": 35,
       "actions": 0,
       "spec": "docs/tools/eplan_page_delete.md",
-      "small": 4,
+      "small": 6,
       "medium": 11,
       "large": 1,
       "apiNotes": [
@@ -2485,7 +2485,7 @@
       "dependencies": 62,
       "actions": 2,
       "spec": "docs/tools/eplan_part_sync.md",
-      "small": 1,
+      "small": 2,
       "medium": 1,
       "large": 1,
       "apiNotes": [
@@ -2603,7 +2603,7 @@
       "dependencies": 68,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_delete.md",
-      "small": 4,
+      "small": 5,
       "medium": 1,
       "large": 5,
       "apiNotes": [

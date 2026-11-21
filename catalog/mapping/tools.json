@@ -19546,6 +19546,11 @@
         ],
         "tests": [
           {
+            "name": "ApprovalTargetsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTargetsTests.cs"
+          },
+          {
             "name": "PlanApplyChecksTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanApplyChecksTests.cs"
@@ -25829,6 +25834,16 @@
             "file": "tests/EplanMcp.Workbench.Tests/Approvals/ApprovalQueueViewTests.cs"
           },
           {
+            "name": "ApprovalTargetTextTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Workbench.Tests/Approvals/ApprovalTargetTextTests.cs"
+          },
+          {
+            "name": "ApprovalTargetsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTargetsTests.cs"
+          },
+          {
             "name": "ApprovalTextsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
@@ -28742,6 +28757,11 @@
         ],
         "tests": [
           {
+            "name": "ApprovalTargetsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTargetsTests.cs"
+          },
+          {
             "name": "ApprovalTextsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
@@ -29822,6 +29842,11 @@
           "A87"
         ],
         "tests": [
+          {
+            "name": "ApprovalTargetsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTargetsTests.cs"
+          },
           {
             "name": "SmallProjectRedrawDriverTests",
             "size": "Small",

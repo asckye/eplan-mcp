@@ -23,13 +23,15 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
     private string _rootFolder = string.Empty;
     private IShellOpen _shell = new ShellOpen();
     private bool _showing;
+    private readonly string _version;
+    private string _updatePage = string.Empty;
 
     public SettingsPage()
     {
         InitializeComponent();
         Loc.Current.LanguageChanged += (_, _) => ShowSection();
-        string version = typeof(SettingsPage).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.8.0";
-        VersionLine.Text = "v" + version + " · .NET 10 WPF";
+        _version = typeof(SettingsPage).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0";
+        VersionLine.Text = "v" + _version + " · .NET 10 WPF";
     }
 
     public FrameworkElement? Heading => PageTitle;
@@ -127,6 +129,37 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
     }
 
     private void OnReleases(object sender, RoutedEventArgs e) => _shell.Open(Loc.Current["Settings.ReleasesUrl"]);
+
+    /// <summary>Where the update check connects; tests give a fake (ADR-0066).</summary>
+    internal System.Net.Http.HttpMessageHandler UpdateHandler { get; set; } = new System.Net.Http.SocketsHttpHandler();
+
+    private void OnCheckUpdate(object sender, RoutedEventArgs e) => _ = CheckUpdateAsync();
+
+    /// <summary>One check, only on the click (ADR-0066): the version and the release page; a failure says why and changes nothing else.</summary>
+    internal async Task CheckUpdateAsync()
+    {
+        Loc loc = Loc.Current;
+        UpdateButton.IsEnabled = false;
+        UpdateButton.Content = loc["Settings.Checking"];
+        UpdateNewer.Visibility = UpdateText.Visibility = Visibility.Collapsed;
+        UpdateResult result = await new UpdateCheck(UpdateHandler, _version).CheckAsync(CancellationToken.None).ConfigureAwait(true);
+        UpdateButton.IsEnabled = true;
+        UpdateButton.Content = loc["Settings.CheckUpdate"];
+        _updatePage = result.State == UpdateState.Newer ? result.Page : string.Empty;
+        UpdateNewer.Visibility = result.State == UpdateState.Newer ? Visibility.Visible : Visibility.Collapsed;
+        UpdateNewerText.Text = loc.T("Settings.UpdateNewer", result.Latest);
+        UpdateText.Visibility = result.State == UpdateState.Newer ? Visibility.Collapsed : Visibility.Visible;
+        UpdateText.Text = result.State == UpdateState.Current ? loc.T("Settings.UpdateCurrent", result.Latest) : loc.T("Settings.UpdateFailed", result.Reason);
+        UpdateText.Foreground = (System.Windows.Media.Brush)FindResource(result.State == UpdateState.Current ? "State.Success.Text" : "Text.Secondary");
+    }
+
+    private void OnOpenUpdate(object sender, RoutedEventArgs e)
+    {
+        if (_updatePage.StartsWith(UpdateCheck.ReleasesPage, StringComparison.Ordinal))
+        {
+            _shell.Open(_updatePage);
+        }
+    }
 
     private void OnDiag(object sender, RoutedEventArgs e) => DiagnosticsRequested?.Invoke();
 

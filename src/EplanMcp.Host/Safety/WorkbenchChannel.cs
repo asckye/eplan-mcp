@@ -163,6 +163,7 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
     {
         WritePlan plan = question.Plan;
         Suspension? suspension = question.Release;
+        (ApprovalTarget? target, string? action) = suspension is null ? ApprovalTargets.For(question.Tool, plan) : (null, null);
         byte[] ask;
         try
         {
@@ -184,7 +185,9 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
                     suspension.ProcessId),
                 plan.Fingerprint,
                 question.ArgumentsHash,
-                question.Deadline.ToUnixTimeMilliseconds()));
+                question.Deadline.ToUnixTimeMilliseconds(),
+                target,
+                action));
         }
         catch (JsonException ex)
         {

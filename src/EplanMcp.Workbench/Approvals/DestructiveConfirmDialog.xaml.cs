@@ -24,7 +24,7 @@ public partial class DestructiveConfirmDialog : Window
         Title = Heading.Text = loc.T("Confirm.Title", item.Tool);
         Backup.Text = item.Backup;
         Changes.Text = item.Changes;
-        TypeLabel.Text = loc.T("Confirm.TypeLabel", item.ConfirmValue);
+        TypeLabel.Text = item.ConfirmLabel;
         CancelButton.Content = loc["Confirm.Cancel"];
         ActionButton.Content = loc["Confirm.Action"];
         AutomationProperties.SetName(CancelButton, WorkbenchDialog.Plain(loc["Confirm.Cancel"]));

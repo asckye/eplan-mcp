@@ -75,7 +75,7 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
         record.Project is { } project ? Loc.Current.T("Question.ScopeProject", ProjectText.Line(project)) : Loc.Current.T("Question.ScopeInstance", record.ProcessId ?? 0));
 
     /// <summary>A Destructive write names what runs and ends in an ellipsis: a typed confirmation follows (ADR-0035).</summary>
-    public string ApproveLabel => IsRelease ? Text("Question.Continue") : IsDestructive ? Loc.Current.T("Question.ApproveDestructive", Tool) : Text("Question.Approve");
+    public string ApproveLabel => IsRelease ? Text("Question.Continue") : IsDestructive ? (ActionWords is { } words ? words + "…" : Loc.Current.T("Question.ApproveDestructive", Tool)) : Text("Question.Approve");
 
     public string RejectLabel => Text(IsRelease ? "Question.KeepSuspended" : IsDestructive ? "Question.RejectDefault" : "Question.Reject");
 
@@ -83,11 +83,40 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
     public string AnswerHint => Text(IsRelease ? "Question.ReleaseHint" : IsDestructive ? "Question.DestructiveHint" : "Question.WriteHint");
 
     /// <summary>
-    /// What the engineer types to approve a Destructive write (ADR-0035): a structured field of the question, never text
-    /// from the change list. The protocol has no page or device field, so it is the project's name, or the tool when the
-    /// project has none.
+    /// What the engineer types to approve a Destructive write (ADR-0035, ADR-0064 decision 3): a structured field of the
+    /// question, never text from the change list. The target's identifier when the Host names one usable target; the
+    /// number of objects for a batch; else the project's name, or the tool when the project has none.
     /// </summary>
-    public string ConfirmValue => ProjectName.Length > 0 ? ProjectName : Tool;
+    public string ConfirmValue => Ask.Target switch
+    {
+        { Count: 1, Id: { } id } when UsableId(id) => id,
+        { Count: > 1 } target => target.Count.ToString(CultureInfo.InvariantCulture),
+        _ => ProjectName.Length > 0 ? ProjectName : Tool,
+    };
+
+    /// <summary>What the confirmation asks to type, matching <see cref="ConfirmValue"/>.</summary>
+    public string ConfirmLabel => Ask.Target switch
+    {
+        { Count: 1, Id: { } id } when UsableId(id) => Loc.Current.T("Confirm.TypeTarget", Text("Kind." + KnownKind), id),
+        { Count: > 1 } target => Loc.Current.T("Confirm.TypeCount", target.Count, Text("Kind." + KnownKind)),
+        _ => Loc.Current.T("Confirm.TypeLabel", ConfirmValue),
+    };
+
+    /// <summary>The Host's kind if this Workbench knows it, else <c>other</c> (ADR-0064 decision 1).</summary>
+    private string KnownKind => Ask.Target?.Kind switch
+    {
+        "page" or "device" or "placement" or "connection" or "part" or "project" or "macro" => Ask.Target.Kind,
+        _ => "other",
+    };
+
+    /// <summary>The action words for the button, from this Workbench's own vocabulary; null for an action it does not know.</summary>
+    private string? ActionWords => Ask.Target is not null && Ask.Action is "delete" or "renumber" or "overwrite" or "import"
+        ? Loc.Current.T("Target.Action", Text("Action." + Ask.Action), Text("Kind." + KnownKind))
+        : null;
+
+    /// <summary>ADR-0064 decision 4: one line, no invisible characters, at most 64 characters; else the count or the project name.</summary>
+    internal static bool UsableId(string id) =>
+        id.Length is > 0 and <= 64 && id.Trim() == id && !id.Any(c => char.IsControl(c) || char.GetUnicodeCategory(c) == UnicodeCategory.Format);
 
     public TimeSpan Left => Countdown.Left(Question, clock.GetUtcNow());
 

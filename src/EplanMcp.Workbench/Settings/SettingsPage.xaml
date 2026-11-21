@@ -182,8 +182,12 @@
           <!-- 3. Storage and about -->
           <StackPanel x:Name="StorageSection" Visibility="Collapsed">
             <Border Style="{StaticResource Workbench.Box}" Padding="{StaticResource Ui.Inset.SettingsBox}" Margin="{StaticResource Ui.Gap.Bottom.Normal}">
+              <StackPanel>
               <DockPanel>
                 <Button x:Name="ReleasesButton" DockPanel.Dock="Right" Style="{StaticResource Workbench.ButtonSm}" Content="{l:Tr Settings.Releases}" VerticalAlignment="Center" Click="OnReleases" />
+                <!-- ADR-0066: the only time the Workbench goes online, and only on this click. -->
+                <Button x:Name="UpdateButton" DockPanel.Dock="Right" Style="{StaticResource Primer.Primary}" Content="{l:Tr Settings.CheckUpdate}" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.XS}"
+                        AutomationProperties.HelpText="{l:Tr Settings.CheckUpdateHelp}" ToolTip="{l:Tr Settings.CheckUpdateHelp}" Click="OnCheckUpdate" />
                 <Border DockPanel.Dock="Left" Width="40" Height="40" CornerRadius="10" Background="{DynamicResource Accent.Button}" Margin="{StaticResource Ui.Gap.Right.SM}">
                   <Path Width="{StaticResource Ui.IconSize.Brand}" Height="{StaticResource Ui.IconSize.Brand}" Stretch="Uniform" Stroke="{DynamicResource Text.OnAccent}" StrokeThickness="2.2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                         Data="M4,6 H20 M4,12 H14 M4,18 H20 M20.2,12 A2.2,2.2 0 1 1 15.8,12 A2.2,2.2 0 1 1 20.2,12" />
@@ -193,6 +197,14 @@
                   <TextBlock x:Name="VersionLine" Style="{StaticResource Workbench.CellMono}" Margin="{StaticResource Ui.Gap.Top.Hair}" />
                 </StackPanel>
               </DockPanel>
+              <Border x:Name="UpdateNewer" Style="{StaticResource Workbench.CodeBox}" Margin="{StaticResource Ui.Gap.Top.XS}" Visibility="Collapsed">
+                <DockPanel>
+                  <Button x:Name="OpenUpdate" DockPanel.Dock="Right" Style="{StaticResource Primer.Primary}" Content="{l:Tr Settings.OpenRelease}" VerticalAlignment="Center" Click="OnOpenUpdate" />
+                  <TextBlock x:Name="UpdateNewerText" Style="{StaticResource Workbench.CellText}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </DockPanel>
+              </Border>
+              <TextBlock x:Name="UpdateText" Style="{StaticResource Workbench.SettingHelp}" Margin="{StaticResource Ui.Gap.Top.XS}" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
+              </StackPanel>
             </Border>
 
             <Border Style="{StaticResource Workbench.Box}" Margin="{StaticResource Ui.Gap.Bottom.Normal}" ClipToBounds="True">

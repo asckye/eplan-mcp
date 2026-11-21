@@ -560,6 +560,12 @@ internal sealed partial class WritePipeline(
         JsonObject record = Record("approval", tool, requestId, plan, eplan);
         record["fingerprint"] = plan.Fingerprint;
         record["changes"] = AuditChanges(plan);
+        if (ApprovalTargets.For(tool, plan) is ({ } target, { } action))
+        {
+            // ADR-0064 decision 5: what the question named, for comparing afterwards; never what the engineer typed.
+            record["target"] = new JsonObject { ["kind"] = target.Kind, ["id"] = target.Id, ["count"] = target.Count };
+            record["action"] = action;
+        }
         return RecordDecisionAsync(record, approval);
     }
 
