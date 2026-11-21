@@ -1728,4 +1728,107 @@
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="FontSize" Value="13" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <!-- ===== Workbench 4.0 project tree: page badges, tree rows ===== -->
+  <Style x:Key="Workbench.PageBadge" TargetType="Border">
+    <Setter Property="MinWidth" Value="26" />
+    <Setter Property="Height" Value="18" />
+    <Setter Property="CornerRadius" Value="5" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.PageBadge}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource State.Info.Background}" />
+  </Style>
+  <Style x:Key="Workbench.PageBadgeText" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="9.5" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.TreeTitle" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+  <Style x:Key="Workbench.Tree" TargetType="TreeView">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.TreeSearch}" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+  </Style>
+  <!-- The project tree's open/close arrow (Workbench 4.0 design): a small chevron, pointing down when open. -->
+  <Style x:Key="Workbench.TreeChevron" TargetType="ToggleButton">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Width" Value="16" />
+    <Setter Property="Height" Value="16" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Border Background="Transparent">
+            <Path x:Name="Arrow" Data="M 3,1 L 7,5 L 3,9" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Stroke="{DynamicResource Text.Tertiary}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                  RenderTransformOrigin="0.5,0.5">
+              <Path.RenderTransform>
+                <RotateTransform x:Name="Turn" Angle="0" />
+              </Path.RenderTransform>
+            </Path>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Arrow" Property="RenderTransform">
+                <Setter.Value>
+                  <RotateTransform Angle="90" />
+                </Setter.Value>
+              </Setter>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <!-- A row of the project tree: the chevron, the row filling the pane so counts sit right; hover and choice as cards. -->
+  <Style x:Key="Workbench.TreeItem" TargetType="TreeViewItem">
+    <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+    <Setter Property="IsExpanded" Value="True" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.TreeItem}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TreeViewItem">
+          <StackPanel>
+            <Border x:Name="Row" Background="Transparent" CornerRadius="{StaticResource Ui.Radius}" Padding="{TemplateBinding Padding}" MinHeight="28" Margin="{StaticResource Ui.Gap.Bottom.XXS}">
+              <Grid>
+                <Border x:Name="Bar" Width="3" CornerRadius="1.5" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.TreeBar}" Background="{DynamicResource Accent.Graphic}" Visibility="Collapsed" />
+                <DockPanel>
+                  <ToggleButton x:Name="Expander" DockPanel.Dock="Left" Style="{StaticResource Workbench.TreeChevron}" Margin="{StaticResource Ui.Gap.Right.XXS}"
+                                IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press" />
+                  <ContentPresenter x:Name="PART_Header" ContentSource="Header" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                </DockPanel>
+              </Grid>
+            </Border>
+            <ItemsPresenter x:Name="ItemsHost" Margin="{StaticResource Ui.Gap.Left.SM}" />
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsExpanded" Value="False">
+              <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="HasItems" Value="False">
+              <Setter TargetName="Expander" Property="Visibility" Value="Hidden" />
+            </Trigger>
+            <Trigger SourceName="Row" Property="IsMouseOver" Value="True">
+              <Setter TargetName="Row" Property="Background" Value="{DynamicResource Surface.Hover}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Row" Property="Background" Value="{DynamicResource Surface.Elevated}" />
+              <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style></ResourceDictionary>

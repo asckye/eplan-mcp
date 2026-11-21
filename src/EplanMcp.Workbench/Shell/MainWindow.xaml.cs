@@ -85,7 +85,6 @@ public partial class MainWindow : Window
         VersionStatusText.Text = "v" + version;
         CommandKeyText.Text = "Ctrl K";
 
-        ProjectPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
         McpPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
         ClientsPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
         ApprovalsPage.AuditRequested += () => Navigate(WorkbenchPage.Audit, NavigationOrigin.Shortcut);

@@ -1,98 +1,174 @@
 using System.ComponentModel;
+using System.IO;
+using System.Text.Json.Nodes;
 using EplanMcp.Workbench.Approvals;
-using EplanMcp.Workbench.Audit;
-using EplanMcp.Workbench.Commands;
 using TiaOpenness.Gui.Localization;
 
 namespace EplanMcp.Workbench.Project;
 
-internal sealed record ProjectActivityRow(string Time, string Tool, string Project, string Result);
+internal enum ProjectState
+{
+    Idle,
+    Loading,
+    NoHost,
+    NotConnected,
+    Ready,
+    Failed,
+}
 
-internal sealed record ProjectSessionRow(string Title, string Detail, CheckStatus Status);
+/// <summary>One device as the page's device table and the group's device list show it.</summary>
+internal sealed record ProjectDeviceRow(string Tag, string VisibleTag, string Category, string Page, int Parts)
+{
+    public string PartsText => Parts.ToString(System.Globalization.CultureInfo.InvariantCulture);
+}
 
 /// <summary>
-/// Live EPLAN project &amp; session workspace model backed by <see cref="HostCommands.DoctorAsync"/> and <see cref="AuditReader"/>.
+/// The project page's model (ADR-0065 decision 2): the EPLAN the Host sees, the project, its tree, and the devices of
+/// the page or group chosen, all read through <see cref="IProjectTools"/> with read-only tools. Nothing here writes.
 /// </summary>
-internal sealed class ProjectView(HostCommands host, string auditFolder) : INotifyPropertyChanged
+internal sealed class ProjectView(IProjectTools? tools) : INotifyPropertyChanged
 {
+    /// <summary>How many pages the tree reads at most (four calls of 200); a larger project says so.</summary>
+    public const int MaxPages = 800;
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public bool IsLoading { get; private set; }
+    public ProjectState State { get; private set; } = tools is null ? ProjectState.NoHost : ProjectState.Idle;
 
-    public bool HasRunningSession { get; private set; }
+    public bool IsLoading => State == ProjectState.Loading;
 
-    public string SessionSummary { get; private set; } = string.Empty;
+    /// <summary>Why the page shows nothing: the Host's text when it gave one, made plain.</summary>
+    public string Problem { get; private set; } = string.Empty;
 
-    public IReadOnlyList<ProjectSessionRow> Sessions { get; private set; } = [];
+    public string ProjectName { get; private set; } = string.Empty;
 
-    public IReadOnlyList<ProjectActivityRow> RecentActivity { get; private set; } = [];
+    public string Eplan { get; private set; } = string.Empty;
 
+    public int PageTotal { get; private set; }
+
+    public int DeviceTotal { get; private set; }
+
+    public bool Truncated { get; private set; }
+
+    public IReadOnlyList<ProjectGroup> Groups { get; private set; } = [];
+
+    /// <summary>The page or group whose devices <see cref="Devices"/> holds.</summary>
+    public string DevicesOf { get; private set; } = string.Empty;
+
+    public IReadOnlyList<ProjectDeviceRow> Devices { get; private set; } = [];
+
+    public bool DevicesLoading { get; private set; }
+
+    /// <summary>Reads the EPLAN, the project and its pages again.</summary>
     public async Task RefreshAsync(CancellationToken cancellationToken)
     {
-        if (IsLoading)
+        if (tools is null || IsLoading)
         {
             return;
         }
 
-        IsLoading = true;
+        (State, Problem) = (ProjectState.Loading, string.Empty);
         Changed();
         try
         {
-            var sessions = new List<ProjectSessionRow>();
-            if (host.IsAvailable)
+            JsonObject status = await tools.ReadAsync("eplan_session_status", [], cancellationToken).ConfigureAwait(true);
+            if (status["connected"] is not JsonValue connected || !connected.TryGetValue(out bool isConnected) || !isConnected)
             {
-                try
+                (State, Problem) = (ProjectState.NotConnected, Plain(status["hint"]));
+                return;
+            }
+
+            Eplan = status["eplan"] is JsonObject eplan ? "EPLAN " + Plain(eplan["version"]) + (Plain(eplan["variant"]) is { Length: > 0 } variant ? " · " + variant : string.Empty) : string.Empty;
+            JsonObject project = await tools.ReadAsync("eplan_project_get", [], cancellationToken).ConfigureAwait(true);
+            ProjectName = Plain(project["project"]?["name"]);
+            PageTotal = Count(project["counts"]?["pages"]);
+            DeviceTotal = Count(project["counts"]?["devices"]);
+
+            var pages = new List<ProjectPageNode>();
+            string? cursor = null;
+            do
+            {
+                JsonObject args = new() { ["limit"] = 200 };
+                if (cursor is not null)
                 {
-                    DoctorReport report = await host.DoctorAsync(cancellationToken).ConfigureAwait(true);
-                    foreach (DoctorCheck check in report.Checks.Where(c => c.Id is "eplan.running" or "eplan.install" or "addin.loaded" or "suspensions"))
-                    {
-                        string text = ProjectText.Line(Loc.Current.Language == AppLanguage.Chinese ? check.Zh : check.En);
-                        sessions.Add(new ProjectSessionRow(check.Id, text, check.Status));
-                    }
-
-                    HasRunningSession = report.Checks.Any(c => c.Id == "eplan.running" && c.Status == CheckStatus.Ok);
-                    DoctorCheck? running = report.Checks.FirstOrDefault(c => c.Id == "eplan.running");
-                    SessionSummary = running is not null
-                        ? ProjectText.Line(Loc.Current.Language == AppLanguage.Chinese ? running.Zh : running.En)
-                        : Loc.Current["Project.NoSession"];
+                    args["cursor"] = cursor;
                 }
-                catch (Exception ex) when (ex is not OutOfMemoryException)
-                {
-                    HasRunningSession = false;
-                    SessionSummary = Loc.Current["Project.NoSession"];
-                }
-            }
-            else
-            {
-                HasRunningSession = false;
-                SessionSummary = Loc.Current["Host.Missing"];
-            }
 
-            Sessions = sessions;
+                JsonObject list = await tools.ReadAsync("eplan_page_list", args, cancellationToken).ConfigureAwait(true);
+                pages.AddRange(ProjectTree.Pages(list));
+                cursor = list["nextCursor"] is JsonValue next && next.TryGetValue(out string? text) && text.Length > 0 ? text : null;
+            }
+            while (cursor is not null && pages.Count < MaxPages);
 
-            try
-            {
-                AuditLogContents read = AuditReader.Read(auditFolder, progress: null, cancellationToken);
-                RecentActivity =
-                [
-                    .. read.Records.TakeLast(25).Reverse().Select(r => new ProjectActivityRow(
-                        r.Time?.ToLocalTime().ToString("MM-dd HH:mm:ss", System.Globalization.CultureInfo.CurrentCulture) ?? "--",
-                        ProjectText.Line(r.Tool ?? "-"),
-                        ProjectText.Line(string.IsNullOrWhiteSpace(r.Project) ? "-" : r.Project),
-                        ProjectText.Line(r.Execution ?? r.Decision ?? r.Kind ?? "-"))),
-                ];
-            }
-            catch (Exception ex) when (ex is not OutOfMemoryException)
-            {
-                RecentActivity = [];
-            }
+            Truncated = cursor is not null;
+            Groups = ProjectTree.Build(pages);
+            State = ProjectState.Ready;
+        }
+        catch (Exception ex) when (ex is ProjectToolException or InvalidOperationException or IOException or TimeoutException or System.ComponentModel.Win32Exception or ModelContextProtocol.McpException)
+        {
+            (State, Problem) = (ProjectState.Failed, ProjectText.Line(ex.Message, 300));
         }
         finally
         {
-            IsLoading = false;
             Changed();
         }
     }
+
+    /// <summary>The devices of one page (<paramref name="page"/>) or of a group, by its structure prefix.</summary>
+    public async Task LoadDevicesAsync(string? page, string? prefix, CancellationToken cancellationToken)
+    {
+        if (tools is null || State != ProjectState.Ready)
+        {
+            return;
+        }
+
+        DevicesOf = page ?? prefix ?? string.Empty;
+        (DevicesLoading, Devices) = (true, []);
+        Changed();
+        try
+        {
+            JsonObject args = new() { ["limit"] = 200 };
+            if (page is not null)
+            {
+                args["page"] = page;
+            }
+            else if (prefix is { Length: > 0 })
+            {
+                args["tag_contains"] = prefix;
+            }
+
+            JsonObject list = await tools.ReadAsync("eplan_device_list", args, cancellationToken).ConfigureAwait(true);
+            Devices =
+            [
+                .. (list["devices"] as JsonArray ?? []).OfType<JsonObject>().Select(d => new ProjectDeviceRow(
+                    Plain(d["tag"]), Plain(d["visibleTag"]), Plain(d["category"]), Plain(d["page"]), Count(d["parts"]))),
+            ];
+        }
+        catch (Exception ex) when (ex is ProjectToolException or InvalidOperationException or IOException or TimeoutException or ModelContextProtocol.McpException)
+        {
+            (Devices, Problem) = ([], ProjectText.Line(ex.Message, 300));
+        }
+        finally
+        {
+            DevicesLoading = false;
+            Changed();
+        }
+    }
+
+    /// <summary>A short status for the page's bar, in the current language.</summary>
+    public string Summary => State switch
+    {
+        ProjectState.Ready => Loc.Current.T("Project.Counts", PageTotal, DeviceTotal),
+        ProjectState.Loading => Loc.Current["Project.Reading"],
+        ProjectState.NoHost => Loc.Current["Host.Missing"],
+        ProjectState.NotConnected => Loc.Current["Project.NotConnected"],
+        ProjectState.Failed => Loc.Current["Project.ReadFailed"],
+        _ => string.Empty,
+    };
+
+    private static string Plain(JsonNode? node) => node is JsonValue value && value.TryGetValue(out string? text) ? ProjectText.Line(text) : string.Empty;
+
+    private static int Count(JsonNode? node) => node is JsonValue value && value.TryGetValue(out int count) ? count : 0;
 
     private void Changed() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
 }

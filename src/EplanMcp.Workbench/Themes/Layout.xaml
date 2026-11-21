@@ -159,6 +159,10 @@
   <Thickness x:Key="Ui.Inset.SettingsFooter">16</Thickness>
   <Thickness x:Key="Ui.Inset.FooterNote">0,8,0,0</Thickness>
   <Thickness x:Key="Ui.Inset.CcTile">14</Thickness>
+  <Thickness x:Key="Ui.Inset.PageBadge">4,0</Thickness>
+  <Thickness x:Key="Ui.Inset.TreeSearch">10,8</Thickness>
+  <Thickness x:Key="Ui.Inset.TreeItem">4,3</Thickness>
+  <Thickness x:Key="Ui.Gap.TreeBar">-4,2,0,2</Thickness>
   <Thickness x:Key="Ui.Gap.ClientGrid">0,0,-10,6</Thickness>
   <Thickness x:Key="Ui.Gap.ClientTile">0,0,10,10</Thickness>
   <Thickness x:Key="Ui.Gap.Left.SM">12,0,0,0</Thickness>

@@ -39,6 +39,7 @@ public sealed partial class App : Application, IDisposable
     private TrayIcon? _tray;
     private MainWindow? _window;
     private Vm.VmView? _vm;
+    private Project.HostToolClient? _tools;
 
     internal int Pending { get; private set; }
 
@@ -99,7 +100,9 @@ public sealed partial class App : Application, IDisposable
         var clients = new ClientsView(host, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         _vm = new Vm.VmView(runner, new Vm.VmElevation(), Vm.VmNetwork.Addresses());
 
-        _window.AttachProject(new ProjectView(host, _locations.Audit));
+        // ADR-0065: the project page reads through the Workbench's own Host, started on its first read.
+        _tools = hostExecutable is not null ? new Project.HostToolClient(hostExecutable) : null;
+        _window.AttachProject(new ProjectView(_tools));
         _window.AttachAudit(new AuditView(_locations.Audit, host, TimeProvider.System));
         _window.AttachStatus(new StatusView(host, () => _listening && _queue.IsAccepting));
         _window.AttachClients(clients);
@@ -116,6 +119,8 @@ public sealed partial class App : Application, IDisposable
     public void Dispose()
     {
         _vm?.Dispose();
+        // The Host child ends with the Workbench; a Host that does not stop in two seconds is left to the job's end.
+        _tools?.DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(2));
         _tray?.Dispose();
         _view?.Dispose();
         _log?.Dispose();

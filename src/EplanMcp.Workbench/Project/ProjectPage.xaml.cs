@@ -6,10 +6,16 @@ using TiaOpenness.Gui.Localization;
 
 namespace EplanMcp.Workbench.Project;
 
+/// <summary>
+/// The project workspace (Workbench 4.0 design, ADR-0065): reads when first shown and on F5, never on its own; a chosen
+/// page or group reads its devices. Every text from EPLAN is made plain in the model.
+/// </summary>
 public partial class ProjectPage : UserControl, IWorkbenchPage
 {
     private ProjectView? _view;
     private bool _loadedOnce;
+    private ProjectTreeNode? _chosen;
+    private IReadOnlyList<ProjectGroup>? _shownGroups;
 
     public ProjectPage()
     {
@@ -18,7 +24,6 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
         {
             Loc.Current.LanguageChanged -= OnLanguageChanged;
             Loc.Current.LanguageChanged += OnLanguageChanged;
-            ApplyTexts();
             Show();
         };
         Unloaded += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
@@ -30,10 +35,7 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
                 Refresh();
             }
         };
-        ApplyTexts();
     }
-
-    public event Action<WorkbenchPage>? NavigateRequested;
 
     public FrameworkElement? Heading => PageTitle;
 
@@ -42,7 +44,7 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
     internal void SetLeftPaneVisible(bool visible)
     {
         LeftPane.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-        LeftCol.Width = visible ? new GridLength(256) : new GridLength(0);
+        LeftCol.Width = visible ? new GridLength(262) : new GridLength(0);
     }
 
     internal void Attach(ProjectView view)
@@ -62,54 +64,96 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
-        ApplyTexts();
+        _shownGroups = null;
         Show();
-    }
-
-    private void ApplyTexts()
-    {
-        Loc loc = Loc.Current;
-        ColTime.Header = ColTime2.Header = loc["Audit.Time"];
-        ColTool.Header = ColTool2.Header = loc["Audit.Tool"];
-        ColProject.Header = ColProject2.Header = loc["Audit.Project"];
-        ColResult.Header = ColResult2.Header = loc["Audit.Result"];
-        RecentHeading.Text = loc.T("Project.RecentCount", _view?.RecentActivity.Count ?? 0);
     }
 
     private void Show()
     {
+        Loc loc = Loc.Current;
         if (_view is not { } view)
         {
-            SessionSummaryText.Text = Loc.Current["Project.NoSession"];
-            NoSessionHelp.Visibility = Visibility.Visible;
+            ShowEmpty(loc["Project.NotConnected"], string.Empty);
             return;
         }
 
-        Working.Visibility = view.IsLoading ? Visibility.Visible : Visibility.Collapsed;
-        SessionSummaryText.Text = string.IsNullOrWhiteSpace(view.SessionSummary) ? Loc.Current["Project.NoSession"] : view.SessionSummary;
-        NoSessionHelp.Visibility = view.HasRunningSession ? Visibility.Collapsed : Visibility.Visible;
-        SessionTree.ItemsSource = view.Sessions;
-        SessionDetailList.ItemsSource = view.Sessions;
-        OverviewActivityList.ItemsSource = view.RecentActivity;
-        FullActivityList.ItemsSource = view.RecentActivity;
-        RecentHeading.Text = Loc.Current.T("Project.RecentCount", view.RecentActivity.Count);
+        Working.Visibility = view.IsLoading || view.DevicesLoading ? Visibility.Visible : Visibility.Collapsed;
+        RefreshButton.IsEnabled = EmptyRefresh.IsEnabled = view.State != ProjectState.NoHost && !view.IsLoading;
+        CountsText.Text = view.Summary + (view.Truncated ? loc.T("Project.Truncated", ProjectView.MaxPages) : string.Empty);
+        HeaderEplan.Text = view.Eplan;
+        if (!ReferenceEquals(_shownGroups, view.Groups))
+        {
+            _shownGroups = view.Groups;
+            Tree.ItemsSource = ProjectTreeNode.From(view.Groups, view.ProjectName, TreeSearch.Text.Trim());
+        }
+
+        switch (view.State)
+        {
+            case ProjectState.Ready when _chosen is not null:
+                ShowDetail(view);
+                break;
+            case ProjectState.Ready:
+                ShowEmpty(view.ProjectName, loc["Project.ChooseNode"]);
+                break;
+            case ProjectState.NoHost:
+                ShowEmpty(loc["Host.Missing"], string.Empty);
+                break;
+            case ProjectState.NotConnected:
+                ShowEmpty(loc["Project.NotConnected"], view.Problem.Length > 0 ? view.Problem : loc["Project.NotConnectedHelp"]);
+                break;
+            case ProjectState.Failed:
+                ShowEmpty(loc["Project.ReadFailed"], view.Problem);
+                break;
+            default:
+                ShowEmpty(loc["Project.Reading"], string.Empty);
+                break;
+        }
     }
 
-    private void OnNodeChanged(object sender, RoutedEventArgs e)
+    private void ShowEmpty(string title, string text)
     {
-        if (OverviewPanel is null)
+        Detail.Visibility = Visibility.Collapsed;
+        Empty.Visibility = Visibility.Visible;
+        EmptyState.Title = title;
+        EmptyState.Text = text;
+        HeaderBadge.Visibility = Visibility.Collapsed;
+        HeaderTitle.Text = _view?.ProjectName ?? string.Empty;
+    }
+
+    private void ShowDetail(ProjectView view)
+    {
+        Loc loc = Loc.Current;
+        Detail.Visibility = Visibility.Visible;
+        Empty.Visibility = Visibility.Collapsed;
+        ProjectPageNode? page = _chosen!.Page;
+        HeaderBadge.Visibility = page is { Kind.Length: > 0 } ? Visibility.Visible : Visibility.Collapsed;
+        HeaderBadgeText.Text = page?.Kind ?? string.Empty;
+        HeaderTitle.Text = page?.Name ?? (_chosen.DevicesPrefix is { Length: > 0 } prefix ? prefix : view.ProjectName);
+        DetailTitle.Text = page is not null ? (page.Description.Length > 0 ? page.Description : page.Name) : loc["Project.DeviceList"];
+        DetailSub.Text = page is not null ? page.Type : loc.T("Project.GroupDevices", HeaderTitle.Text);
+        Devices.ItemsSource = view.Devices;
+        NoDevices.Visibility = !view.DevicesLoading && view.Devices.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void OnTreeSelected(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (e.NewValue is not ProjectTreeNode { } node || (node.Page is null && node.DevicesPrefix is null) || _view is not { } view)
         {
             return;
         }
 
-        OverviewPanel.Visibility = NodeOverview.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-        EnvPanel.Visibility = NodeEnv.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-        ActivityPanel.Visibility = NodeActivity.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        _chosen = node;
+        _ = view.LoadDevicesAsync(node.Page?.Name, node.DevicesPrefix, CancellationToken.None);
+        Show();
+    }
+
+    private void OnSearch(object sender, TextChangedEventArgs e)
+    {
+        if (_view is { } view)
+        {
+            Tree.ItemsSource = ProjectTreeNode.From(view.Groups, view.ProjectName, TreeSearch.Text.Trim());
+        }
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
-
-    private void OnJumpApprovals(object sender, RoutedEventArgs e) => NavigateRequested?.Invoke(WorkbenchPage.Approvals);
-
-    private void OnJumpMcp(object sender, RoutedEventArgs e) => NavigateRequested?.Invoke(WorkbenchPage.Mcp);
 }
