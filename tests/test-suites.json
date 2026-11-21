@@ -8,6 +8,6 @@
     { "assembly": "EplanMcp.Catalog.Tests", "minPassed": 53 },
     { "assembly": "EplanMcp.Coverage.Tests", "minPassed": 744 },
     { "assembly": "EplanMcp.Workbench.Protocol.Tests", "minPassed": 63 },
-    { "assembly": "EplanMcp.Workbench.Tests", "minPassed": 2075 }
+    { "assembly": "EplanMcp.Workbench.Tests", "minPassed": 2408 }
   ]
 }
