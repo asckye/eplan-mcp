@@ -98,7 +98,6 @@ internal static class ClientConfigOutput
     {
         ["code"] = issue.Problem switch
         {
-            ClientProblem.InvalidVmKey => "invalid_vm_key",
             ClientProblem.RemoteUnsupported => "remote_unsupported",
             ClientProblem.InvalidFile => "invalid_file",
             ClientProblem.UnsupportedToml => "unsupported_toml",

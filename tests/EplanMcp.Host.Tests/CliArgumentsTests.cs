@@ -174,14 +174,14 @@ public sealed class CliArgumentsTests
     public void Usage_NamesEveryCommandWithItsOptionsAndTheClients()
     {
         Assert.Equal(
-            "usage: eplanmcp [serve [--profile core|full|discovery]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--offline] [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+            "usage: eplanmcp [serve [--profile core|full|discovery]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | doctor [--offline] [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
             + " | client-config claude-code --plugin [--dry-run] [--format json] | addin-variants [--format json]"
-            + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp --key-stdin [--dry-run] [--format json]"
+            + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp [--dry-run] [--format json]"
             + " | client-config [<client>...] --vm --remove [--format json]"
             + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
             + " | vm-firewall show|add|remove --port <n> --host-address <IPv4> (show: [--format json])"
             + " | vm-instances --format json"
-            + " | vm-test --url http://<IPv4>:<port>/mcp --key-stdin [--format json]"
+            + " | vm-test --url http://<IPv4>:<port>/mcp [--format json]"
             + Environment.NewLine
             + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
             + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"

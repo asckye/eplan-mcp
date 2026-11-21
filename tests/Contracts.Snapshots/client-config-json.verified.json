@@ -180,19 +180,5 @@
         }
       }
     ]
-  },
-  "vmInvalidKey": {
-    "schemaVersion": 2,
-    "mode": "write",
-    "server": {
-      "name": "eplan-vm",
-      "url": "http://192.168.1.42:8766/mcp"
-    },
-    "problem": {
-      "code": "invalid_vm_key",
-      "zh": "请仅通过重定向的 stdin 提供一把有效的 VM 密钥，可带一个末尾换行",
-      "en": "Provide exactly one valid VM key on redirected stdin, optionally followed by one newline"
-    },
-    "clients": []
   }
 }

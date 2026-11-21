@@ -16,7 +16,6 @@ internal enum CliCommand
     AddinVariants,
     UninstallAddin,
     Pack,
-    VmKey,
     VmFirewall,
     VmInstances,
     VmTest,
@@ -37,20 +36,19 @@ internal sealed record CliArguments(
     IReadOnlyList<string>? Variants = null,
     PackRequest? Pack = null,
     HttpArguments? Http = null,
-    string? KeyAction = null,
     VmFirewallRequest? Firewall = null,
     VmTestRequest? VmTest = null,
     bool Offline = false)
 {
     public static string Usage { get; } =
-        "usage: eplanmcp [serve [--profile core|full|discovery]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--offline] [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+        "usage: eplanmcp [serve [--profile core|full|discovery]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | doctor [--offline] [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
         + " | client-config claude-code --plugin [--dry-run] [--format json] | addin-variants [--format json]"
-        + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp --key-stdin [--dry-run] [--format json]"
+        + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp [--dry-run] [--format json]"
         + " | client-config [<client>...] --vm --remove [--format json]"
         + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
         + " | vm-firewall show|add|remove --port <n> --host-address <IPv4> (show: [--format json])"
         + " | vm-instances --format json"
-        + " | vm-test --url http://<IPv4>:<port>/mcp --key-stdin [--format json]"
+        + " | vm-test --url http://<IPv4>:<port>/mcp [--format json]"
         + Environment.NewLine + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
         + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"
         + " | pack check <folder|file.eplanpack> | pack export <folder> <file.eplanpack> | pack install <folder|file.eplanpack> (each [--format json])"
@@ -64,7 +62,6 @@ internal sealed record CliArguments(
         ["serve", "--profile", "core"] => new(CliCommand.Serve, Json: false, Profile: ToolProfile.Core),
         ["serve", "--profile", "discovery"] => new(CliCommand.Serve, Json: false, Profile: ToolProfile.Discovery),
         ["serve", .. var options] when HttpArguments.Parse(options) is { } http => new(CliCommand.Serve, Json: false, Http: http),
-        ["vm-key", var action] when action is "create" or "show" or "delete" => new(CliCommand.VmKey, Json: false, KeyAction: action),
         ["vm-firewall", var action, .. var options] when VmFirewallRequest.Parse(action, options) is { } firewall => new(CliCommand.VmFirewall, Json: firewall.Json, Firewall: firewall),
         ["--version"] => new(CliCommand.Version, Json: false),
         ["vm-instances", "--format", "json"] => new(CliCommand.VmInstances, Json: true),
@@ -95,7 +92,7 @@ internal sealed record CliArguments(
     private static CliArguments? ClientConfigArguments(string[] options)
     {
         var clients = new List<McpClient>();
-        bool json = false, dryRun = false, remove = false, plugin = false, vm = false, keyStdin = false;
+        bool json = false, dryRun = false, remove = false, plugin = false, vm = false;
         string? url = null;
         for (int i = 0; i < options.Length; i++)
         {
@@ -117,9 +114,6 @@ internal sealed record CliArguments(
                 case "--vm" when !vm:
                     vm = true;
                     break;
-                case "--key-stdin" when !keyStdin:
-                    keyStdin = true;
-                    break;
                 case "--url" when url is null && i + 1 < options.Length:
                     url = options[++i];
                     break;
@@ -139,7 +133,7 @@ internal sealed record CliArguments(
         }
 
         ClientConfigMode mode = remove ? ClientConfigMode.Remove : dryRun ? ClientConfigMode.DryRun : ClientConfigMode.Write;
-        bool validVm = vm ? !plugin && (remove ? url is null && !keyStdin : url is not null && RemoteServer.ValidUrl(url)) : url is null && !keyStdin;
+        bool validVm = vm ? !plugin && (remove ? url is null : url is not null && RemoteServer.ValidUrl(url)) : url is null;
         return !validVm || (dryRun && remove) || (clients.Count == 0 && !remove) || (plugin && (remove || clients.Count != 1 || clients[0].Name != "claude-code"))
             ? null : new(CliCommand.ClientConfig, json, new(clients, mode, plugin, vm, url));
     }

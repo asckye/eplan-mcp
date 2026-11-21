@@ -104,7 +104,6 @@ public sealed class CliJsonSnapshotTests
             [
                 new("claude-desktop", null, ClientAction.Write, ClientOutcome.Failed) { Problem = new(ClientProblem.RemoteUnsupported, "claude-desktop") },
             ], Vm: true, Url: "http://192.168.1.42:8766/mcp")),
-            ["vmInvalidKey"] = Parse(new(server, ClientConfigMode.Write, new(ClientProblem.InvalidVmKey, ""), [], Vm: true, Url: "http://192.168.1.42:8766/mcp")),
         };
 
         return Snapshot(results.ToJsonString(), "client-config-json");

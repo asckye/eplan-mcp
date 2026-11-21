@@ -15,7 +15,6 @@ public sealed class VmTestCommandTests
     [Theory]
     [InlineData("--url http://192.168.1.42:8766/mcp", false)]
     [InlineData("--format json --url http://192.168.1.42:8766/mcp", true)]
-    [InlineData("--key-stdin --format json --url http://192.168.1.42:8766/mcp", true)]
     public void Arguments_RequireAnExplicitIpv4Endpoint(string options, bool json)
     {
         CliArguments cli = Assert.IsType<CliArguments>(CliArguments.Parse(["vm-test", .. options.Split(' ')]));
