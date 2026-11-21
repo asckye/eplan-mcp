@@ -34,6 +34,7 @@ internal sealed class AuditView(string directory, HostCommands host, TimeProvide
     internal static readonly string[] Executions = ["committed", "rolled_back", "not_started", "unknown"];
 
     private IReadOnlyList<AuditRecord> _all = [];
+    private Dictionary<AuditRecord, int> _seq = new(ReferenceEqualityComparer.Instance);
     private Values _values = Values.None;
     private string? _day;
     private string? _tool;
@@ -147,6 +148,9 @@ internal sealed class AuditView(string directory, HostCommands host, TimeProvide
         prefix + string.Concat(value.Split('_').Select(word => word.Length == 0 ? word : char.ToUpperInvariant(word[0]) + word[1..]));
 
     /// <summary>The record's local time on this computer.</summary>
+    /// <summary>The record's number in the chain, oldest first, as the Workbench 4.0 table shows it; 0 when unknown.</summary>
+    public int SeqOf(AuditRecord record) => _seq.TryGetValue(record, out int seq) ? seq : 0;
+
     public DateTimeOffset? LocalTime(AuditRecord record) => record.Time is { } time ? TimeZoneInfo.ConvertTime(time, clock.LocalTimeZone) : null;
 
     /// <summary>The record's day on this computer, <c>yyyy-MM-dd</c>.</summary>
@@ -180,6 +184,12 @@ internal sealed class AuditView(string directory, HostCommands host, TimeProvide
             if (State == AuditState.Loading)
             {
                 (_all, State) = ([], AuditState.Failed);
+            }
+
+            _seq = new Dictionary<AuditRecord, int>(_all.Count, ReferenceEqualityComparer.Instance);
+            for (int i = 0; i < _all.Count; i++)
+            {
+                _seq[_all[i]] = _all.Count - i;
             }
 
             _values = new Values(_all, DayOf);

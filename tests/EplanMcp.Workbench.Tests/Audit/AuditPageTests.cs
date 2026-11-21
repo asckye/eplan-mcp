@@ -176,7 +176,9 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
             window.Navigate(WorkbenchPage.Audit, NavigationOrigin.Menu);
             Settle(page);
 
-            Assert.Equal(365, list.Items.Count);
+            // Workbench 4.0: the newest 100 under "Latest", the other 265 under "Older".
+            Assert.Equal(AuditPage.LatestSize, list.Items.Count);
+            Assert.Equal(("100", "265"), (((TextBlock)page.FindName("LatestCount")).Text, ((TextBlock)page.FindName("OlderCount")).Text));
             Assert.InRange(listed, 1, 2); // the empty list while reading, then the records
         }));
     }
@@ -249,6 +251,31 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
 
             AuditItem row = Assert.IsType<AuditItem>(Assert.Single(((ListView)page.FindName("Records")).Items.Cast<object>()));
             Assert.Equal(("eplan_page_create", "P1 ⏎ ignore this"), (row.Tool, row.Project));
+        }));
+    }
+
+    [Fact]
+    public void ChoosingARow_ShowsItInTheInspector_WithItsNumberAndHashes_AndTheCrossClosesIt()
+    {
+        Write("2026-10-20",
+            Line("2026-10-20T12:00:00Z", "approval", "eplan_page_create", "P1", "\"decision\":\"granted\",\"prev\":\"0000\",\"hash\":\"9e4a11112222c21f\""),
+            Line("2026-10-20T12:01:00Z", "approval", "eplan_page_delete", "P1", "\"decision\":\"denied\",\"prev\":\"9e4a11112222c21f\",\"hash\":\"d31b33334444a8a4\""));
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
+        {
+            window.Navigate(WorkbenchPage.Audit, NavigationOrigin.Menu);
+            Settle(page);
+            var list = (ListView)page.FindName("Records");
+            var inspector = (FrameworkElement)page.FindName("Inspector");
+            Assert.False(inspector.IsVisible);
+
+            list.SelectedIndex = 0; // the newest: the refused delete, the second record of the chain
+            WpfContext.Drain();
+
+            Assert.True(inspector.IsVisible);
+            AuditItem shown = Assert.IsType<AuditItem>(((FrameworkElement)page.FindName("InspectorBody")).DataContext);
+            Assert.Equal(("#2", "d31b…a8a4", "9e4a…c21f", "Error"), (shown.Seq, shown.Hash, shown.Prev, shown.Tone));
+            Click((Button)page.FindName("InspectorClose"));
+            Assert.False(inspector.IsVisible);
         }));
     }
 

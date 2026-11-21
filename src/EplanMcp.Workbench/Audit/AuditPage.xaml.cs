@@ -25,6 +25,9 @@ public partial class AuditPage : UserControl, IWorkbenchPage
     private IReadOnlyList<AuditRecord>? _listed;
     private (int Reads, AppLanguage Language)? _filled;
 
+    /// <summary>How many of the newest records "Latest" holds (Workbench 4.0); the rest are "Older".</summary>
+    internal const int LatestSize = 100;
+
     public AuditPage()
     {
         InitializeComponent();
@@ -102,8 +105,8 @@ public partial class AuditPage : UserControl, IWorkbenchPage
     private void Show()
     {
         Loc loc = Loc.Current;
-        (TimeColumn.Header, KindColumn.Header, ToolColumn.Header, ProjectColumn.Header, ResultColumn.Header) =
-            (loc["Audit.Time"], loc["Audit.Kind"], loc["Audit.Tool"], loc["Audit.Project"], loc["Audit.Result"]);
+        (TimeColumn.Header, KindColumn.Header, ToolColumn.Header, ResultColumn.Header, HashColumn.Header, SourceColumn.Header) =
+            (loc["Audit.ColSeq"], loc["Audit.ColEvent"], loc["Audit.ColTarget"], loc["Audit.Result"], loc["Audit.ColHash"], loc["Audit.ColSource"]);
         ReloadButton.ToolTip = loc.T("Shell.Shortcut", loc["Audit.Reload"], "F5");
         if (_view is not { } view)
         {
@@ -157,7 +160,11 @@ public partial class AuditPage : UserControl, IWorkbenchPage
         AuditRecord? chosen = (Records.SelectedItem as AuditItem)?.Record;
         bool focused = Records.IsKeyboardFocusWithin;
         _listed = view.Shown;
-        List<AuditItem> rows = [.. view.Shown.Select(r => new AuditItem(r, view.LocalTime(r)))];
+        // "Latest" is the newest records shown, "Older" the rest; both counts beside their pills.
+        LatestCount.Text = Math.Min(view.Shown.Count, AuditPage.LatestSize).ToString(System.Globalization.CultureInfo.CurrentCulture);
+        OlderCount.Text = Math.Max(0, view.Shown.Count - AuditPage.LatestSize).ToString(System.Globalization.CultureInfo.CurrentCulture);
+        IEnumerable<AuditRecord> part = OlderTab.IsChecked == true ? view.Shown.Skip(AuditPage.LatestSize) : view.Shown.Take(AuditPage.LatestSize);
+        List<AuditItem> rows = [.. part.Select(r => new AuditItem(r, view.LocalTime(r), view.SeqOf(r)))];
         Records.ItemsSource = rows;
         if (rows.FirstOrDefault(row => row.Record == chosen) is { } again)
         {
@@ -184,8 +191,9 @@ public partial class AuditPage : UserControl, IWorkbenchPage
         (string? text, string? details, bool failed) = view.State == AuditState.Failed
             ? (Loc.Current.T("Audit.Unreadable", view.Folder), view.Problem, true)
             : (view.Verification, view.VerificationDetails, view.VerificationFailed);
-        Banner.Visibility = Visibility.Collapsed; // every message is a toast (owner, 2026-11-20)
-        Banner.SetResourceReference(StyleProperty, failed ? "Primer.Alert.Error" : "Primer.Alert.Success");
+        // The Workbench 4.0 strip under the bar: the chain's state stays shown, green or red, until the next check.
+        Banner.Visibility = text is null ? Visibility.Collapsed : Visibility.Visible;
+        Banner.SetResourceReference(StyleProperty, failed ? "Workbench.ResultStrip.Error" : "Workbench.ResultStrip.Success");
         BannerIcon.SetResourceReference(StyleProperty, failed ? "Primer.AlertIcon.Error" : "Primer.AlertIcon.Success");
         string severity = Loc.Current[failed ? "Audit.Error" : "Audit.Done"];
         string shown = text is null ? string.Empty : Loc.Current.T("Audit.Banner", severity, text);
@@ -226,6 +234,41 @@ public partial class AuditPage : UserControl, IWorkbenchPage
     }
 
     private void OnReload(object sender, RoutedEventArgs e) => Refresh();
+
+    private void OnPart(object sender, RoutedEventArgs e)
+    {
+        if (_view is { } view && Records is not null)
+        {
+            _listed = null;
+            List(view);
+        }
+    }
+
+    /// <summary>A chosen row shows in the inspector (Workbench 4.0): its number, target, result and hashes.</summary>
+    private void OnRecordSelected(object sender, SelectionChangedEventArgs e)
+    {
+        if (Records.SelectedItem is AuditItem item)
+        {
+            InspectorBody.DataContext = item;
+            Inspector.Visibility = Visibility.Visible;
+            InspectorColumn.Width = new GridLength(320);
+        }
+    }
+
+    private void OnInspectorClose(object sender, RoutedEventArgs e)
+    {
+        Inspector.Visibility = Visibility.Collapsed;
+        InspectorColumn.Width = new GridLength(0);
+        Records.Focus();
+    }
+
+    private void OnInspectorOpen(object sender, RoutedEventArgs e)
+    {
+        if (InspectorBody.DataContext is AuditItem item)
+        {
+            RecordOpened?.Invoke(item.Record);
+        }
+    }
 
     private void OnVerify(object sender, RoutedEventArgs e) => _ = _view?.VerifyAsync(CancellationToken.None);
 

@@ -6,120 +6,178 @@
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
     Focusable="False">
   <!--
-    Audit (2026-11-20 design): the bar, the filters, the table with mono cells and the record kind as a tag.
+    Audit (Workbench 4.0 design): latest and older records in the bar, the chain check on the right; a strip while it
+    reads or checks and with the result; the table with the record's number, its hash and its source; the inspector.
   -->
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-          <Button x:Name="ReloadButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Audit.Reload}" AutomationProperties.AcceleratorKey="F5" Click="OnReload" />
-          <Button x:Name="FolderButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Audit.OpenFolder}" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnFolder" />
-          <Button x:Name="VerifyButton" Style="{StaticResource Primer.Primary}" Content="{l:Tr Audit.Verify}" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnVerify" />
+          <Button x:Name="ReloadButton" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Audit.Reload}" AutomationProperties.AcceleratorKey="F5" Click="OnReload" />
+          <Button x:Name="FolderButton" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Audit.OpenFolder}" Margin="{StaticResource Ui.Gap.Right.XXS}" Click="OnFolder" />
+          <Button x:Name="VerifyButton" Style="{StaticResource Workbench.ButtonSmPrimary}" Content="{l:Tr Audit.Verify}" Click="OnVerify" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Audit}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.SM}"
-                     AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
-          <TextBlock x:Name="Caption" Style="{StaticResource Primer.Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          <!-- The page's heading for screen readers and focus (NAV-07); the design shows the two pills in its place. -->
+          <Canvas Width="0">
+            <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Audit}" Opacity="0" AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" />
+          </Canvas>
+          <RadioButton x:Name="LatestTab" GroupName="AuditPart" AutomationProperties.Name="{l:Tr Audit.Latest}" Style="{StaticResource Workbench.IdePill}" IsChecked="True" Checked="OnPart" Margin="{StaticResource Ui.Gap.Right.XXS}">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{l:Tr Audit.Latest}" VerticalAlignment="Center" />
+              <Border Style="{StaticResource Workbench.PillCount}" Margin="{StaticResource Ui.Gap.Left.Dot}">
+                <TextBlock x:Name="LatestCount" VerticalAlignment="Center" />
+              </Border>
+            </StackPanel>
+          </RadioButton>
+          <RadioButton x:Name="OlderTab" GroupName="AuditPart" AutomationProperties.Name="{l:Tr Audit.Older}" Style="{StaticResource Workbench.IdePill}" Checked="OnPart">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{l:Tr Audit.Older}" VerticalAlignment="Center" />
+              <Border Style="{StaticResource Workbench.PillCount}" Margin="{StaticResource Ui.Gap.Left.Dot}">
+                <TextBlock x:Name="OlderCount" VerticalAlignment="Center" />
+              </Border>
+            </StackPanel>
+          </RadioButton>
         </StackPanel>
       </DockPanel>
     </Border>
 
-    <TextBlock x:Name="Notice" DockPanel.Dock="Top" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Banner}"
-               Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
+    <!-- The filters beside the count, in the sub bar: the design has none, the engineer still finds a day, a tool, a project. -->
+    <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeSubBar}">
+      <DockPanel>
+        <TextBlock x:Name="Caption" DockPanel.Dock="Right" Style="{StaticResource Workbench.CellMono}" VerticalAlignment="Center" />
+        <WrapPanel x:Name="Filters" AutomationProperties.Name="{l:Tr Audit.Filters}" VerticalAlignment="Center">
+          <TextBlock x:Name="DayLabel" Text="{l:Tr Audit.Day}" Style="{StaticResource Workbench.FilterLabel}" />
+          <ComboBox x:Name="DayFilter" Width="120" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=DayLabel}" SelectionChanged="OnFilter" Margin="{StaticResource Ui.Gap.Right.SM}" />
+          <TextBlock x:Name="ToolLabel" Text="{l:Tr Audit.Tool}" Style="{StaticResource Workbench.FilterLabel}" />
+          <ComboBox x:Name="ToolFilter" Width="160" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ToolLabel}" SelectionChanged="OnFilter" Margin="{StaticResource Ui.Gap.Right.SM}" />
+          <TextBlock x:Name="ProjectLabel" Text="{l:Tr Audit.Project}" Style="{StaticResource Workbench.FilterLabel}" />
+          <ComboBox x:Name="ProjectFilter" Width="160" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ProjectLabel}" SelectionChanged="OnFilter" Margin="{StaticResource Ui.Gap.Right.SM}" />
+          <TextBlock x:Name="DecisionLabel" Text="{l:Tr Audit.Decision}" Style="{StaticResource Workbench.FilterLabel}" />
+          <ComboBox x:Name="DecisionFilter" Width="110" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=DecisionLabel}" SelectionChanged="OnFilter" Margin="{StaticResource Ui.Gap.Right.SM}" />
+          <TextBlock x:Name="ExecutionLabel" Text="{l:Tr Audit.Execution}" Style="{StaticResource Workbench.FilterLabel}" />
+          <ComboBox x:Name="ExecutionFilter" Width="110" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ExecutionLabel}" SelectionChanged="OnFilter" />
+        </WrapPanel>
+      </DockPanel>
+    </Border>
 
-    <StackPanel x:Name="Working" DockPanel.Dock="Top" Margin="{StaticResource Ui.Gap.Banner}" Visibility="Collapsed">
-      <TextBlock x:Name="WorkingText" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
-      <ProgressBar x:Name="WorkingBar" Style="{StaticResource Primer.Progress}" Maximum="1" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.Name="{Binding Text, ElementName=WorkingText}" />
-    </StackPanel>
-    <Border x:Name="Banner" DockPanel.Dock="Top" Margin="{StaticResource Ui.Gap.Banner}" Visibility="Collapsed">
+    <!-- Reading or checking: the strip with what runs and how far. -->
+    <Border x:Name="Working" DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeSubBar}" Visibility="Collapsed">
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <TextBlock x:Name="WorkingText" Style="{StaticResource Workbench.CellText}" FontWeight="Medium" AutomationProperties.LiveSetting="Polite" />
+        <ProgressBar x:Name="WorkingBar" Style="{StaticResource Primer.Progress}" Width="260" Maximum="1" Margin="{StaticResource Ui.Gap.Left.Normal}" VerticalAlignment="Center" AutomationProperties.Name="{Binding Text, ElementName=WorkingText}" />
+      </StackPanel>
+    </Border>
+    <!-- The last check or a read that failed: a green or red strip under the bar, its details below. -->
+    <Border x:Name="Banner" DockPanel.Dock="Top" Style="{StaticResource Workbench.ResultStrip}" Visibility="Collapsed">
       <DockPanel>
         <Path x:Name="BannerIcon" DockPanel.Dock="Left" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
         <StackPanel>
-          <TextBlock x:Name="BannerText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
+          <TextBlock x:Name="BannerText" Style="{StaticResource Workbench.CellText}" FontWeight="Medium" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
           <TextBox x:Name="BannerDetails" Style="{StaticResource Workbench.CodeValue}" Visibility="Collapsed" AutomationProperties.LabeledBy="{Binding ElementName=BannerText}" />
         </StackPanel>
       </DockPanel>
     </Border>
-
-    <Border x:Name="NotRecordsBanner" DockPanel.Dock="Top" Margin="{StaticResource Ui.Gap.Banner}" Style="{StaticResource Primer.Alert.Warning}" Visibility="Collapsed">
+    <TextBlock x:Name="Notice" DockPanel.Dock="Top" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Banner}"
+               Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
+    <Border x:Name="NotRecordsBanner" DockPanel.Dock="Top" Style="{StaticResource Workbench.ResultStrip}" Visibility="Collapsed">
       <DockPanel>
         <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
-        <TextBlock x:Name="NotRecordsText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
+        <TextBlock x:Name="NotRecordsText" Style="{StaticResource Workbench.CellText}" TextWrapping="Wrap" TextTrimming="None" />
       </DockPanel>
     </Border>
 
-    <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeSubBar}">
-      <WrapPanel x:Name="Filters" AutomationProperties.Name="{l:Tr Audit.Filters}">
-        <StackPanel Margin="{StaticResource Ui.Inset.FilterField}" Width="140">
-          <TextBlock x:Name="DayLabel" Text="{l:Tr Audit.Day}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-          <ComboBox x:Name="DayFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=DayLabel}" SelectionChanged="OnFilter" />
-        </StackPanel>
-        <StackPanel Margin="{StaticResource Ui.Inset.FilterField}" Width="180">
-          <TextBlock x:Name="ToolLabel" Text="{l:Tr Audit.Tool}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-          <ComboBox x:Name="ToolFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ToolLabel}" SelectionChanged="OnFilter" />
-        </StackPanel>
-        <StackPanel Margin="{StaticResource Ui.Inset.FilterField}" Width="210">
-          <TextBlock x:Name="ProjectLabel" Text="{l:Tr Audit.Project}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-          <ComboBox x:Name="ProjectFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ProjectLabel}" SelectionChanged="OnFilter" />
-        </StackPanel>
-        <StackPanel Margin="{StaticResource Ui.Inset.FilterField}" Width="140">
-          <TextBlock x:Name="DecisionLabel" Text="{l:Tr Audit.Decision}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-          <ComboBox x:Name="DecisionFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=DecisionLabel}" SelectionChanged="OnFilter" />
-        </StackPanel>
-        <StackPanel Margin="{StaticResource Ui.Inset.FilterFieldEnd}" Width="140">
-          <TextBlock x:Name="ExecutionLabel" Text="{l:Tr Audit.Execution}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-          <ComboBox x:Name="ExecutionFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ExecutionLabel}" SelectionChanged="OnFilter" />
-        </StackPanel>
-      </WrapPanel>
-    </Border>
-
     <Grid>
-      <ListView x:Name="Records" BorderThickness="0" AutomationProperties.Name="{l:Tr Audit.List}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
-                ScrollViewer.HorizontalScrollBarVisibility="Auto" KeyDown="OnListKeyDown" MouseDoubleClick="OnListOpen">
-        <ListView.View>
-          <GridView>
-            <GridViewColumn x:Name="TimeColumn" Width="160">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Time}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11.5" />
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-            <GridViewColumn x:Name="KindColumn" Width="140">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <Border Style="{StaticResource Workbench.Tag}" HorizontalAlignment="Left">
-                    <TextBlock Text="{Binding Kind}" VerticalAlignment="Center" />
-                  </Border>
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-            <GridViewColumn x:Name="ToolColumn" Width="200">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" FontSize="12" FontWeight="Medium" />
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-            <GridViewColumn x:Name="ProjectColumn" Width="260">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Project}" Style="{StaticResource Primer.Mono.text}" FontSize="11.5" TextTrimming="CharacterEllipsis" />
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-            <GridViewColumn x:Name="ResultColumn" Width="160">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Result}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11.5" />
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-          </GridView>
-        </ListView.View>
-      </ListView>
-      <shell:EmptyState x:Name="Empty" Title="{l:Tr Audit.Empty}" Text="{l:Tr Audit.EmptyText}" Visibility="Collapsed" />
-      <shell:EmptyState x:Name="NoMatch" Title="{l:Tr Audit.NoMatch}" Text="{l:Tr Audit.NoMatchText}" Visibility="Collapsed" />
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition x:Name="InspectorColumn" Width="0" />
+      </Grid.ColumnDefinitions>
+      <Grid Background="{DynamicResource Surface.Elevated}">
+        <ListView x:Name="Records" BorderThickness="0" Background="Transparent" AutomationProperties.Name="{l:Tr Audit.List}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto" ItemContainerStyle="{StaticResource Workbench.AuditRow}"
+                  SelectionChanged="OnRecordSelected" KeyDown="OnListKeyDown" MouseDoubleClick="OnListOpen">
+          <ListView.View>
+            <GridView>
+              <GridViewColumn x:Name="TimeColumn" Width="150">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding SeqTime}" Style="{StaticResource Workbench.CellMono}" Foreground="{DynamicResource Text.Primary}" />
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+              <GridViewColumn x:Name="KindColumn" Width="150">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <Border Style="{StaticResource Workbench.CcTag}" HorizontalAlignment="Left">
+                      <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding ToneGlyph}" Style="{StaticResource Workbench.ToneGlyph}" Tag="{Binding Tone}" />
+                        <TextBlock Text="{Binding Kind}" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+              <GridViewColumn x:Name="ToolColumn" Width="240">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Target}" Style="{StaticResource Workbench.CellMono}" Foreground="{DynamicResource Text.Primary}" />
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+              <GridViewColumn x:Name="ResultColumn" Width="120">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Result}" Style="{StaticResource Workbench.CellText}" />
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+              <GridViewColumn x:Name="HashColumn" Width="110">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Hash}" Style="{StaticResource Workbench.CellMono}" />
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+              <GridViewColumn x:Name="SourceColumn" Width="140">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Source}" Style="{StaticResource Workbench.CellText}" Foreground="{DynamicResource Text.Tertiary}" />
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+            </GridView>
+          </ListView.View>
+        </ListView>
+        <shell:EmptyState x:Name="Empty" Title="{l:Tr Audit.Empty}" Text="{l:Tr Audit.EmptyText}" Visibility="Collapsed" />
+        <shell:EmptyState x:Name="NoMatch" Title="{l:Tr Audit.NoMatch}" Text="{l:Tr Audit.NoMatchText}" Visibility="Collapsed" />
+      </Grid>
+
+      <!-- The inspector (320 px): the chosen record's number, target, result and its place in the chain. -->
+      <Border x:Name="Inspector" Grid.Column="1" Style="{StaticResource Workbench.InspectorPane}" Visibility="Collapsed">
+        <Border Style="{StaticResource Workbench.Box}" Padding="{StaticResource Ui.Inset.BoxBody}" VerticalAlignment="Top">
+          <StackPanel x:Name="InspectorBody">
+            <DockPanel>
+              <Button x:Name="InspectorClose" DockPanel.Dock="Right" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Audit.InspectorX}" AutomationProperties.Name="{l:Tr Audit.InspectorClose}" Click="OnInspectorClose" />
+              <TextBlock Text="{Binding Seq}" Style="{StaticResource Workbench.CellMonoStrong}" FontSize="13" VerticalAlignment="Center" />
+            </DockPanel>
+            <TextBlock Text="{Binding Target}" Style="{StaticResource Workbench.CellMonoStrong}" FontSize="12" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+            <TextBlock Text="{Binding Detail}" Style="{StaticResource Workbench.CellText}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+            <Border Style="{StaticResource Workbench.CodeBox}" Margin="{StaticResource Ui.Gap.Top.SM}">
+              <StackPanel>
+                <DockPanel>
+                  <TextBlock DockPanel.Dock="Right" Text="{Binding Prev}" Style="{StaticResource Workbench.CellMono}" Foreground="{DynamicResource Text.Secondary}" />
+                  <TextBlock Text="{l:Tr Audit.Prev}" Style="{StaticResource Workbench.CellMono}" />
+                </DockPanel>
+                <DockPanel Margin="{StaticResource Ui.Gap.Top.XXS}">
+                  <TextBlock DockPanel.Dock="Right" Text="{Binding Hash}" Style="{StaticResource Workbench.CellMonoStrong}" FontSize="11.5" Foreground="{DynamicResource Accent.Text}" />
+                  <TextBlock Text="{l:Tr Audit.HashLabel}" Style="{StaticResource Workbench.CellMono}" />
+                </DockPanel>
+              </StackPanel>
+            </Border>
+            <Button x:Name="InspectorOpen" Style="{StaticResource Workbench.ButtonSm}" Content="{l:Tr Audit.OpenRecord}" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.Top.SM}" Click="OnInspectorOpen" />
+          </StackPanel>
+        </Border>
+      </Border>
     </Grid>
   </DockPanel>
 </UserControl>

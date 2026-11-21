@@ -1391,4 +1391,65 @@
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
     <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <!-- ===== Workbench 4.0 audit: filter labels, table rows, the inspector, the code box and the result strips ===== -->
+  <Style x:Key="Workbench.FilterLabel" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Right.XS}" />
+  </Style>
+  <Style x:Key="Workbench.AuditRow" TargetType="ListViewItem">
+    <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListViewItem">
+          <Grid>
+            <Border x:Name="Bd" Background="Transparent" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,0,0,1" Padding="{StaticResource Ui.Inset.AuditRow}">
+              <GridViewRowPresenter VerticalAlignment="Center" />
+            </Border>
+            <Border x:Name="Bar" Width="2.5" HorizontalAlignment="Left" Background="{DynamicResource Accent.Button}" Visibility="Collapsed" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource State.Info.Background}" />
+              <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.InspectorPane" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Surface.Window}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="1,0,0,0" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.BoxBody}" />
+  </Style>
+  <Style x:Key="Workbench.CodeBox" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Surface.Code}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.CodeBox}" />
+  </Style>
+  <Style x:Key="Workbench.ResultStrip" TargetType="Border">
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.ResultStrip}" />
+    <Setter Property="Background" Value="{DynamicResource State.Warning.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style x:Key="Workbench.ResultStrip.Success" TargetType="Border" BasedOn="{StaticResource Workbench.ResultStrip}">
+    <Setter Property="Background" Value="{DynamicResource State.Success.Background}" />
+  </Style>
+  <Style x:Key="Workbench.ResultStrip.Error" TargetType="Border" BasedOn="{StaticResource Workbench.ResultStrip}">
+    <Setter Property="Background" Value="{DynamicResource State.Error.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource State.Error.Border}" />
   </Style></ResourceDictionary>
