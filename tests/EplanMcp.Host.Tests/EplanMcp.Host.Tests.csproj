@@ -27,6 +27,8 @@
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <Compile Include="..\Shared\PageTextStore.cs" Link="PageTextStore.cs" />
     <Compile Include="..\Shared\PageFrameStore.cs" Link="PageFrameStore.cs" />
+    <!-- ADR-0065: the Workbench's button calls, run here through the real tools to compare the arguments hash. -->
+    <Compile Include="..\..\src\EplanMcp.Workbench\Project\EngineerCalls.cs" Link="Workbench\EngineerCalls.cs" />
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
     <!-- Medium tests run the real Bridge.Core server (with fake EPLAN adapters) on a real pipe. -->
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />

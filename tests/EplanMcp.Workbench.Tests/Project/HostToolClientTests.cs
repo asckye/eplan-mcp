@@ -20,17 +20,46 @@ public sealed class HostToolClientTests
         await Assert.ThrowsAsync<ArgumentException>(() => client.ReadAsync(tool, [], CancellationToken.None));
     }
 
+    [Theory]
+    [InlineData("eplan_page_delete")]
+    [InlineData("eplan_api_try")]
+    [InlineData("eplan_project_get")]
+    public async Task AButtonCallOffItsList_IsRefused_WithoutStartingTheHost(string tool)
+    {
+        await using var client = new HostToolClient(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "eplanmcp.exe"), new EplanMcp.Workbench.Approvals.EngineerWrites());
+
+        await Assert.ThrowsAsync<ArgumentException>(() => client.RunAsync(new EngineerCall(tool, [], "h"), execute: true, CancellationToken.None));
+    }
+
+    [Fact]
+    public void TheButtonsTools_AreOrdinaryWritesWithAPreview_OrExports_NeverDestructive()
+    {
+        Dictionary<string, JsonObject> tools = Contract();
+
+        Assert.All(HostToolClient.WriteTools.Concat(HostToolClient.ExportTools), name =>
+        {
+            Assert.True(tools.ContainsKey(name), name);
+            Assert.True((bool?)tools[name]["annotations"]?["destructiveHint"] == false, name);
+        });
+        Assert.All(HostToolClient.WriteTools, name => Assert.NotNull(tools[name]["inputSchema"]?["properties"]?["dry_run"]));
+    }
+
     [Fact]
     public void EveryToolOnTheReadList_IsReadOnlyInTheHostsContract()
     {
-        using Stream stream = typeof(HostToolClientTests).Assembly.GetManifestResourceStream("Snapshots/server-contract.verified.json")!;
-        var contract = (JsonObject)JsonNode.Parse(stream)!;
-        Dictionary<string, JsonObject> tools = (contract["tools"] as JsonArray ?? []).OfType<JsonObject>().ToDictionary(t => (string)t["name"]!);
+        Dictionary<string, JsonObject> tools = Contract();
 
         Assert.All(HostToolClient.ReadTools, name =>
         {
             Assert.True(tools.ContainsKey(name), name);
             Assert.True((bool?)tools[name]["annotations"]?["readOnlyHint"] == true, name);
         });
+    }
+
+    private static Dictionary<string, JsonObject> Contract()
+    {
+        using Stream stream = typeof(HostToolClientTests).Assembly.GetManifestResourceStream("Snapshots/server-contract.verified.json")!;
+        var contract = (JsonObject)JsonNode.Parse(stream)!;
+        return (contract["tools"] as JsonArray ?? []).OfType<JsonObject>().ToDictionary(t => (string)t["name"]!);
     }
 }

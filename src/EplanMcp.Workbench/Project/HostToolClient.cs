@@ -10,6 +10,13 @@ namespace EplanMcp.Workbench.Project;
 internal interface IProjectTools
 {
     public Task<JsonObject> ReadAsync(string tool, JsonObject args, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The engineer's call: with <paramref name="execute"/> false a preview (<c>dry_run: true</c>); with true the write,
+    /// registered with the approval server while it runs so the Host's question is answered for this click (ADR-0065).
+    /// An export runs as it is.
+    /// </summary>
+    public Task<JsonObject> RunAsync(EngineerCall call, bool execute, CancellationToken cancellationToken);
 }
 
 /// <summary>A tool call that ended in an error: the tool's own text, which is data from the Host, never instructions.</summary>
@@ -23,13 +30,19 @@ internal sealed class ProjectToolException(string tool, string message) : Except
 /// first call and ended with the Workbench, named <c>EplanMcp Workbench</c> in the Host's audit. Only the read-only
 /// tools of <see cref="ReadTools"/> can be called here (decision 2); a write goes another way, with its own checks.
 /// </summary>
-internal sealed class HostToolClient(string hostExecutable) : IProjectTools, IAsyncDisposable
+internal sealed class HostToolClient(string hostExecutable, Approvals.EngineerWrites? engineerWrites = null) : IProjectTools, IAsyncDisposable
 {
     /// <summary>The tools the project page reads with; every one is annotated read-only by the Host.</summary>
     public static readonly IReadOnlySet<string> ReadTools = new HashSet<string>(StringComparer.Ordinal)
     {
         "eplan_session_status", "eplan_project_get", "eplan_page_list", "eplan_page_get", "eplan_device_list", "eplan_connection_list", "eplan_structure_list", "eplan_check_list",
     };
+
+    /// <summary>The writes behind the project page's buttons; previews first, the write only after the engineer's click.</summary>
+    public static readonly IReadOnlySet<string> WriteTools = new HashSet<string>(StringComparer.Ordinal) { "eplan_report_update", "eplan_check_run" };
+
+    /// <summary>The exports behind the export button; an export changes no project and asks no approval (ADR-0012).</summary>
+    public static readonly IReadOnlySet<string> ExportTools = new HashSet<string>(StringComparer.Ordinal) { "eplan_export_pdf", "eplan_export_dxf" };
 
     private readonly SemaphoreSlim _start = new(1, 1);
     private McpClient? _client;
@@ -42,6 +55,35 @@ internal sealed class HostToolClient(string hostExecutable) : IProjectTools, IAs
             throw new ArgumentException($"{tool} is not a read-only tool the Workbench may call.", nameof(tool));
         }
 
+        return await CallAsync(tool, args, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<JsonObject> RunAsync(EngineerCall call, bool execute, CancellationToken cancellationToken)
+    {
+        bool write = WriteTools.Contains(call.Tool);
+        if (!write && !ExportTools.Contains(call.Tool))
+        {
+            throw new ArgumentException($"{call.Tool} is not a tool the Workbench's buttons may call.", nameof(call));
+        }
+
+        if (!write)
+        {
+            return await CallAsync(call.Tool, call.Arguments, cancellationToken).ConfigureAwait(false);
+        }
+
+        var args = (JsonObject)call.Arguments.DeepClone();
+        args["dry_run"] = !execute;
+        if (!execute)
+        {
+            return await CallAsync(call.Tool, args, cancellationToken).ConfigureAwait(false);
+        }
+
+        using IDisposable? started = engineerWrites?.Begin(call.Tool, call.ArgumentsHash);
+        return await CallAsync(call.Tool, args, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<JsonObject> CallAsync(string tool, JsonObject args, CancellationToken cancellationToken)
+    {
         McpClient client = await ClientAsync(cancellationToken).ConfigureAwait(false);
         Dictionary<string, object?> arguments = args.ToDictionary(a => a.Key, a => (object?)JsonSerializer.SerializeToElement(a.Value));
         CallToolResult result = await client.CallToolAsync(tool, arguments, cancellationToken: cancellationToken).ConfigureAwait(false);

@@ -236,7 +236,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 80 | 35 | 0 | 44 | 1 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_device_update | write | device.update.execute<br>device.update.plan | 153 | 71 | 4 | 55 | 0 | 6/2/7 | A3 A13 A79 A82 A85 A93 | 2026-10-20 pass（api-notes A17） |
 | eplan_enclosure_place | write | layout.enclosure.place.execute<br>layout.enclosure.place.plan | 132 | 62 | 2 | 53 | 0 | 0/0/0 | — | — |
-| eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 48 | 20 | 0 | 22 | 6 | 1/1/0 | A16 | — |
+| eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 48 | 20 | 0 | 22 | 6 | 1/2/0 | A16 | — |
 | eplan_export_image | write | export.image.plan<br>export.image.run | 49 | 18 | 0 | 27 | 4 | 3/2/12 | A14 A16 | 2026-10-20 pass（api-notes A21） |
 | eplan_export_labels | write | export.labels.plan<br>export.labels.run | 37 | 16 | 0 | 20 | 1 | 1/2/1 | A24 A25 B9 | — |
 | eplan_export_parts | write | export.parts.plan<br>export.parts.run | 25 | 8 | 0 | 16 | 1 | 1/2/2 | A25 | — |
@@ -300,7 +300,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_potential_update | write | potential.update.execute<br>potential.update.plan | 186 | 107 | 2 | 67 | 0 | 1/0/0 | — | — |
 | eplan_project_close | write | project.close.execute<br>project.close.plan | 17 | 7 | 0 | 10 | 0 | 0/0/2 | A34 | — |
 | eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 38 | 15 | 1 | 18 | 2 | 4/3/4 | A31 A32 A34 A35 | — |
-| eplan_project_get | read | project.get | 62 | 33 | 0 | 29 | 0 | 5/4/9 | A11 | 2026-10-19 pass（api-notes A12） |
+| eplan_project_get | read | project.get | 62 | 33 | 0 | 29 | 0 | 6/4/9 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/10 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_project_open | write | project.open.execute<br>project.open.plan | 19 | 7 | 0 | 12 | 0 | 0/0/3 | A41 | — |
 | eplan_project_rename | destructive | project.rename.execute<br>project.rename.plan | 32 | 14 | 0 | 18 | 0 | 0/0/0 | A18 | — |

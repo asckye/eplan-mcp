@@ -30,8 +30,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\EplanMcp.Contracts\Security\SecretRedactor.cs" Link="Logging\SecretRedactor.cs" />
     <ProjectReference Include="..\EplanMcp.Workbench.Protocol\EplanMcp.Workbench.Protocol.csproj" />
+    <!-- ADR-0065: the engineer's writes are built from the Host's own argument types, so their arguments hash matches. -->
+    <ProjectReference Include="..\EplanMcp.Contracts\EplanMcp.Contracts.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <!-- ADR-0065: the Workbench starts its own eplanmcp serve and calls its tools as an MCP client over stdio. -->
     <PackageReference Include="ModelContextProtocol" />

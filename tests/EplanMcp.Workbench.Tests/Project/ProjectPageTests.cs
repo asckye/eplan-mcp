@@ -101,6 +101,71 @@ public sealed class ProjectPageTests(WpfContext wpf)
     }
 
     [Fact]
+    public void UpdatingReports_PreviewsFirst_RunsOnlyAfterTheEngineerConfirms_AndSaysWhatChanged()
+    {
+        _tools.Answer = Connected;
+        _tools.Run = (call, execute) => execute
+            ? new JsonObject { ["execution"] = "committed", ["reportPages"] = new JsonObject { ["before"] = 204, ["after"] = 205 } }
+            : new JsonObject { ["changes"] = new JsonArray(new JsonObject { ["action"] = "update", ["kind"] = "project", ["name"] = "Sample", ["property"] = "reports", ["oldValue"] = "204", ["newValue"] = null }) };
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage(page =>
+        {
+            Until(() => ((TreeView)page.FindName("Tree")).ItemsSource is IReadOnlyList<ProjectTreeNode> { Count: 2 });
+            string? details = null;
+            page.Confirm = (_, _, d) =>
+            {
+                details = d;
+                return false;
+            };
+
+            Click((UIElement)page.FindName("ReportsButton"));
+            Until(() => Text(page, "ActionText").Length > 0);
+            Assert.Equal("update project Sample · reports: 204 → ", details);
+            Assert.Equal([false], _tools.Runs.Select(r => r.Execute));
+            Assert.Equal(Loc.Current["Project.ActionCancelled"], Text(page, "ActionText"));
+
+            page.Confirm = (_, _, _) => true;
+            Click((UIElement)page.FindName("ReportsButton"));
+            Until(() => _tools.Runs.Count == 3 && Text(page, "ActionText") != Loc.Current["Project.ActionCancelled"]);
+            Assert.Equal([false, false, true], _tools.Runs.Select(r => r.Execute));
+            Assert.All(_tools.Runs, r => Assert.Equal(EngineerCalls.ReportUpdate("Sample"), r.Call, new CallComparer()));
+            Assert.Equal(Loc.Current.T("Project.ReportsUpdated", 204, 205), Text(page, "ActionText"));
+            Assert.False(((UIElement)page.FindName("SaveButton")).IsEnabled);
+        }));
+    }
+
+    [Fact]
+    public void CheckingAPage_ChecksThatPage_ThenReadsItsMessagesAgain_AndExportsNeedNoConfirmation()
+    {
+        _tools.Answer = Connected;
+        _tools.Run = (call, execute) => call.Tool.StartsWith("eplan_export", StringComparison.Ordinal)
+            ? new JsonObject { ["fileCount"] = 1, ["directory"] = @"D:\exports" }
+            : execute ? new JsonObject { ["execution"] = "committed", ["counts"] = new JsonObject { ["error"] = 1, ["warning"] = 2, ["hint"] = 0 } } : new JsonObject { ["changes"] = new JsonArray() };
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage(page =>
+        {
+            var tree = (TreeView)page.FindName("Tree");
+            Until(() => tree.ItemsSource is IReadOnlyList<ProjectTreeNode> { Count: 2 });
+            ProjectTreeNode first = ((IReadOnlyList<ProjectTreeNode>)tree.ItemsSource)[0].Children[0].Children[0];
+            tree.RaiseEvent(new RoutedPropertyChangedEventArgs<object>(null!, first, TreeView.SelectedItemChangedEvent));
+            Until(() => _tools.Calls.Any(c => c.Tool == "eplan_check_list"));
+            page.Confirm = (_, _, _) => true;
+            Assert.Equal(Loc.Current["Project.CheckPage"], ((Button)page.FindName("CheckButton")).Content);
+
+            page.CheckAsync().GetAwaiter().GetResult();
+            WpfContext.Drain();
+            Assert.Equal(EngineerCalls.CheckRun("Sample", "=GAA+A1&EFS1/1").ArgumentsHash, _tools.Runs[^1].Call.ArgumentsHash);
+            Assert.Equal(2, _tools.Calls.Count(c => c.Tool == "eplan_check_list"));
+            Assert.Equal(Loc.Current.T("Project.Checked", 1, 2, 0), Text(page, "ActionText"));
+
+            bool asked = false;
+            page.Confirm = (_, _, _) => asked = true;
+            page.Export(dxf: true);
+            Until(() => Text(page, "ActionText") == Loc.Current.T("Project.Exported", 1, @"D:\exports"));
+            Assert.False(asked);
+            Assert.Equal(("eplan_export_dxf", true), (_tools.Runs[^1].Call.Tool, _tools.Runs[^1].Execute));
+        }));
+    }
+
+    [Fact]
     public void AToolError_ShowsReadFailed_WithTheHostsText_AndRefreshReadsAgain()
     {
         _tools.Answer = (tool, _) => tool == "eplan_session_status"
@@ -195,16 +260,36 @@ public sealed class ProjectPageTests(WpfContext wpf)
 
     private static void Until(Func<bool> condition) => WpfContext.DrainUntil(condition, "Not in time.");
 
+    /// <summary>Compares calls by tool, arguments as JSON and hash.</summary>
+    private sealed class CallComparer : IEqualityComparer<EngineerCall>
+    {
+        public bool Equals(EngineerCall? x, EngineerCall? y) =>
+            x is not null && y is not null && x.Tool == y.Tool && x.ArgumentsHash == y.ArgumentsHash && JsonNode.DeepEquals(x.Arguments, y.Arguments);
+
+        public int GetHashCode(EngineerCall obj) => obj.Tool.GetHashCode(StringComparison.Ordinal);
+    }
+
     private sealed class FakeTools : IProjectTools
     {
         public Func<string, JsonObject, JsonObject> Answer { get; set; } = (_, _) => [];
 
         public List<(string Tool, JsonObject Args)> Calls { get; } = [];
 
+        public List<(EngineerCall Call, bool Execute)> Runs { get; } = [];
+
+        public Func<EngineerCall, bool, JsonObject> Run { get; set; } = (_, _) => [];
+
         public Task<JsonObject> ReadAsync(string tool, JsonObject args, CancellationToken cancellationToken)
         {
             Calls.Add((tool, (JsonObject)args.DeepClone()));
             return Task.FromResult(Answer(tool, args));
+        }
+
+        public Task<JsonObject> RunAsync(EngineerCall call, bool execute, CancellationToken cancellationToken)
+        {
+            Runs.Add((call, execute));
+            Calls.Add((call.Tool, (JsonObject)call.Arguments.DeepClone()));
+            return Task.FromResult(Run(call, execute));
         }
     }
 }

@@ -192,6 +192,102 @@ internal sealed class ProjectView(IProjectTools? tools) : INotifyPropertyChanged
         }
     }
 
+    /// <summary>A button's call is running (ADR-0065 step 3); the buttons wait for it.</summary>
+    public bool Acting { get; private set; }
+
+    /// <summary>What the last button did, or why it did nothing; empty before the first. Plain text.</summary>
+    public string ActionResult { get; private set; } = string.Empty;
+
+    /// <summary>Whether <see cref="ActionResult"/> reports a failure.</summary>
+    public bool ActionFailed { get; private set; }
+
+    /// <summary>
+    /// The engineer's write behind a button: previews it, asks <paramref name="confirm"/> with the change list, and only
+    /// then runs it. Null from <paramref name="confirm"/> or a failure leaves the project as it was.
+    /// </summary>
+    public async Task WriteAsync(EngineerCall call, Func<IReadOnlyList<string>, bool> confirm, CancellationToken cancellationToken)
+    {
+        if (tools is null || State != ProjectState.Ready || Acting)
+        {
+            return;
+        }
+
+        await ActAsync(async () =>
+        {
+            JsonObject preview = await tools.RunAsync(call, execute: false, cancellationToken).ConfigureAwait(true);
+            IReadOnlyList<string> changes = ChangesOf(preview);
+            if (!confirm(changes))
+            {
+                return Loc.Current["Project.ActionCancelled"];
+            }
+
+            JsonObject done = await tools.RunAsync(call, execute: true, cancellationToken).ConfigureAwait(true);
+            if (call.Tool == "eplan_check_run")
+            {
+                _messages = null; // the check replaced EPLAN's messages
+            }
+
+            return Outcome(call.Tool, done);
+        }).ConfigureAwait(true);
+    }
+
+    /// <summary>An export: no preview and no approval, it changes no project (ADR-0012).</summary>
+    public async Task ExportAsync(EngineerCall call, CancellationToken cancellationToken)
+    {
+        if (tools is null || State != ProjectState.Ready || Acting)
+        {
+            return;
+        }
+
+        await ActAsync(async () =>
+        {
+            JsonObject done = await tools.RunAsync(call, execute: true, cancellationToken).ConfigureAwait(true);
+            return Loc.Current.T("Project.Exported", Count(done["fileCount"]), Plain(done["directory"]));
+        }).ConfigureAwait(true);
+    }
+
+    /// <summary>The change list of a preview, one plain line per change.</summary>
+    internal static IReadOnlyList<string> ChangesOf(JsonObject preview) =>
+    [
+        .. (preview["changes"] as JsonArray ?? []).OfType<JsonObject>().Select(c =>
+        {
+            string line = $"{Plain(c["action"])} {Plain(c["kind"])} {Plain(c["name"])}".Trim();
+            string property = Plain(c["property"]);
+            return property.Length == 0 ? line : $"{line} · {property}: {Plain(c["oldValue"])} → {Plain(c["newValue"])}";
+        }),
+    ];
+
+    private static string Outcome(string tool, JsonObject done)
+    {
+        if (Plain(done["execution"]) != "committed")
+        {
+            return Loc.Current.T("Project.NotDone", Plain(done["execution"]), Plain(done["hint"]));
+        }
+
+        return tool == "eplan_check_run"
+            ? Loc.Current.T("Project.Checked", Count(done["counts"]?["error"]), Count(done["counts"]?["warning"]), Count(done["counts"]?["hint"]))
+            : Loc.Current.T("Project.ReportsUpdated", Count(done["reportPages"]?["before"]), Count(done["reportPages"]?["after"]));
+    }
+
+    private async Task ActAsync(Func<Task<string>> action)
+    {
+        (Acting, ActionResult, ActionFailed) = (true, string.Empty, false);
+        Changed();
+        try
+        {
+            ActionResult = await action().ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is ProjectToolException or InvalidOperationException or IOException or TimeoutException or ModelContextProtocol.McpException)
+        {
+            (ActionResult, ActionFailed) = (ProjectText.Line(ex.Message, 300), true);
+        }
+        finally
+        {
+            Acting = false;
+            Changed();
+        }
+    }
+
     /// <summary>A short status for the page's bar, in the current language.</summary>
     public string Summary => State switch
     {

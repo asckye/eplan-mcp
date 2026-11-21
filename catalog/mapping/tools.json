@@ -20107,6 +20107,11 @@
             "name": "ExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolTests.cs"
+          },
+          {
+            "name": "ProjectPageTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/ProjectPageTests.cs"
           }
         ],
         "operationTests": [
@@ -32436,6 +32441,11 @@
             "name": "EvalRunTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Run/EvalRunTests.cs"
+          },
+          {
+            "name": "HostToolClientTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/HostToolClientTests.cs"
           },
           {
             "name": "ProjectGetToolTests",

@@ -59,10 +59,25 @@
       </DockPanel>
     </Border>
 
-    <DockPanel Grid.Column="1">
+    <DockPanel x:Name="Workspace" Grid.Column="1" SizeChanged="OnWorkspaceSized">
       <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
         <DockPanel>
-          <TextBlock x:Name="CountsText" DockPanel.Dock="Right" Style="{StaticResource Workbench.CellMono}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+          <!-- The engineer's own actions (ADR-0065 step 3): each previews, asks, then runs through the Workbench's Host. -->
+          <StackPanel x:Name="Actions" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button x:Name="ExportButton" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Project.Export}" Click="OnExport">
+              <Button.ContextMenu>
+                <ContextMenu>
+                  <MenuItem x:Name="ExportPdf" Header="{l:Tr Project.ExportPdf}" Click="OnExportPdf" />
+                  <MenuItem x:Name="ExportDxf" Header="{l:Tr Project.ExportDxf}" Click="OnExportDxf" />
+                </ContextMenu>
+              </Button.ContextMenu>
+            </Button>
+            <Button x:Name="ReportsButton" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Project.Reports}" Click="OnReports" />
+            <Button x:Name="CheckButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Project.CheckRun}" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnCheck" />
+            <Button x:Name="SaveButton" Style="{StaticResource Primer.Primary}" Content="{l:Tr Project.Save}" Margin="{StaticResource Ui.Gap.Left.XS}" IsEnabled="False"
+                    ToolTip="{l:Tr Project.SaveHelp}" ToolTipService.ShowOnDisabled="True" AutomationProperties.HelpText="{l:Tr Project.SaveHelp}" />
+          </StackPanel>
+          <TextBlock x:Name="CountsText" DockPanel.Dock="Right" Style="{StaticResource Workbench.CellMono}" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.SM}" AutomationProperties.LiveSetting="Polite" />
           <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <Border x:Name="HeaderBadge" Style="{StaticResource Workbench.PageBadge}" Margin="{StaticResource Ui.Gap.Right.XS}" Visibility="Collapsed">
               <TextBlock x:Name="HeaderBadgeText" Style="{StaticResource Workbench.PageBadgeText}" />
@@ -86,6 +101,9 @@
         </DockPanel>
       </Border>
 
+      <Border x:Name="ActionStrip" DockPanel.Dock="Top" Style="{StaticResource Workbench.ResultStrip}" Visibility="Collapsed">
+        <TextBlock x:Name="ActionText" Style="{StaticResource Workbench.CellText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      </Border>
       <ProgressBar x:Name="Working" DockPanel.Dock="Top" Style="{StaticResource Primer.Progress}" IsIndeterminate="True" Height="2" Visibility="Collapsed" AutomationProperties.Name="{l:Tr Project.Reading}" />
 
       <Grid>

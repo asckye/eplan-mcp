@@ -20,6 +20,8 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
     public ProjectPage()
     {
         InitializeComponent();
+        Confirm = (title, message, details) => WorkbenchDialog.Confirm(
+            Window.GetWindow(this)!, title, message, Loc.Current["Confirm.Cancel"], Loc.Current["Project.ConfirmRun"], details);
         Loaded += (_, _) =>
         {
             Loc.Current.LanguageChanged -= OnLanguageChanged;
@@ -38,6 +40,12 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
     }
 
     public FrameworkElement? Heading => PageTitle;
+
+    /// <summary>
+    /// The engineer's confirmation of a write: title, message and the change list; true only for "run" (DLG-12). Tests
+    /// replace it.
+    /// </summary>
+    internal Func<string, string, string, bool> Confirm { get; set; }
 
     public void FocusHeading() => Keyboard.Focus(PageTitle);
 
@@ -77,7 +85,15 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
             return;
         }
 
-        Working.Visibility = view.IsLoading || view.DevicesLoading ? Visibility.Visible : Visibility.Collapsed;
+        Working.Visibility = view.IsLoading || view.DevicesLoading || view.Acting ? Visibility.Visible : Visibility.Collapsed;
+        bool ready = view.State == ProjectState.Ready && !view.Acting;
+        ExportButton.IsEnabled = ReportsButton.IsEnabled = CheckButton.IsEnabled = ready;
+        CheckButton.Content = _chosen?.Page is not null ? loc["Project.CheckPage"] : loc["Project.CheckRun"];
+        ActionStrip.Visibility = view.ActionResult.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        ActionText.Text = view.ActionResult;
+        ActionText.Foreground = (System.Windows.Media.Brush)FindResource(view.ActionFailed ? "State.Error.Text" : "Text.Primary");
+        ActionStrip.Background = (System.Windows.Media.Brush)FindResource(view.ActionFailed ? "State.Error.Background" : "State.Success.Background");
+        Narrow();
         RefreshButton.IsEnabled = EmptyRefresh.IsEnabled = view.State != ProjectState.NoHost && !view.IsLoading;
         CountsText.Text = view.Summary + (view.Truncated ? loc.T("Project.Truncated", ProjectView.MaxPages) : string.Empty);
         HeaderEplan.Text = view.Eplan;
@@ -176,6 +192,72 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
+
+    /// <summary>The Workbench 4.0 design's narrow layout: a chosen page hides its name and the counts so its tabs and buttons fit.</summary>
+    private const double NarrowWorkspace = 900;
+
+    private void OnWorkspaceSized(object sender, SizeChangedEventArgs e) => Narrow();
+
+    private void Narrow()
+    {
+        bool page = _chosen?.Page is not null;
+        bool narrow = Workspace.ActualWidth is > 0 and < NarrowWorkspace;
+        CountsText.Visibility = page ? Visibility.Collapsed : Visibility.Visible;
+        HeaderTitle.Visibility = page && narrow ? Visibility.Collapsed : Visibility.Visible;
+        if (page && narrow)
+        {
+            HeaderBadge.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void OnExport(object sender, RoutedEventArgs e)
+    {
+        ContextMenu menu = ExportButton.ContextMenu;
+        menu.PlacementTarget = ExportButton;
+        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        menu.IsOpen = true;
+    }
+
+    private void OnExportPdf(object sender, RoutedEventArgs e) => Export(dxf: false);
+
+    private void OnExportDxf(object sender, RoutedEventArgs e) => Export(dxf: true);
+
+    internal void Export(bool dxf)
+    {
+        if (_view is { } view)
+        {
+            _ = view.ExportAsync(EngineerCalls.Export(view.ProjectName, _chosen?.Page?.Name, dxf), CancellationToken.None);
+        }
+    }
+
+    private void OnReports(object sender, RoutedEventArgs e)
+    {
+        if (_view is { } view)
+        {
+            _ = view.WriteAsync(EngineerCalls.ReportUpdate(view.ProjectName), changes => Ask("Project.ConfirmReports", changes), CancellationToken.None);
+        }
+    }
+
+    private void OnCheck(object sender, RoutedEventArgs e) => _ = CheckAsync();
+
+    /// <summary>Checks the chosen page, or the project when none is chosen, then reads the page's messages again.</summary>
+    internal async Task CheckAsync()
+    {
+        if (_view is not { } view)
+        {
+            return;
+        }
+
+        ProjectTreeNode? chosen = _chosen;
+        await view.WriteAsync(EngineerCalls.CheckRun(view.ProjectName, chosen?.Page?.Name), changes => Ask("Project.ConfirmCheck", changes), CancellationToken.None).ConfigureAwait(true);
+        if (chosen is not null && ReferenceEquals(chosen, _chosen))
+        {
+            await view.LoadDevicesAsync(chosen.Page?.Name, chosen.DevicesPrefix, CancellationToken.None).ConfigureAwait(true); // the check replaced the messages
+        }
+    }
+
+    private bool Ask(string title, IReadOnlyList<string> changes) =>
+        Confirm(Loc.Current[title], Loc.Current.T("Project.ConfirmMessage", changes.Count), string.Join(Environment.NewLine, changes));
 
     private void OnTabChanged(object sender, RoutedEventArgs e)
     {
