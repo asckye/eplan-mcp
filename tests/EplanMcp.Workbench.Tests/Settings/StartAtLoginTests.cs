@@ -88,7 +88,7 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
         {
             var toggle = (ToggleButton)drawer.FindName("LoginSwitch");
             Assert.True(toggle.IsChecked);
-            Assert.Equal("登录 Windows 时启动 Workbench", AutomationProperties.GetName(toggle));
+            Assert.Equal("登录 Windows 时自动启动工作台", AutomationProperties.GetName(toggle));
 
             Toggle(toggle);
             Assert.False(toggle.IsChecked);
@@ -166,6 +166,32 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
             Assert.Equal("没有 config.json：使用默认值。", ((TextBox)page.FindName("ConfigText")).Text);
             Assert.False(((Button)page.FindName("ConfigButton")).IsEnabled);
         }));
+    }
+
+    [Fact]
+    public void TheSettingsBar_NamesTheCategory_TheScratchRootsAreShown_AndReleasesOpenInTheBrowser()
+    {
+        string config = Path.Combine(_root.FullName, "config.json");
+        File.WriteAllText(config, "{ \"scratchRoots\": [\"D:\\\\EPLAN\\\\Scratch\", \"E:\\\\Sandbox\"] }");
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithDrawer((window, page) =>
+        {
+            Assert.Equal("安全与审批控制", ((TextBlock)page.FindName("SectionTitle")).Text);
+            Assert.Equal([@"D:\EPLAN\Scratch", @"E:\Sandbox"], ((ItemsControl)page.FindName("ScratchRoots")).Items.Cast<string>());
+
+            page.OpenStorageCategory();
+            WpfContext.Drain();
+            Assert.Equal("存储、更新与关于", ((TextBlock)page.FindName("SectionTitle")).Text);
+            Assert.Equal(Path.Combine(_root.FullName, "backups"), ((TextBlock)page.FindName("DirBackupsPath")).Text);
+            Click((Button)page.FindName("ReleasesButton"));
+            Assert.Equal(["https://github.com/asckye/eplan-mcp/releases"], _opened);
+        }));
+    }
+
+    [Fact]
+    public void WithoutScratchRoots_TheDataRootsScratchFolderIsShown()
+    {
+        wpf.Run(() => WithDrawer((window, page) =>
+            Assert.Equal([Path.Combine(_root.FullName, "scratch")], ((ItemsControl)page.FindName("ScratchRoots")).Items.Cast<string>())));
     }
 
     private void WithDrawer(Action<MainWindow, SettingsPage> test) => With(window =>

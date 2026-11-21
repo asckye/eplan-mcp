@@ -27,8 +27,9 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
     public SettingsPage()
     {
         InitializeComponent();
+        Loc.Current.LanguageChanged += (_, _) => ShowSection();
         string version = typeof(SettingsPage).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.8.0";
-        VersionLine.Text = "EplanMcp Workbench v" + version;
+        VersionLine.Text = "v" + version + " · .NET 10 WPF";
     }
 
     public FrameworkElement? Heading => PageTitle;
@@ -38,16 +39,25 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
     internal void SetLeftPaneVisible(bool visible)
     {
         LeftPane.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-        LeftCol.Width = visible ? new GridLength(236) : new GridLength(0);
+        LeftCol.Width = visible ? new GridLength(228) : new GridLength(0);
     }
 
     internal void OpenStorageCategory() => NavStorage.IsChecked = true;
+
+    /// <summary>"Create diagnostics ZIP": the logs page makes the archive and says where it went.</summary>
+    public event Action? DiagnosticsRequested;
 
     internal void Attach(StartAtLogin login, string configFile, SafetyPolicyStore? policy = null, IShellOpen? shell = null)
     {
         _login = login;
         _config = configFile;
-        _policy = policy ?? new SafetyPolicyStore(configFile);
+        if (policy is null)
+        {
+            policy = new SafetyPolicyStore(configFile);
+            policy.Load();
+        }
+
+        _policy = policy;
         _shell = shell ?? _shell;
         _rootFolder = Path.GetDirectoryName(configFile) ?? string.Empty;
         _policy.Changed += () => Dispatcher.BeginInvoke(Refresh);
@@ -78,6 +88,9 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
         DirRootPath.Text = _rootFolder;
         DirAuditPath.Text = _rootFolder.Length > 0 ? Path.Combine(_rootFolder, "audit") : string.Empty;
         DirLogsPath.Text = _rootFolder.Length > 0 ? Path.Combine(_rootFolder, "logs") : string.Empty;
+        DirBackupsPath.Text = _rootFolder.Length > 0 ? Path.Combine(_rootFolder, "backups") : string.Empty;
+        ScratchRoots.ItemsSource = _policy?.ScratchRoots ?? [];
+        ShowSection();
         ConfigPath.Text = _config ?? string.Empty;
         ConfigText.Text = _config is null ? string.Empty : Config(_config);
         ConfigButton.IsEnabled = File.Exists(_config);
@@ -94,7 +107,30 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
         SafetySection.Visibility = NavSafety.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         AppearanceSection.Visibility = NavAppearance.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         StorageSection.Visibility = NavStorage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        ShowSection();
     }
+
+    /// <summary>The bar names the category shown and what it covers (Workbench 4.0 design).</summary>
+    private void ShowSection()
+    {
+        if (SectionTitle is null)
+        {
+            return;
+        }
+
+        Loc loc = Loc.Current;
+        (string title, string sub) = NavAppearance.IsChecked == true ? ("Settings.NavAppearance", "Settings.SubAppearance")
+            : NavStorage.IsChecked == true ? ("Settings.NavStorage", "Settings.SubStorage")
+            : ("Settings.NavSafety", "Settings.SubSafety");
+        SectionTitle.Text = loc[title];
+        SectionSub.Text = loc[sub];
+    }
+
+    private void OnReleases(object sender, RoutedEventArgs e) => _shell.Open(Loc.Current["Settings.ReleasesUrl"]);
+
+    private void OnDiag(object sender, RoutedEventArgs e) => DiagnosticsRequested?.Invoke();
+
+    private void OnOpenBackups(object sender, RoutedEventArgs e) => OpenFolder(DirBackupsPath.Text);
 
     private void OnApprovalChanged(object sender, RoutedEventArgs e)
     {

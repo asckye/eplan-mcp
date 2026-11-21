@@ -150,6 +150,15 @@
   <Thickness x:Key="Ui.Inset.AuditRow">0,6</Thickness>
   <Thickness x:Key="Ui.Inset.CodeBox">12</Thickness>
   <Thickness x:Key="Ui.Inset.PassRow">20,14</Thickness>
+  <Thickness x:Key="Ui.Inset.PaneHeader">16,0</Thickness>
+  <Thickness x:Key="Ui.Gap.NavBar">3,0,0,0</Thickness>
+  <Thickness x:Key="Ui.Inset.SettingRow">20,14</Thickness>
+  <Thickness x:Key="Ui.Inset.SettingsBox">20</Thickness>
+  <Thickness x:Key="Ui.Inset.SettingsBoxRow">20,16</Thickness>
+  <Thickness x:Key="Ui.Inset.SettingsDivided">0,12,0,0</Thickness>
+  <Thickness x:Key="Ui.Inset.SettingsFooter">16</Thickness>
+  <Thickness x:Key="Ui.Inset.FooterNote">0,8,0,0</Thickness>
+  <Thickness x:Key="Ui.Inset.CcTile">14</Thickness>
   <Thickness x:Key="Ui.Gap.SectionLabel">2,0,0,8</Thickness>
   <Thickness x:Key="Ui.Gap.Horizontal.SM">12,0</Thickness>
   <Thickness x:Key="Ui.Inset.ResultStrip">16,8</Thickness>

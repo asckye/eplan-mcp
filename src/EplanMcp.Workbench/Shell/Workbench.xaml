@@ -1508,4 +1508,99 @@
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.PassRow}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
     <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+
+  <!-- ===== Workbench 4.0 settings: the pane header, nav rows, setting rows, tiles ===== -->
+  <Style x:Key="Workbench.PaneHeader" TargetType="Border">
+    <Setter Property="Height" Value="44" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.PaneHeader}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style x:Key="Workbench.PaneHeaderText" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.NavRow" TargetType="RadioButton">
+    <Setter Property="Height" Value="36" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.NavRow}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Bottom.XXS}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Grid>
+            <Border x:Name="Bd" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
+              <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="False" />
+            </Border>
+            <Border x:Name="Bar" Width="3" Height="16" CornerRadius="2" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.NavBar}" Background="{DynamicResource Accent.Button}" Visibility="Collapsed" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Elevated}" />
+              <Setter TargetName="Bd" Property="Effect">
+                <Setter.Value>
+                  <DropShadowEffect BlurRadius="3" ShadowDepth="1" Direction="270" Opacity="0.08" />
+                </Setter.Value>
+              </Setter>
+              <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
+              <Setter Property="FontWeight" Value="SemiBold" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.SettingRow" TargetType="Border">
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.SettingRow}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style x:Key="Workbench.SettingTitle" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style x:Key="Workbench.SettingHelp" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Top.Hair}" />
+  </Style>
+  <Style x:Key="Workbench.SegmentItemMono" TargetType="RadioButton" BasedOn="{StaticResource Workbench.SegmentItem}">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+  </Style>
+  <!-- cc-tile: an elevated tile that takes the accent border and ring when chosen. -->
+  <Style x:Key="Workbench.CcTile" TargetType="RadioButton">
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.CcTile}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Border x:Name="Bd" Background="{DynamicResource Surface.Elevated}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="1" CornerRadius="10" Padding="{TemplateBinding Padding}">
+            <ContentPresenter RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent.Graphic}" />
+              <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style></ResourceDictionary>

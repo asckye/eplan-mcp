@@ -30,6 +30,12 @@ internal sealed class SafetyPolicyStore(string? configFile = null)
 
     public int ApprovalTimeoutSeconds => _approvalTimeoutSeconds;
 
+    /// <summary>
+    /// The folders where writes need no approval (<c>scratchRoots</c>), shown on the settings page as the file has them,
+    /// made plain; the data root's <c>scratch</c> when the file names none. The Workbench never changes them.
+    /// </summary>
+    public IReadOnlyList<string> ScratchRoots { get; private set; } = [];
+
     /// <summary>Reads the file. Without one, or with one that cannot be read, the Host asks for approval, and so this shows.</summary>
     public void Load()
     {
@@ -51,6 +57,13 @@ internal sealed class SafetyPolicyStore(string? configFile = null)
 
         _mode = mode;
         _approvalTimeoutSeconds = timeout;
+        List<string> roots = [];
+        if (Read()?["scratchRoots"] is JsonArray listed)
+        {
+            roots.AddRange(listed.Select(Text).OfType<string>().Where(r => r.Length > 0).Select(r => Approvals.ProjectText.Line(r)));
+        }
+
+        ScratchRoots = roots.Count > 0 ? roots : [Path.Combine(Path.GetDirectoryName(ConfigFile) ?? string.Empty, "scratch")];
         Changed?.Invoke();
     }
 
