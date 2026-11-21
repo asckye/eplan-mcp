@@ -1677,4 +1677,55 @@
         <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
       </DataTrigger>
     </Style.Triggers>
+  </Style>
+
+  <!-- ===== Workbench 4.0 dialogs: the icon square, title and body, 36 px buttons ===== -->
+  <Style x:Key="Workbench.DialogIcon" TargetType="Border">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Background" Value="{DynamicResource State.Info.Background}" />
+  </Style>
+  <Style x:Key="Workbench.DialogIconDanger" TargetType="Border" BasedOn="{StaticResource Workbench.DialogIcon}">
+    <Setter Property="Background" Value="{DynamicResource State.Error.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource State.Error.Text}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style x:Key="Workbench.DialogIconText" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.DialogTitle" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style x:Key="Workbench.DialogBody" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="LineHeight" Value="20" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Top.XS}" />
+  </Style>
+  <Style x:Key="Workbench.ButtonPrimaryLg" TargetType="Button" BasedOn="{StaticResource Workbench.ButtonPrimaryMd}">
+    <Setter Property="MinHeight" Value="36" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+  <Style x:Key="Workbench.ButtonDangerSolidLg" TargetType="Button" BasedOn="{StaticResource Workbench.ButtonPrimaryLg}">
+    <Setter Property="Background" Value="{DynamicResource State.Error.Solid}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource State.Error.Solid}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.OnHighlight}" />
+  </Style>
+
+  <!-- The command palette's field: no box, the placeholder from the palette's own code, 13 px. -->
+  <Style x:Key="Workbench.BareInput" TargetType="TextBox" BasedOn="{StaticResource Primer.Input}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style></ResourceDictionary>

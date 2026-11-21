@@ -215,15 +215,20 @@
     <!-- ============ COMMAND PALETTE OVERLAY (Ctrl+K) ============ -->
     <Grid x:Name="CommandLayer" Grid.RowSpan="3" Visibility="Collapsed">
       <Border Style="{StaticResource Primer.Overlay}" MouseLeftButtonUp="OnCommandScrim" />
-      <Border Width="560" MaxHeight="420" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.CommandPalette}" Style="{StaticResource Workbench.Card}" CornerRadius="12" Padding="0"
+      <Border Width="490" MaxHeight="360" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.CommandPalette}" Style="{StaticResource Workbench.Popover}" Padding="0"
               AutomationProperties.IsDialog="True" AutomationProperties.Name="{l:Tr Shell.CommandPalette}"
               PreviewKeyDown="OnCommandPreviewKeyDown">
-        <Border.Effect>
-          <DropShadowEffect BlurRadius="48" ShadowDepth="18" Direction="270" Opacity="0.2" />
-        </Border.Effect>
         <DockPanel>
-          <Border DockPanel.Dock="Top" Padding="{StaticResource Ui.Inset.CommandSearch}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,0,0,1">
-            <TextBox x:Name="CommandSearch" Style="{StaticResource Primer.Input}" TextChanged="OnCommandSearchChanged" />
+          <!-- The Workbench 4.0 palette's search row: a glass, the field without a box, the Esc key. -->
+          <Border DockPanel.Dock="Top" Height="44" Padding="{StaticResource Ui.Inset.CommandSearch}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,0,0,1">
+            <DockPanel>
+              <Path DockPanel.Dock="Left" Width="{StaticResource Ui.IconSize.Theme}" Height="{StaticResource Ui.IconSize.Theme}" Stretch="Uniform" Stroke="{DynamicResource Text.Tertiary}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center"
+                    Data="M11.5,7 A4.5,4.5 0 1 1 2.5,7 A4.5,4.5 0 1 1 11.5,7 M10.5,10.5 L14,14" />
+              <Border DockPanel.Dock="Right" Style="{StaticResource Workbench.Kbd}">
+                <TextBlock Text="{l:Tr Shell.EscKey}" Style="{StaticResource Workbench.KbdText}" />
+              </Border>
+              <TextBox x:Name="CommandSearch" Style="{StaticResource Workbench.BareInput}" Margin="{StaticResource Ui.Gap.Horizontal.SM}" TextChanged="OnCommandSearchChanged" />
+            </DockPanel>
           </Border>
           <ListBox x:Name="CommandList" Style="{StaticResource Primer.List}" Padding="{StaticResource Ui.Inset.CommandList}" MouseDoubleClick="OnCommandPick" KeyDown="OnCommandListKeyDown" />
         </DockPanel>
