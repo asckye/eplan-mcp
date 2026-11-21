@@ -75,7 +75,7 @@ eng/scripts/release-package.ps1 -Tag v0.5.0 -Worktree <脚本打印的 worktree>
 
 插件 ZIP 的实际哈希必须符合发布说明中唯一且格式完全一致的 `Add-in SHA-256: …  EplanMcp-addin-vX.Y.Z.zip` 行，上传前再次核对；manifest JSON 的标签、提交和测试记录也必须符合。打包不执行 EPLAN，不自动发布 release。上传后在解压的程序包上跑 `smoke.ps1 -HostPath`，并扫描程序包里有没有本机路径。
 
-Host 为 win-x64 自包含单文件；Workbench 为 win-x64 自包含目录，不附带字体（用 Windows 自带字体，ADR-0034）。发布使用独立的 `packages.win-x64.lock.json`，常规 CI 继续使用原锁文件，两者都保持 locked mode。CycloneDX 6.0.0（Apache-2.0，仅构建工具）生成三个项目的 SBOM 后合并，并补充随包运行时和 TIA 主题。暂存 `app\` 的全部内容打进唯一顶层目录 `EplanMcp-<version>\`，包括点目录；不套 `app\`，不调用 Inno Setup。
+Host 为 win-x64 自包含单文件；Workbench 为 win-x64 自包含目录，Inter 和 JetBrains Mono 字体作为资源编进程序集（SIL OFL 1.1，许可证见 `THIRD-PARTY-NOTICES`，ADR-0034 第 3 条修订）。发布使用独立的 `packages.win-x64.lock.json`，常规 CI 继续使用原锁文件，两者都保持 locked mode。CycloneDX 6.0.0（Apache-2.0，仅构建工具）生成三个项目的 SBOM 后合并，并补充随包运行时和 TIA 主题。暂存 `app\` 的全部内容打进唯一顶层目录 `EplanMcp-<version>\`，包括点目录；不套 `app\`，不调用 Inno Setup。
 
 以 `v0.5.0` 为例，发布保留以下 6 个附件：
 
