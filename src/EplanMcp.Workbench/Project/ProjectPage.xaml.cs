@@ -129,6 +129,26 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
         HeaderBadge.Visibility = page is { Kind.Length: > 0 } ? Visibility.Visible : Visibility.Collapsed;
         HeaderBadgeText.Text = page?.Kind ?? string.Empty;
         HeaderTitle.Text = page?.Name ?? (_chosen.DevicesPrefix is { Length: > 0 } prefix ? prefix : view.ProjectName);
+        PageTabs.Visibility = page is not null ? Visibility.Visible : Visibility.Collapsed;
+        HeaderEplan.Visibility = page is null ? Visibility.Visible : Visibility.Collapsed;
+        int flagged = view.CheckErrors + view.CheckWarnings;
+        ReviewCount.Text = flagged.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        ReviewCountPill.Visibility = flagged > 0 ? Visibility.Visible : Visibility.Collapsed;
+        bool netlist = page is not null && TabSchematic.IsChecked == true;
+        bool review = page is not null && TabReview.IsChecked == true;
+        NetlistPanel.Visibility = netlist ? Visibility.Visible : Visibility.Collapsed;
+        ReviewPanel.Visibility = review ? Visibility.Visible : Visibility.Collapsed;
+        DevicesPanel.Visibility = !netlist && !review ? Visibility.Visible : Visibility.Collapsed;
+        string lines = string.Join(Environment.NewLine, view.Netlist);
+        if (NetlistText.Text != lines)
+        {
+            NetlistText.Text = lines;
+        }
+
+        NoNetlist.Visibility = !view.DevicesLoading && view.Netlist.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ReviewSummary.Text = loc.T("Project.ReviewSummary", view.CheckErrors, view.CheckWarnings);
+        Checks.ItemsSource = view.Checks;
+        NoChecks.Visibility = !view.DevicesLoading && view.Checks.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         DetailTitle.Text = page is not null ? (page.Description.Length > 0 ? page.Description : page.Name) : loc["Project.DeviceList"];
         DetailSub.Text = page is not null ? page.Type : loc.T("Project.GroupDevices", HeaderTitle.Text);
         Devices.ItemsSource = view.Devices;
@@ -156,4 +176,12 @@ public partial class ProjectPage : UserControl, IWorkbenchPage
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
+
+    private void OnTabChanged(object sender, RoutedEventArgs e)
+    {
+        if (IsLoaded)
+        {
+            Show();
+        }
+    }
 }

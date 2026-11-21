@@ -69,6 +69,19 @@
             </Border>
             <TextBlock x:Name="HeaderTitle" Style="{StaticResource Workbench.CellMonoStrong}" FontSize="13" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level2" />
             <TextBlock x:Name="HeaderEplan" Style="{StaticResource Workbench.CellText}" Foreground="{DynamicResource Text.Tertiary}" Margin="{StaticResource Ui.Gap.Left.XS}" />
+            <!-- A chosen page has three views, as the Workbench 4.0 design's pills: net list, devices, check messages. -->
+            <StackPanel x:Name="PageTabs" Orientation="Horizontal" Margin="{StaticResource Ui.Gap.Left.SM}" Visibility="Collapsed">
+              <RadioButton x:Name="TabSchematic" GroupName="ProjectSub" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Project.TabSchematic}" Margin="{StaticResource Ui.Gap.Right.XXS}" Checked="OnTabChanged" />
+              <RadioButton x:Name="TabDevices" GroupName="ProjectSub" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Project.TabDevices}" Margin="{StaticResource Ui.Gap.Right.XXS}" IsChecked="True" Checked="OnTabChanged" />
+              <RadioButton x:Name="TabReview" GroupName="ProjectSub" Style="{StaticResource Workbench.IdePill}" AutomationProperties.Name="{l:Tr Project.TabReview}" Checked="OnTabChanged">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="{l:Tr Project.TabReview}" VerticalAlignment="Center" />
+                  <Border x:Name="ReviewCountPill" Style="{StaticResource Workbench.PillCount}" Margin="{StaticResource Ui.Gap.Left.Dot}" Visibility="Collapsed">
+                    <TextBlock x:Name="ReviewCount" VerticalAlignment="Center" />
+                  </Border>
+                </StackPanel>
+              </RadioButton>
+            </StackPanel>
           </StackPanel>
         </DockPanel>
       </Border>
@@ -81,7 +94,47 @@
           <StackPanel Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="880">
             <TextBlock x:Name="DetailTitle" Style="{StaticResource Workbench.DetailTitle}" />
             <TextBlock x:Name="DetailSub" Style="{StaticResource Workbench.CellText}" Margin="{StaticResource Ui.Gap.Top.XXS}" />
-            <Border Style="{StaticResource Workbench.Box}" Margin="{StaticResource Ui.Gap.Top.Normal}" ClipToBounds="True">
+            <!-- The net list as plain, selectable lines (the design's "网表摘要"); EPLAN's drawing itself is not rendered. -->
+            <Border x:Name="NetlistPanel" Style="{StaticResource Workbench.CodeBox}" Margin="{StaticResource Ui.Gap.Top.Normal}" Visibility="Collapsed">
+              <Grid>
+                <TextBox x:Name="NetlistText" Style="{StaticResource Workbench.CodeValue}" IsReadOnly="True" TextWrapping="NoWrap" AcceptsReturn="True"
+                         HorizontalScrollBarVisibility="Auto" AutomationProperties.Name="{l:Tr Project.TabSchematic}" />
+                <TextBlock x:Name="NoNetlist" Text="{l:Tr Project.NoNetlist}" Style="{StaticResource Workbench.SettingHelp}" Visibility="Collapsed" />
+              </Grid>
+            </Border>
+
+            <!-- The check messages EPLAN holds for this page or its devices, errors first. -->
+            <Border x:Name="ReviewPanel" Style="{StaticResource Workbench.Box}" Margin="{StaticResource Ui.Gap.Top.Normal}" Padding="{StaticResource Ui.Inset.BoxBody}" Visibility="Collapsed">
+              <StackPanel>
+                <TextBlock x:Name="ReviewSummary" Style="{StaticResource Workbench.RowTitle}" />
+                <TextBlock Text="{l:Tr Project.ChecksHint}" Style="{StaticResource Workbench.SettingHelp}" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+                <ItemsControl x:Name="Checks" Focusable="False" AutomationProperties.Name="{l:Tr Project.TabReview}" Margin="{StaticResource Ui.Gap.Top.XS}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Style="{StaticResource Workbench.CodeBox}" Margin="{StaticResource Ui.Gap.Top.XS}">
+                        <DockPanel>
+                          <TextBlock x:Name="Glyph" DockPanel.Dock="Left" Text="{Binding Glyph}" Style="{StaticResource Workbench.CellMonoStrong}" Foreground="{DynamicResource State.Warning.Solid}" Margin="{StaticResource Ui.Gap.Right.XS}" />
+                          <TextBlock TextWrapping="Wrap" Style="{StaticResource Workbench.CellMono}">
+                            <Run Text="{Binding Code, Mode=OneWay}" FontWeight="Bold" /><Run Text="{Binding Detail, Mode=OneWay}" />
+                          </TextBlock>
+                        </DockPanel>
+                      </Border>
+                      <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Severity}" Value="error">
+                          <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource State.Error.Solid}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Severity}" Value="hint">
+                          <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource Accent.Text}" />
+                        </DataTrigger>
+                      </DataTemplate.Triggers>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock x:Name="NoChecks" Text="{l:Tr Project.NoChecks}" Style="{StaticResource Workbench.SettingHelp}" Foreground="{DynamicResource State.Success.Text}" Margin="{StaticResource Ui.Gap.Top.XS}" Visibility="Collapsed" />
+              </StackPanel>
+            </Border>
+
+            <Border x:Name="DevicesPanel" Style="{StaticResource Workbench.Box}" Margin="{StaticResource Ui.Gap.Top.Normal}" ClipToBounds="True">
               <DockPanel>
                 <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.TableHead}">
                   <Grid>

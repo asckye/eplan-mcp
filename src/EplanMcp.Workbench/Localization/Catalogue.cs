@@ -227,6 +227,13 @@ internal static class Catalogue
         ("Project.ColPage", "Page", "所在页"),
         ("Project.ColParts", "Parts", "部件"),
         ("Project.ReadAgain", "Read again", "重新读取"),
+        ("Project.TabSchematic", "Drawing / net list", "图面 / 网表"),
+        ("Project.TabDevices", "Devices on page", "页内设备"),
+        ("Project.TabReview", "Checks", "核查与规范"),
+        ("Project.NoNetlist", "No devices or connections on this page.", "这一页没有设备和连接。"),
+        ("Project.ReviewSummary", "EPLAN check messages · {0} errors · {1} warnings", "EPLAN 核查消息 · {0} 错误 · {1} 警告"),
+        ("Project.ChecksHint", "From EPLAN's last check run; after checking again in EPLAN, press Refresh.", "消息来自 EPLAN 上一次核查；在 EPLAN 中重新核查后点“刷新”。"),
+        ("Project.NoChecks", "✓ No check messages for this page.", "✓ 这一页没有核查消息。"),
 
         // Collaboration & AI Calls sub-tabs (Ctrl+2)
         ("Approvals.TabApprovals", "Approvals", "协作与审批"),

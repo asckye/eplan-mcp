@@ -222,11 +222,11 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_cable_get | read | cable.get | 75 | 37 | 2 | 30 | 0 | 2/2/4 | A24 | — |
 | eplan_cable_reassign | destructive | cable.reassign.execute<br>cable.reassign.plan | 116 | 55 | 2 | 52 | 0 | 0/0/2 | — | — |
 | eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 139 | 71 | 2 | 63 | 1 | 0/1/1 | A24 | 2026-10-21 pass（api-notes A24） |
-| eplan_check_list | read | check.list | 31 | 16 | 0 | 15 | 0 | 2/3/4 | A12 | 2026-10-20 pass（api-notes A20） |
+| eplan_check_list | read | check.list | 31 | 16 | 0 | 15 | 0 | 2/4/4 | A12 | 2026-10-20 pass（api-notes A20） |
 | eplan_check_run | write | check.run.execute<br>check.run.plan | 77 | 35 | 0 | 40 | 2 | 0/1/4 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_connection_create | write | connection.create.execute<br>connection.create.plan<br>project.get | 413 | 234 | 9 | 141 | 0 | 8/11/18 | A52 A55 A86 A93 A94 | — |
 | eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 90 | 41 | 1 | 45 | 1 | 8/2/13 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
-| eplan_connection_list | read | connection.list | 81 | 46 | 1 | 32 | 0 | 2/4/9 | — | 2026-10-20 pass（api-notes A19） |
+| eplan_connection_list | read | connection.list | 81 | 46 | 1 | 32 | 0 | 2/5/9 | — | 2026-10-20 pass（api-notes A19） |
 | eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 95 | 41 | 1 | 52 | 1 | 1/1/1 | A24 | — |
 | eplan_connection_route | write | connection.route.execute<br>connection.route.plan | 69 | 38 | 0 | 31 | 0 | 0/1/0 | A1 | — |
 | eplan_context_get | read | project.snapshot | 99 | 41 | 4 | 32 | 0 | 3/5/3 | A20 A33 A34 A35 A36 A39 | — |

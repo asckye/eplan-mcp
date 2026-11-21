@@ -16344,6 +16344,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/CheckRunToolTests.cs"
           },
           {
+            "name": "ProjectPageTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/ProjectPageTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -17627,6 +17632,11 @@
             "name": "ConnectionToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/ConnectionToolsInteropTests.cs"
+          },
+          {
+            "name": "ProjectPageTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/ProjectPageTests.cs"
           },
           {
             "name": "StdioEndToEndTests",

@@ -54,10 +54,10 @@ public sealed class ProjectPageTests(WpfContext wpf)
 
             tree.RaiseEvent(new RoutedPropertyChangedEventArgs<object>(null!, first, TreeView.SelectedItemChangedEvent));
             var devices = (ItemsControl)page.FindName("Devices");
-            Until(() => devices.ItemsSource is IReadOnlyList<ProjectDeviceRow> { Count: 1 });
+            Until(() => devices.ItemsSource is IReadOnlyList<ProjectDeviceRow> { Count: 1 } && _tools.Calls.Any(c => c.Tool == "eplan_check_list"));
 
             Assert.Equal("=GAA+A1-Q1", ((IReadOnlyList<ProjectDeviceRow>)devices.ItemsSource)[0].VisibleTag);
-            Assert.Equal("=GAA+A1&EFS1/1", _tools.Calls[^1].Args["page"]?.GetValue<string>());
+            Assert.Equal("=GAA+A1&EFS1/1", _tools.Calls.Last(c => c.Tool == "eplan_device_list").Args["page"]?.GetValue<string>());
             Assert.Equal("=GAA+A1&EFS1/1", Text(page, "HeaderTitle"));
 
             ProjectTreeNode deviceList = groups[1].Children[^1];
@@ -67,6 +67,37 @@ public sealed class ProjectPageTests(WpfContext wpf)
         }));
 
         Assert.All(_tools.Calls, c => Assert.Contains(c.Tool, HostToolClient.ReadTools));
+    }
+
+    [Fact]
+    public void APage_ShowsItsNetList_AndOnlyItsOwnCheckMessages_ErrorsFirst()
+    {
+        _tools.Answer = Connected;
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage(page =>
+        {
+            var tree = (TreeView)page.FindName("Tree");
+            Until(() => tree.ItemsSource is IReadOnlyList<ProjectTreeNode> { Count: 2 });
+            ProjectTreeNode first = ((IReadOnlyList<ProjectTreeNode>)tree.ItemsSource)[0].Children[0].Children[0];
+            tree.RaiseEvent(new RoutedPropertyChangedEventArgs<object>(null!, first, TreeView.SelectedItemChangedEvent));
+            var checks = (ItemsControl)page.FindName("Checks");
+            Until(() => checks.ItemsSource is IReadOnlyList<ProjectCheckRow> { Count: 2 });
+
+            Assert.True(((FrameworkElement)page.FindName("PageTabs")).IsVisible);
+            Assert.Equal("2", Text(page, "ReviewCount"));
+            Choose(page, "TabSchematic");
+            Assert.True(((FrameworkElement)page.FindName("NetlistPanel")).IsVisible);
+            Assert.False(((FrameworkElement)page.FindName("DevicesPanel")).IsVisible);
+            string[] lines = ((TextBox)page.FindName("NetlistText")).Text.Split(Environment.NewLine);
+            Assert.Equal("DEVICE  -Q1              Circuit breaker", lines[0]);
+            Assert.Equal("WIRE    -Q1:2            → -K1:1            1,5 GY", lines[1]);
+
+            Choose(page, "TabReview");
+            Assert.True(((FrameworkElement)page.FindName("ReviewPanel")).IsVisible);
+            IReadOnlyList<ProjectCheckRow> rows = (IReadOnlyList<ProjectCheckRow>)checks.ItemsSource;
+            Assert.Equal(["error", "warning"], rows.Select(r => r.Severity));
+            Assert.Equal(("✕", "#4025 · Connections", "Open connection"), (rows[0].Glyph, rows[0].Code, rows[0].Text));
+            Assert.Equal(Loc.Current.T("Project.ReviewSummary", 1, 1), Text(page, "ReviewSummary"));
+        }));
     }
 
     [Fact]
@@ -111,7 +142,36 @@ public sealed class ProjectPageTests(WpfContext wpf)
                 ["parts"] = 1,
             }),
         },
+        "eplan_connection_list" => new JsonObject
+        {
+            ["connections"] = new JsonArray(new JsonObject
+            {
+                ["from"] = new JsonObject { ["device"] = "=GAA+A1-Q1", ["pin"] = "2" },
+                ["to"] = new JsonObject { ["device"] = "=GAA+A1-K1", ["pin"] = "1" },
+                ["page"] = "=GAA+A1&EFS1/1",
+                ["crossSection"] = "1,5",
+                ["colour"] = "GY",
+                ["kind"] = "2d",
+            }),
+        },
+        "eplan_check_list" => new JsonObject
+        {
+            ["messages"] = new JsonArray(
+                Message(2003, "warning", "Devices", "Part missing", "Function", "=GAA+A1-Q1"),
+                Message(9001, "error", "Pages", "Elsewhere", "Page", "=GAA+A2&EFS2/1"),
+                Message(4025, "error", "Connections", "Open connection", "Page", "=GAA+A1&EFS1/1")),
+        },
         _ => throw new InvalidOperationException("not expected: " + tool),
+    };
+
+    private static JsonObject Message(int number, string severity, string region, string text, string kind, string name) => new()
+    {
+        ["number"] = number,
+        ["severity"] = severity,
+        ["region"] = region,
+        ["text"] = text,
+        ["done"] = false,
+        ["object"] = new JsonObject { ["kind"] = kind, ["name"] = name },
     };
 
     private static JsonObject Page(string name, string type, string description) =>
@@ -124,6 +184,12 @@ public sealed class ProjectPageTests(WpfContext wpf)
         WpfContext.Drain();
         test((ProjectPage)window.FindName("ProjectPage"));
     });
+
+    private static void Choose(FrameworkElement page, string tab)
+    {
+        ((RadioButton)page.FindName(tab)).IsChecked = true;
+        WpfContext.Drain();
+    }
 
     private static string Text(FrameworkElement page, string name) => ((TextBlock)page.FindName(name)).Text;
 

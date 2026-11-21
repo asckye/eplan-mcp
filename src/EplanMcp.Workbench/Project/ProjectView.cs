@@ -22,6 +22,13 @@ internal sealed record ProjectDeviceRow(string Tag, string VisibleTag, string Ca
     public string PartsText => Parts.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
 
+/// <summary>One EPLAN check message about the chosen page or one of its devices.</summary>
+internal sealed record ProjectCheckRow(string Severity, string Glyph, string Code, string Text)
+{
+    /// <summary>The text after the code, as the row shows it.</summary>
+    public string Detail => " · " + Text;
+}
+
 /// <summary>
 /// The project page's model (ADR-0065 decision 2): the EPLAN the Host sees, the project, its tree, and the devices of
 /// the page or group chosen, all read through <see cref="IProjectTools"/> with read-only tools. Nothing here writes.
@@ -58,6 +65,21 @@ internal sealed class ProjectView(IProjectTools? tools) : INotifyPropertyChanged
     public IReadOnlyList<ProjectDeviceRow> Devices { get; private set; } = [];
 
     public bool DevicesLoading { get; private set; }
+
+    /// <summary>The chosen page's net list as text lines: its devices, then its connections (Workbench 4.0 "网表摘要").</summary>
+    public IReadOnlyList<string> Netlist { get; private set; } = [];
+
+    /// <summary>The check messages about the chosen page or its devices, errors first.</summary>
+    public IReadOnlyList<ProjectCheckRow> Checks { get; private set; } = [];
+
+    public int CheckErrors { get; private set; }
+
+    public int CheckWarnings { get; private set; }
+
+    /// <summary>How many check messages the page reads at most (five calls of 200).</summary>
+    public const int MaxMessages = 1000;
+
+    private List<JsonObject>? _messages;
 
     /// <summary>Reads the EPLAN, the project and its pages again.</summary>
     public async Task RefreshAsync(CancellationToken cancellationToken)
@@ -102,6 +124,7 @@ internal sealed class ProjectView(IProjectTools? tools) : INotifyPropertyChanged
 
             Truncated = cursor is not null;
             Groups = ProjectTree.Build(pages);
+            _messages = null;
             State = ProjectState.Ready;
         }
         catch (Exception ex) when (ex is ProjectToolException or InvalidOperationException or IOException or TimeoutException or System.ComponentModel.Win32Exception or ModelContextProtocol.McpException)
@@ -123,7 +146,7 @@ internal sealed class ProjectView(IProjectTools? tools) : INotifyPropertyChanged
         }
 
         DevicesOf = page ?? prefix ?? string.Empty;
-        (DevicesLoading, Devices) = (true, []);
+        (DevicesLoading, Devices, Netlist, Checks, CheckErrors, CheckWarnings) = (true, [], [], [], 0, 0);
         Changed();
         try
         {
@@ -143,6 +166,20 @@ internal sealed class ProjectView(IProjectTools? tools) : INotifyPropertyChanged
                 .. (list["devices"] as JsonArray ?? []).OfType<JsonObject>().Select(d => new ProjectDeviceRow(
                     Plain(d["tag"]), Plain(d["visibleTag"]), Plain(d["category"]), Plain(d["page"]), Count(d["parts"]))),
             ];
+            if (page is not null)
+            {
+                JsonObject connections = await tools.ReadAsync("eplan_connection_list", new JsonObject { ["page"] = page, ["limit"] = 200 }, cancellationToken).ConfigureAwait(true);
+                Netlist = NetlistOf(page, Devices, connections);
+                _messages ??= await MessagesAsync(cancellationToken).ConfigureAwait(true);
+                HashSet<string> names = [page, .. Devices.Select(d => d.Tag)];
+                Checks =
+                [
+                    .. _messages.Where(m => m["object"]?["name"] is JsonValue name && name.TryGetValue(out string? text) && names.Contains(text))
+                        .Select(CheckOf).OrderBy(c => c.Severity switch { "error" => 0, "warning" => 1, _ => 2 }),
+                ];
+                CheckErrors = Checks.Count(c => c.Severity == "error");
+                CheckWarnings = Checks.Count(c => c.Severity == "warning");
+            }
         }
         catch (Exception ex) when (ex is ProjectToolException or InvalidOperationException or IOException or TimeoutException or ModelContextProtocol.McpException)
         {
@@ -165,6 +202,52 @@ internal sealed class ProjectView(IProjectTools? tools) : INotifyPropertyChanged
         ProjectState.Failed => Loc.Current["Project.ReadFailed"],
         _ => string.Empty,
     };
+
+    /// <summary>
+    /// The net list lines of one page: each device with its category, then each connection from pin to pin with its
+    /// cross-section and colour. Tags lose the page's structure prefix, as EPLAN shows them on the page.
+    /// </summary>
+    internal static IReadOnlyList<string> NetlistOf(string page, IReadOnlyList<ProjectDeviceRow> devices, JsonObject connections)
+    {
+        string prefix = ProjectTree.Prefix(page);
+        string Short(string tag) => prefix.Length > 0 && tag.StartsWith(prefix, StringComparison.Ordinal) && tag.Length > prefix.Length ? tag[prefix.Length..] : tag;
+        string End(JsonNode? end) => end is JsonObject point ? Short(Plain(point["device"])) + ":" + Plain(point["pin"]) : "—";
+        var lines = new List<string>();
+        lines.AddRange(devices.Select(d => $"DEVICE  {Short(d.Tag),-16} {d.Category}".TrimEnd()));
+        lines.AddRange((connections["connections"] as JsonArray ?? []).OfType<JsonObject>().Where(c => Plain(c["kind"]) != "3d").Select(c =>
+            $"WIRE    {End(c["from"]),-16} → {End(c["to"]),-16} {Plain(c["crossSection"])} {Plain(c["colour"])}".TrimEnd()));
+        return lines;
+    }
+
+    private static ProjectCheckRow CheckOf(JsonObject message)
+    {
+        string severity = Plain(message["severity"]);
+        string glyph = severity switch { "error" => "✕", "warning" => "!", _ => "i" };
+        string code = "#" + Count(message["number"]).ToString(System.Globalization.CultureInfo.InvariantCulture)
+            + (Plain(message["region"]) is { Length: > 0 } region ? " · " + region : string.Empty);
+        return new ProjectCheckRow(severity, glyph, code, Plain(message["text"]));
+    }
+
+    private async Task<List<JsonObject>> MessagesAsync(CancellationToken cancellationToken)
+    {
+        var messages = new List<JsonObject>();
+        string? cursor = null;
+        do
+        {
+            JsonObject args = new() { ["limit"] = 200 };
+            if (cursor is not null)
+            {
+                args["cursor"] = cursor;
+            }
+
+            JsonObject list = await tools!.ReadAsync("eplan_check_list", args, cancellationToken).ConfigureAwait(true);
+            messages.AddRange((list["messages"] as JsonArray ?? []).OfType<JsonObject>());
+            cursor = list["nextCursor"] is JsonValue next && next.TryGetValue(out string? text) && text.Length > 0 ? text : null;
+        }
+        while (cursor is not null && messages.Count < MaxMessages);
+
+        return messages;
+    }
 
     private static string Plain(JsonNode? node) => node is JsonValue value && value.TryGetValue(out string? text) ? ProjectText.Line(text) : string.Empty;
 

@@ -28,7 +28,7 @@ internal sealed class HostToolClient(string hostExecutable) : IProjectTools, IAs
     /// <summary>The tools the project page reads with; every one is annotated read-only by the Host.</summary>
     public static readonly IReadOnlySet<string> ReadTools = new HashSet<string>(StringComparer.Ordinal)
     {
-        "eplan_session_status", "eplan_project_get", "eplan_page_list", "eplan_page_get", "eplan_device_list", "eplan_structure_list", "eplan_check_list",
+        "eplan_session_status", "eplan_project_get", "eplan_page_list", "eplan_page_get", "eplan_device_list", "eplan_connection_list", "eplan_structure_list", "eplan_check_list",
     };
 
     private readonly SemaphoreSlim _start = new(1, 1);
