@@ -5,20 +5,20 @@
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
     Focusable="False">
-  <!-- Runtime logs (2026-11-20 design): the filter bar, the stream with mono cells and a level chip, the storage strip at the bottom. -->
+  <!-- Runtime logs (Workbench 4.0 design): the level pills and three actions in the bar; one mono row per entry, full width. -->
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBox x:Name="SearchBox" Width="180" Style="{StaticResource Primer.Input}" Margin="{StaticResource Ui.Gap.Right.XS}" TextChanged="OnFilterChanged" />
-          <Button x:Name="RefreshButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Logs.Refresh}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnRefresh" />
-          <Button x:Name="CopyButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Logs.Copy}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnCopy" />
-          <Button x:Name="FolderButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Logs.OpenFolder}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnOpenFolder" />
-          <Button x:Name="DiagButton" Style="{StaticResource Primer.Primary}" Content="{l:Tr Logs.ExportDiag}" Click="OnExportDiag" />
+          <Button x:Name="DiagButton" Style="{StaticResource Workbench.ButtonSmPrimary}" Content="{l:Tr Logs.ExportDiag}" Margin="{StaticResource Ui.Gap.Right.XXS}" Click="OnExportDiag" />
+          <Button x:Name="ClearButton" Style="{StaticResource Workbench.ButtonSm}" Content="{l:Tr Logs.Clear}" Margin="{StaticResource Ui.Gap.Right.XXS}" Click="OnClear" />
+          <Button x:Name="StorageLink" Style="{StaticResource Workbench.ToolButton}" Content="{l:Tr Logs.StorageLink}" Click="OnGoStorage" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Logs}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.SM}"
-                     AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
+          <!-- The page's heading for screen readers and focus (NAV-07); the design shows the filters in its place. -->
+          <Canvas Width="0">
+            <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Logs}" Opacity="0" AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" />
+          </Canvas>
           <RadioButton x:Name="FilterAll" GroupName="LogLevel" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Logs.All}" IsChecked="True" Checked="OnFilterChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
           <RadioButton x:Name="FilterWarn" GroupName="LogLevel" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Logs.Warn}" Checked="OnFilterChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
           <RadioButton x:Name="FilterError" GroupName="LogLevel" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Logs.Error}" Checked="OnFilterChanged" />
@@ -26,64 +26,24 @@
       </DockPanel>
     </Border>
 
-    <Border x:Name="Banner" DockPanel.Dock="Top" Style="{StaticResource Primer.Alert.Info}" Margin="{StaticResource Ui.Gap.LogBanner}" Visibility="Collapsed">
-      <TextBlock x:Name="BannerText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-    </Border>
-
-    <Border DockPanel.Dock="Bottom" Style="{StaticResource Workbench.IdeSubBar}" MinHeight="30" BorderThickness="0,1,0,0">
-      <DockPanel>
-        <Button x:Name="StorageLink" DockPanel.Dock="Right" Style="{StaticResource Workbench.StatusPill}" Content="{l:Tr Logs.StorageLink}" Click="OnGoStorage" />
-        <TextBlock x:Name="FolderFooter" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-      </DockPanel>
-    </Border>
-
-    <Grid>
-      <ListView x:Name="LogList" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
-        <ListView.View>
-          <GridView>
-            <GridViewColumn x:Name="ColTime" Width="88">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Time}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11.5" />
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-            <!-- The level as a small chip in its tone: ERROR red, WARN amber, INFO neutral. -->
-            <GridViewColumn x:Name="ColLevel" Width="76">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <Border x:Name="Chip" Style="{StaticResource Workbench.Tag}" Height="18" HorizontalAlignment="Left">
-                    <TextBlock Text="{Binding Level}" Style="{StaticResource Workbench.MonoStrong}" FontSize="10" Foreground="{Binding (TextElement.Foreground), RelativeSource={RelativeSource AncestorType=Border}}" VerticalAlignment="Center" />
-                  </Border>
-                  <DataTemplate.Triggers>
-                    <DataTrigger Binding="{Binding Level}" Value="ERROR">
-                      <Setter TargetName="Chip" Property="Style" Value="{StaticResource Workbench.Tag.Error}" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Level}" Value="WARN">
-                      <Setter TargetName="Chip" Property="Style" Value="{StaticResource Workbench.Tag.Warning}" />
-                    </DataTrigger>
-                  </DataTemplate.Triggers>
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-            <GridViewColumn x:Name="ColSource" Width="170">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Source}" Style="{StaticResource Primer.Mono.text}" FontSize="11.5" FontWeight="Medium" Foreground="{DynamicResource Accent.Text}" />
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-            <GridViewColumn x:Name="ColMessage" Width="620">
-              <GridViewColumn.CellTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Message}" Style="{StaticResource Primer.Mono.text}" FontSize="12" TextTrimming="CharacterEllipsis" />
-                </DataTemplate>
-              </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-          </GridView>
-        </ListView.View>
-      </ListView>
-      <shell:EmptyState x:Name="Empty" Title="{l:Tr Logs.Empty}" Text="{l:Tr Logs.EmptyText}" Visibility="Collapsed" />
+    <Grid Background="{DynamicResource Surface.Elevated}">
+      <ListBox x:Name="LogList" Style="{StaticResource Primer.List}" Background="Transparent" BorderThickness="0" ItemContainerStyle="{StaticResource Workbench.LogRow}"
+               VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" AutomationProperties.Name="{l:Tr Page.Logs}">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <DockPanel>
+              <TextBlock DockPanel.Dock="Left" Text="{Binding Time}" Style="{StaticResource Workbench.LogTime}" />
+              <TextBlock DockPanel.Dock="Left" Style="{StaticResource Workbench.LogLevel}" Tag="{Binding Tone}" Text="{Binding LevelText}" />
+              <TextBlock DockPanel.Dock="Left" Text="{Binding Source}" Style="{StaticResource Workbench.LogSource}" />
+              <TextBlock Text="{Binding Message}" Style="{StaticResource Workbench.LogMessage}" />
+            </DockPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <StackPanel x:Name="Empty" VerticalAlignment="Center" Visibility="Collapsed">
+        <shell:EmptyState Title="{l:Tr Logs.Empty}" Text="{l:Tr Logs.EmptyText}" />
+        <Button Style="{StaticResource Primer.Secondary}" Content="{l:Tr Logs.EmptyCta}" HorizontalAlignment="Center" Margin="{StaticResource Ui.Gap.Top.Normal}" Click="OnGoStorage" />
+      </StackPanel>
     </Grid>
   </DockPanel>
 </UserControl>

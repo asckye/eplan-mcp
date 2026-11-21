@@ -1301,4 +1301,94 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
+  </Style>
+
+  <!-- ===== Workbench 4.0 small buttons (cc-btn-sm, ide-tool-btn) and log rows ===== -->
+  <Style x:Key="Workbench.ButtonSm" TargetType="Button" BasedOn="{StaticResource Primer.Secondary}">
+    <Setter Property="MinHeight" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.ButtonSm}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="ux:Ux.CornerRadius" Value="7" />
+  </Style>
+  <Style x:Key="Workbench.ButtonSmPrimary" TargetType="Button" BasedOn="{StaticResource Primer.Primary}">
+    <Setter Property="MinHeight" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.ButtonSm}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="ux:Ux.CornerRadius" Value="7" />
+  </Style>
+  <Style x:Key="Workbench.ToolButton" TargetType="Button">
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.ToolButton}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Bd" Background="Transparent" CornerRadius="7" Padding="{TemplateBinding Padding}">
+            <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+              <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.LogRow" TargetType="ListBoxItem">
+    <Setter Property="AutomationProperties.Name" Value="{Binding Message}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Border x:Name="Bd" Background="Transparent" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,0,0,1" Padding="{StaticResource Ui.Inset.LogRow}">
+            <ContentPresenter />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource State.Info.Background}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.LogTime" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Right.SM}" />
+  </Style>
+  <Style x:Key="Workbench.LogLevel" TargetType="TextBlock" BasedOn="{StaticResource Workbench.ToneGlyph}">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Width" Value="64" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Right.SM}" />
+  </Style>
+  <Style x:Key="Workbench.LogSource" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Width" Value="128" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Right.SM}" />
+  </Style>
+  <Style x:Key="Workbench.LogMessage" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
   </Style></ResourceDictionary>

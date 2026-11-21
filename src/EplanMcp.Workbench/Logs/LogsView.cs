@@ -7,7 +7,14 @@ using EplanMcp.Workbench.Approvals;
 
 namespace EplanMcp.Workbench.Logs;
 
-internal sealed record LogRow(string Time, string Level, string Source, string Message);
+internal sealed record LogRow(string Time, string Level, string Source, string Message)
+{
+    /// <summary>The level with the design's glyph: "✕ ERROR", "! WARN", "• INFO".</summary>
+    public string LevelText => (Level switch { "ERROR" => "✕ ", "WARN" => "! ", _ => "• " }) + Level;
+
+    /// <summary>The tone the level's text takes.</summary>
+    public string Tone => Level switch { "ERROR" => "Error", "WARN" => "Warning", _ => string.Empty };
+}
 
 /// <summary>
 /// Reads Workbench and Bridge runtime log files from <c>%USERPROFILE%\EplanMcp\logs</c> and exports redacted diagnostic ZIP archives.
@@ -20,6 +27,7 @@ internal sealed partial class LogsView(string logsFolder, string configFile) : I
     private List<LogRow> _all = [];
     private string _levelFilter = "ALL";
     private string _search = string.Empty;
+    private HashSet<LogRow> _cleared = [];
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -37,6 +45,13 @@ internal sealed partial class LogsView(string logsFolder, string configFile) : I
     {
         _levelFilter = level;
         _search = search.Trim();
+        ApplyFilter();
+    }
+
+    /// <summary>Hides the entries shown now; the files stay as they are, and newer entries show on the next reload.</summary>
+    public void ClearShown()
+    {
+        _cleared = [.. _all];
         ApplyFilter();
     }
 
@@ -142,7 +157,7 @@ internal sealed partial class LogsView(string logsFolder, string configFile) : I
 
     private void ApplyFilter()
     {
-        IEnumerable<LogRow> query = _all;
+        IEnumerable<LogRow> query = _all.Where(r => !_cleared.Contains(r));
         if (_levelFilter != "ALL")
         {
             query = query.Where(r => r.Level == _levelFilter);

@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using EplanMcp.Workbench.Shell;
-using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
 
 namespace EplanMcp.Workbench.Logs;
@@ -21,7 +20,6 @@ public partial class LogsPage : UserControl, IWorkbenchPage
         {
             Loc.Current.LanguageChanged -= OnLanguageChanged;
             Loc.Current.LanguageChanged += OnLanguageChanged;
-            ApplyTexts();
             Show();
         };
         Unloaded += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
@@ -33,7 +31,6 @@ public partial class LogsPage : UserControl, IWorkbenchPage
                 Refresh();
             }
         };
-        ApplyTexts();
     }
 
     public event Action? StorageSettingsRequested;
@@ -47,7 +44,6 @@ public partial class LogsPage : UserControl, IWorkbenchPage
         _view = view;
         _shell = shell ?? _shell;
         view.PropertyChanged += (_, _) => Dispatcher.BeginInvoke(Show);
-        FolderFooter.Text = view.LogsFolder;
         Show();
     }
 
@@ -62,33 +58,15 @@ public partial class LogsPage : UserControl, IWorkbenchPage
 
         try
         {
-            string zip = _view.ExportDiagnosticsZip();
-            BannerText.Text = Loc.Current.T("Logs.DiagCreated", zip);
-            Toasts.Show(BannerText.Text, ToastTone.Success);
-            AccessibleStatus.Announce(BannerText);
+            Toasts.Show(Loc.Current.T("Logs.DiagCreated", _view.ExportDiagnosticsZip()), ToastTone.Success);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            BannerText.Text = Loc.Current.T("Logs.DiagFailed", ex.Message);
-            Toasts.Show(BannerText.Text, ToastTone.Error);
-            AccessibleStatus.Announce(BannerText);
+            Toasts.Show(Loc.Current.T("Logs.DiagFailed", ex.Message), ToastTone.Error);
         }
     }
 
-    private void OnLanguageChanged(object? sender, EventArgs e)
-    {
-        ApplyTexts();
-        Show();
-    }
-
-    private void ApplyTexts()
-    {
-        Loc loc = Loc.Current;
-        ColTime.Header = loc["Logs.ColTime"];
-        ColLevel.Header = loc["Logs.ColLevel"];
-        ColSource.Header = loc["Logs.ColModule"];
-        ColMessage.Header = loc["Logs.ColMessage"];
-    }
+    private void OnLanguageChanged(object? sender, EventArgs e) => Show();
 
     private void Show()
     {
@@ -99,41 +77,38 @@ public partial class LogsPage : UserControl, IWorkbenchPage
 
         LogList.ItemsSource = view.Visible;
         Empty.Visibility = view.Visible.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ClearButton.IsEnabled = view.Visible.Count > 0;
     }
 
     private void OnFilterChanged(object sender, RoutedEventArgs e)
     {
-        if (_view is null || FilterAll is null || SearchBox is null)
+        if (_view is null || FilterAll is null)
         {
             return;
         }
 
         string level = FilterError.IsChecked == true ? "ERROR" : FilterWarn.IsChecked == true ? "WARN" : "ALL";
-        _view.SetFilter(level, SearchBox.Text);
+        _view.SetFilter(level, string.Empty);
     }
 
-    private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
+    /// <summary>Asks first, then hides the entries shown; the log files stay (Workbench 4.0 design); a test replaces the question.</summary>
+    internal Func<int, bool>? ConfirmClear { get; set; }
 
-    private void OnCopy(object sender, RoutedEventArgs e)
+    private void OnClear(object sender, RoutedEventArgs e)
     {
         if (_view is not { Visible.Count: > 0 } view)
         {
             return;
         }
 
-        string text = string.Join(Environment.NewLine, view.Visible.Select(r => $"{r.Time} [{r.Level}] {r.Source}: {r.Message}"));
-        Clipboard.SetText(text);
-        BannerText.Text = Loc.Current.T("Logs.Copied", view.Visible.Count);
-        Toasts.Show(BannerText.Text, ToastTone.Success);
-        AccessibleStatus.Announce(BannerText);
-    }
-
-    private void OnOpenFolder(object sender, RoutedEventArgs e)
-    {
-        if (_view is { } view)
+        Loc loc = Loc.Current;
+        int count = view.Visible.Count;
+        bool yes = (ConfirmClear ?? (n => WorkbenchDialog.Confirm(Window.GetWindow(this)!, loc["Logs.ClearTitle"], loc["Logs.ClearMessage"], loc["Logs.ClearCancel"], loc["Logs.ClearAction"],
+            loc.T("Logs.ClearDetails", n, view.LogsFolder))))(count);
+        if (yes)
         {
-            Directory.CreateDirectory(view.LogsFolder);
-            _shell.Open(view.LogsFolder);
+            view.ClearShown();
+            Toasts.Show(loc["Logs.Cleared"], ToastTone.Success);
         }
     }
 
