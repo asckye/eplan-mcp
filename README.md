@@ -15,7 +15,7 @@
 <p align="center"><sub>这一页由 MCP 工具调用完成：建页、放置设备（-Q1 来自部件库）、自动连线、导出图片，没有手工绘制。图中只保留绘图区。</sub></p>
 
 > [!NOTE]
-> 当前是预览版（0.x），供测试使用，工具的参数和返回结构仍可能变化。版本变更见 [CHANGELOG](CHANGELOG.md)，后续计划见[路线图](docs/roadmap.md)。
+> 1.0 起按[语义化版本](https://semver.org/lang/zh-CN/)发布：MCP 工具契约（工具名称、参数、返回结构、安全注解）、`config.json` 格式和命令行在 1.x 内保持兼容，破坏性变化只在 2.0 出现；新增工具、字段或可选参数不算破坏性变化。目前只支持 EPLAN 2026，其他年份会以小版本加入。程序不带代码签名。版本变更见 [CHANGELOG](CHANGELOG.md)，后续计划见[路线图](docs/roadmap.md)。
 
 ## 能这样用
 

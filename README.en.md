@@ -15,7 +15,7 @@ The engineer stays in control: writes only preview by default, writes to real pr
 <p align="center"><sub>This page was produced by MCP tool calls: create the page, place devices (-Q1 comes from the parts library), autoconnect, export the image. Nothing was drawn by hand. Only the drawing area is shown.</sub></p>
 
 > [!NOTE]
-> This is a preview release (0.x) for testing. Tool arguments and results may still change. See the [CHANGELOG](CHANGELOG.md) for changes and the [roadmap](docs/roadmap.md) for plans. Most project documentation is in Chinese.
+> From 1.0 on, releases follow [Semantic Versioning](https://semver.org/): the MCP tool contract (tool names, arguments, result structures, safety annotations), the `config.json` format and the command line stay compatible throughout 1.x, and breaking changes come only with 2.0; new tools, fields or optional arguments are not breaking. Only EPLAN 2026 is supported for now; other years will be added in minor releases. The programs are not code-signed. See the [CHANGELOG](CHANGELOG.md) for changes and the [roadmap](docs/roadmap.md) for plans. Most project documentation is in Chinese.
 
 ## What you can ask
 

@@ -88,6 +88,13 @@ public sealed class ReleasePrepScriptTests
     [InlineData("0.5.1", "v0.4.0", false)]
     [InlineData("0.6.0", "v0.4.0", false)]
     [InlineData("0.4.1", "v0.5.0", false)]
+    [InlineData("1.0.0", "v0.8.0,v0.9.0", true)]
+    [InlineData("1.0.1", "v0.9.0,v1.0.0", true)]
+    [InlineData("1.1.0", "v1.0.0", true)]
+    [InlineData("2.0.0", "v1.0.0", true)]
+    [InlineData("1.0.0", "v1.0.0", false)]
+    [InlineData("1.0.1", "v0.9.0", false)]
+    [InlineData("0.10.0", "v1.0.0", false)]
     public async Task Version_RequiresCanonicalNextPatchOrMinor(string version, string tags, bool expected)
     {
         using JsonDocument result = await RunAsync($"$accepted = try {{ Assert-ReleaseVersion {Ps(version)} ({Ps(tags)}.Split(',')); $true }} catch {{ $false }}; $accepted | ConvertTo-Json");

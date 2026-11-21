@@ -4,11 +4,13 @@ param([string]$Version)
 $ErrorActionPreference = 'Stop'
 
 function Assert-ReleaseVersion([string]$Version, [string[]]$Tags) {
-    if ($Version -cnotmatch '^0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Expected a canonical 0.x.y version without v.' }
-    $latest = @($Tags | Where-Object { $_ -cmatch '^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' } |
+    $canonical = '(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'
+    if ($Version -cnotmatch "^$canonical$") { throw 'Expected a canonical x.y.z version without v.' }
+    $latest = @($Tags | Where-Object { $_ -cmatch "^v$canonical$" } |
         ForEach-Object { [version]$_.Substring(1) } | Sort-Object -Descending)[0]
-    if (-not $latest) { throw 'No v0.x.y tag found; fetch origin and tags first.' }
-    $allowed = @("0.$($latest.Minor).$($latest.Build + 1)", "0.$($latest.Minor + 1).0")
+    if (-not $latest) { throw 'No vx.y.z tag found; fetch origin and tags first.' }
+    # The next patch, minor or major release (SemVer 2.0.0); 1.0.0 ends the 0.x previews.
+    $allowed = @("$($latest.Major).$($latest.Minor).$($latest.Build + 1)", "$($latest.Major).$($latest.Minor + 1).0", "$($latest.Major + 1).0.0")
     if ($Version -cnotin $allowed) { throw "Expected $($allowed -join ' or ') after v$latest; got $Version." }
 }
 
@@ -60,7 +62,13 @@ function Invoke-ReleasePrep([string]$Root, [string]$Version) {
     if (Read-ReleaseGit $Root @('status', '--porcelain', '--untracked-files=all')) { throw 'The working tree must be clean, including untracked files.' }
     $head = Read-ReleaseGit $Root @('rev-parse', 'HEAD')
     if ($head -cne (Read-ReleaseGit $Root @('rev-parse', 'origin/main'))) { throw 'HEAD must equal origin/main.' }
-    Assert-ReleaseVersion $Version @(Read-ReleaseGit $Root @('tag', '--list', 'v0.*'))
+    Assert-ReleaseVersion $Version @(Read-ReleaseGit $Root @('tag', '--list', 'v*'))
+    # 0.x releases are previews (prerelease on GitHub); from 1.0.0 on they are stable releases.
+    $preview = $Version.StartsWith('0.', [StringComparison]::Ordinal)
+    $kind = if ($preview) { '预览版' } else { '正式版' }
+    $prerelease = if ($preview) { ' --prerelease' } else { '' }
+    $title = if ($preview) { "v$Version preview" } else { "v$Version" }
+    $subject = if ($preview) { 'preview' } else { 'release' }
     $projects = @('Host', 'Workbench', 'Bridge.Eplan') | ForEach-Object { "src/EplanMcp.$_/EplanMcp.$_.csproj" }
     $updates = @{}
     foreach ($project in $projects) {
@@ -83,17 +91,17 @@ function Invoke-ReleasePrep([string]$Root, [string]$Version) {
     $notes = Join-Path $Root ".local/release/v$Version-notes.md"
     if (Test-Path -LiteralPath $notes) { throw "Notes already exist: $notes; review or move them before preparing again." }
     New-Item -ItemType Directory -Path (Split-Path -Parent $notes) -Force | Out-Null
-    Set-Content -LiteralPath $notes -Encoding utf8 -NoNewline -Value ("# v$Version 预览版`n`n$($release.Section)`n`n## 未实机验证 / 默认关闭`n`napiTry、actionTry 保持默认关闭；以下待验功能默认关闭或明确标为未实机验证。`n`n$pending`n")
+    Set-Content -LiteralPath $notes -Encoding utf8 -NoNewline -Value ("# v$Version $kind`n`n$($release.Section)`n`n## 未实机验证 / 默认关闭`n`napiTry、actionTry 保持默认关闭；以下待验功能默认关闭或明确标为未实机验证。`n`n$pending`n")
     foreach ($path in $updates.Keys) { Set-Content -LiteralPath (Join-Path $Root $path) -Encoding utf8 -NoNewline -Value $updates[$path] }
     Write-Output @"
 已准备 v$Version；请审阅版本、CHANGELOG、待验范围和 $notes。以下步骤均须维护者手动执行：
 git add -- $($projects -join ' ') $pluginPath CHANGELOG.md
-git commit -m "chore(ci): prepare v$Version preview"
+git commit -m "chore(ci): prepare v$Version $subject"
 pwsh eng/scripts/local-gate.ps1 -Full -Push
 pwsh eng/scripts/smoke.ps1
 git tag v$Version HEAD
 git push origin v$Version
-gh release create v$Version --repo asckye/eplan-mcp --verify-tag --draft --prerelease --title 'v$Version preview' --notes-file .local/release/v$Version-notes.md
+gh release create v$Version --repo asckye/eplan-mcp --verify-tag --draft$prerelease --title '$title' --notes-file .local/release/v$Version-notes.md
 pwsh eng/scripts/release-addin.ps1 -Tag v$Version -WhatIf
 pwsh eng/scripts/release-addin.ps1 -Tag v$Version
 ADR-0020：把脚本输出的 Add-in SHA-256 整行原样贴入草稿说明，补支持矩阵、提交号和验证证据。

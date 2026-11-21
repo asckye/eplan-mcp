@@ -1,6 +1,8 @@
-# 0.x 预览版发布
+# 发布
 
-依据 [规范开发流程条款](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/15-build-release.md#build-release)、[ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md)、[ADR-0020](../adr/0020-no-self-hosted-runner.md) 和 [M5 设计](../design/2026-10-20-m5-operability.md)。只交付 ZIP，0.x 程序不签名；附 SHA-256、CycloneDX SBOM、GitHub 来源证明。全程保留草稿，最后由维护者手动发布。
+依据 [规范开发流程条款](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/15-build-release.md#build-release)、[ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md)、[ADR-0020](../adr/0020-no-self-hosted-runner.md) 和 [M5 设计](../design/2026-10-20-m5-operability.md)。只交付 ZIP，程序不签名（1.x 也不签名，发布说明里写明）；附 SHA-256、CycloneDX SBOM、GitHub 来源证明。全程保留草稿，最后由维护者手动发布。
+
+0.x 是预览版（GitHub 上标为 prerelease）。负责人 2026-11-21 决定发布 1.0.0：从 1.0.0 起是正式版，按语义化版本递增，1.x 内 MCP 工具契约、`config.json` 格式和命令行保持兼容；`release-prep.ps1` 对 1.x 生成“正式版”说明，草稿不再带 `--prerelease`，其余步骤与下文相同。v0.9.0 的草稿没有单独发布，它的内容随 1.0.0 发布。
 
 ## 每周预览版（发布列车）
 
