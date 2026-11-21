@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 状态 | Accepted |
-| 后续修订 | [ADR-0035](0035-destructive-approval-default-reject.md)（2026-11-01）修订第 6 条：破坏性操作的审批默认拒绝，批准需输入确认；[ADR-0064](0064-approval-target-fields.md)（Proposed，2026-11-20）提议给审批问题加结构化的目标和动作字段，协议版本升到 2 |
+| 后续修订 | [ADR-0035](0035-destructive-approval-default-reject.md)（2026-11-01）修订第 6 条：破坏性操作的审批默认拒绝，批准需输入确认；[ADR-0064](0064-approval-target-fields.md)（Proposed，2026-11-20）提议给审批问题加结构化的目标和动作字段，协议版本升到 2；[ADR-0065](0065-workbench-as-host-client.md)（Proposed，2026-11-20）提议 Workbench 启动自己的 Host 子进程，作为客户端读取项目数据并执行工程师发起的操作 |
 | 日期 | 2026-10-20（提出）· 2026-10-20（接受：项目负责人对 M5 设计的待定问题和三个 ADR 明确答复"全部按建议"） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门（1.0 发布前）：协议有版本号；但"问题送达后只在 Workbench 中回答""Host 从不启动 Workbench"放宽时要新的 ADR |
