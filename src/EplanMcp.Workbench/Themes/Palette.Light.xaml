@@ -100,6 +100,9 @@
   <SolidColorBrush x:Key="Text.Secondary" Color="{Binding Color, Source={StaticResource Primer.textMuted}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Faint" Color="{Binding Color, Source={StaticResource Primer.textFaint}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Tertiary" Color="{Binding Color, Source={StaticResource Ant.colorTextDisabled}, Mode=OneWay}" />
+  <!-- Workbench 4.0 diff rows: an added and a removed line's background. -->
+  <SolidColorBrush x:Key="Workbench.DiffAddBg" Color="#1716A34A" />
+  <SolidColorBrush x:Key="Workbench.DiffDelBg" Color="#14DC2626" />
   <SolidColorBrush x:Key="Text.Disabled" Color="{Binding Color, Source={StaticResource Ant.colorTextDisabled}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Border.Strong" Color="{Binding Color, Source={StaticResource Ant.colorBorder}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Selected" Color="{Binding Color, Source={StaticResource Primer.selectedText}, Mode=OneWay}" />

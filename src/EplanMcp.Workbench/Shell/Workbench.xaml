@@ -1057,4 +1057,248 @@
     <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.PopoverTile}" />
     <Setter Property="Margin" Value="{StaticResource Ui.Gap.Top.XS}" />
+  </Style>
+
+  <!-- ===== Workbench 4.0 approvals: segmented switch, boxes, tags, queue rows, diff and table ===== -->
+  <Style x:Key="Workbench.Segment" TargetType="Border">
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Segment}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.SegmentItem" TargetType="RadioButton">
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.SegmentItem}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Border x:Name="Bd" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+            <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Elevated}" />
+              <Setter TargetName="Bd" Property="Effect">
+                <Setter.Value>
+                  <DropShadowEffect BlurRadius="3" ShadowDepth="1" Direction="270" Opacity="0.08" />
+                </Setter.Value>
+              </Setter>
+              <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
+              <Setter Property="FontWeight" Value="SemiBold" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.Box" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Surface.Elevated}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="12" />
+  </Style>
+  <Style x:Key="Workbench.BoxStrip" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Surface.Pane}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.BoxStrip}" />
+  </Style>
+  <Style x:Key="Workbench.BoxCaption" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Bottom.XXS}" />
+  </Style>
+  <Style x:Key="Workbench.BoxHint" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.MetaLine" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+  <Style x:Key="Workbench.DetailTitle" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="18" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style x:Key="Workbench.CcTag" TargetType="Border">
+    <Setter Property="Height" Value="22" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.CcTag}" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="TextElement.FontSize" Value="11.5" />
+    <Setter Property="TextElement.FontWeight" Value="Medium" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <!-- A tone named in Tag ("Warning", "Error", "Success") colours the text: the design's ✓ ! ✕ before a word. -->
+  <Style x:Key="Workbench.ToneGlyph" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="10.5" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Style.Triggers>
+      <Trigger Property="Tag" Value="Warning"><Setter Property="Foreground" Value="{DynamicResource State.Warning.Text}" /></Trigger>
+      <Trigger Property="Tag" Value="Error"><Setter Property="Foreground" Value="{DynamicResource State.Error.Text}" /></Trigger>
+      <Trigger Property="Tag" Value="Success"><Setter Property="Foreground" Value="{DynamicResource State.Success.Text}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="Workbench.ToneBadge" TargetType="TextBlock" BasedOn="{StaticResource Workbench.ToneGlyph}">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style x:Key="Workbench.RowTimer" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
+  </Style>
+  <Style x:Key="Workbench.QueueTitle" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+  <Style x:Key="Workbench.QueueSub" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Top.Hair}" />
+  </Style>
+  <Style x:Key="Workbench.PaneCaption" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+  </Style>
+  <Style x:Key="Workbench.PaneCaptionCount" TargetType="TextBlock" BasedOn="{StaticResource Workbench.PaneCaption}">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+  </Style>
+  <Style x:Key="Workbench.DiffRow" TargetType="Border">
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.DiffRow}" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style x:Key="Workbench.DiffNumber" TargetType="TextBlock">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.DiffSign" TargetType="TextBlock" BasedOn="{StaticResource Workbench.DiffNumber}">
+    <Setter Property="Width" Value="16" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Style.Triggers>
+      <!-- A line without a sign keeps its column but is no element for a screen reader. -->
+      <Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Hidden" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="Workbench.DiffCounts" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Style.Triggers>
+      <Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <!-- The change list's text over the diff rows: one line per 24 px row, plain, selectable, read only (APR-08). -->
+  <Style x:Key="Workbench.DiffText" TargetType="TextBox" BasedOn="{StaticResource Workbench.ProjectData}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.DiffText}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
+    <Setter Property="TextBlock.LineHeight" Value="24" />
+    <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
+    <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+  </Style>
+  <Style x:Key="Workbench.CellText" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+  <Style x:Key="Workbench.CellMono" TargetType="TextBlock" BasedOn="{StaticResource Workbench.CellText}">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+  </Style>
+  <Style x:Key="Workbench.CellMonoStrong" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+  <!-- A link in a table cell: accent text, underlined, a 24 px target. -->
+  <Style x:Key="Workbench.LinkButton" TargetType="Button">
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border Background="Transparent">
+            <TextBlock Text="{TemplateBinding Content}" TextDecorations="Underline" VerticalAlignment="Center" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.TableHead" TargetType="Border">
+    <Setter Property="Height" Value="34" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.TableHead}" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Pane}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style x:Key="Workbench.TableHeadText" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.TableRow" TargetType="ListBoxItem">
+    <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Border x:Name="Bd" Background="Transparent" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,0,0,1" Padding="{StaticResource Ui.Inset.TableCell}">
+            <ContentPresenter />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource State.Info.Background}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style></ResourceDictionary>

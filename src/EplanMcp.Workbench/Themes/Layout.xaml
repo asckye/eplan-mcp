@@ -129,6 +129,21 @@
   <Thickness x:Key="Ui.Gap.TitleDivider.Outer">4,0,0,0</Thickness>
   <Thickness x:Key="Ui.Inset.Popover">16</Thickness>
   <Thickness x:Key="Ui.Inset.PopoverTile">12,8</Thickness>
+  <!-- Workbench 4.0 approvals: boxes, the diff, the history table. -->
+  <Thickness x:Key="Ui.Inset.BoxCell">16,12</Thickness>
+  <Thickness x:Key="Ui.Gap.Top.Hair">0,2,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Bottom.XXS">0,0,0,4</Thickness>
+  <Thickness x:Key="Ui.Inset.BoxBody">16</Thickness>
+  <Thickness x:Key="Ui.Inset.BoxStrip">16,10</Thickness>
+  <Thickness x:Key="Ui.Gap.DiffBody">0,8</Thickness>
+  <Thickness x:Key="Ui.Inset.DiffRow">16,0</Thickness>
+  <Thickness x:Key="Ui.Inset.DiffText">64,0,16,0</Thickness>
+  <Thickness x:Key="Ui.Gap.EmptyCta">0,190,0,0</Thickness>
+  <Thickness x:Key="Ui.Inset.SegmentItem">10,0</Thickness>
+  <Thickness x:Key="Ui.Inset.Segment">2</Thickness>
+  <Thickness x:Key="Ui.Inset.TableCell">14,10</Thickness>
+  <Thickness x:Key="Ui.Inset.TableHead">14,0</Thickness>
+  <Thickness x:Key="Ui.Inset.CcTag">7,0</Thickness>
   <Thickness x:Key="Ui.Inset.CommandSearch">12,12</Thickness>
   <Thickness x:Key="Ui.Inset.CommandList">8</Thickness>
   <Thickness x:Key="Ui.Inset.ListCard">12,12</Thickness>
