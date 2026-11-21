@@ -146,13 +146,36 @@ internal sealed partial class LogsView(string logsFolder, string configFile) : I
         }
     }
 
-    private static LogRow ParseLine(string source, string raw)
+    /// <summary>
+    /// One line of a log as a row: the Workbench writes "2026-11-20T14:18:13.154Z Information …", the Bridge
+    /// "2026-11-20 03:55:14.225 [Information] …". The source is the file's program ("Workbench", "Bridge"); the message
+    /// is what follows the level. A line in neither form keeps its text, and only a level word at its start counts.
+    /// </summary>
+    internal static LogRow ParseLine(string file, string raw)
     {
         string clean = ProjectText.Line(raw);
-        string level = clean.Contains("ERR", StringComparison.OrdinalIgnoreCase) || clean.Contains("FAIL", StringComparison.OrdinalIgnoreCase) ? "ERROR"
-            : clean.Contains("WARN", StringComparison.OrdinalIgnoreCase) ? "WARN" : "INFO";
-        string time = clean.Length >= 19 && clean[4] == '-' && clean[10] is 'T' or ' ' ? clean.Substring(11, 8) : "--:--:--";
-        return new LogRow(time, level, source, clean);
+        string source = Program(file);
+        Match match = LinePattern().Match(clean);
+        if (!match.Success)
+        {
+            return new LogRow("--:--:--", "INFO", source, clean);
+        }
+
+        string level = match.Groups["level"].Value.ToUpperInvariant() switch
+        {
+            "ERROR" or "CRITICAL" or "FATAL" or "ERR" => "ERROR",
+            "WARNING" or "WARN" => "WARN",
+            _ => "INFO",
+        };
+        return new LogRow(match.Groups["time"].Value, level, source, match.Groups["message"].Value);
+    }
+
+    /// <summary>"workbench-20261120.log" is the Workbench's, "bridge-startup-error.log" the Bridge's.</summary>
+    private static string Program(string file)
+    {
+        string name = Path.GetFileNameWithoutExtension(file);
+        string first = name.Split('-')[0];
+        return first.Length == 0 ? name : char.ToUpperInvariant(first[0]) + first[1..];
     }
 
     private void ApplyFilter()
@@ -174,4 +197,7 @@ internal sealed partial class LogsView(string logsFolder, string configFile) : I
 
     [GeneratedRegex(@"[A-Za-z0-9_-]{43,}", RegexOptions.CultureInvariant | RegexOptions.NonBacktracking)]
     private static partial Regex SecretPattern();
+
+    [GeneratedRegex(@"^\d{4}-\d{2}-\d{2}[T ](?<time>\d{2}:\d{2}:\d{2})\S*\s+\[?(?<level>[A-Za-z]+)\]?\s+(?<message>.*)$", RegexOptions.CultureInvariant | RegexOptions.NonBacktracking)]
+    private static partial Regex LinePattern();
 }
