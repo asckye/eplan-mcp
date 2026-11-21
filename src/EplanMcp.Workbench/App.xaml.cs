@@ -104,7 +104,7 @@ public sealed partial class App : Application, IDisposable
         _vm = new Vm.VmView(runner, new Vm.VmElevation(), Vm.VmNetwork.Addresses());
 
         // ADR-0065: the project page reads through the Workbench's own Host, started on its first read.
-        _tools = hostExecutable is not null ? new Project.HostToolClient(hostExecutable) : null;
+        _tools = hostExecutable is not null ? new Project.HostToolClient(hostExecutable, _engineerWrites) : null; // its writes are answered by _server
         _window.AttachProject(new ProjectView(_tools));
         _window.AttachAudit(new AuditView(_locations.Audit, host, TimeProvider.System));
         _window.AttachStatus(new StatusView(host, () => _listening && _queue.IsAccepting));
