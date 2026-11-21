@@ -43,8 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- The 2026-11-20 design's fonts, Inter and JetBrains Mono (SIL OFL 1.1, see THIRD-PARTY-NOTICES.md), inside the assembly. -->
-    <Resource Include="Fonts\*.ttf" />
   </ItemGroup>
 
   <ItemGroup>

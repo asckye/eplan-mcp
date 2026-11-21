@@ -75,12 +75,12 @@
   <Thickness x:Key="Ui.Inset.IdeCard">16,16</Thickness>
   <Thickness x:Key="Ui.Inset.StatCard">16,12</Thickness>
   <Thickness x:Key="Ui.Inset.StatusBar">12,0</Thickness>
-  <Thickness x:Key="Ui.Inset.StatusPill">7,0</Thickness>
+  <Thickness x:Key="Ui.Inset.StatusPill">6,0</Thickness>
   <Thickness x:Key="Ui.Inset.CommandButton">10,0</Thickness>
   <Thickness x:Key="Ui.Inset.QueuePane">10</Thickness>
   <Thickness x:Key="Ui.Inset.Toast">14,8</Thickness>
   <Thickness x:Key="Ui.Gap.Toast">0,8,0,0</Thickness>
-  <Thickness x:Key="Ui.Gap.ToastLayer">0,0,16,10</Thickness>
+  <Thickness x:Key="Ui.Gap.ToastLayer">0,0,0,10</Thickness>
   <Thickness x:Key="Ui.Inset.SettingsCard">20</Thickness>
   <Thickness x:Key="Ui.Gap.Bottom.Card">0,0,0,20</Thickness>
   <Thickness x:Key="Ui.Inset.Preview">8</Thickness>
@@ -105,7 +105,7 @@
   <Thickness x:Key="Ui.Inset.CardBody">14</Thickness>
   <Thickness x:Key="Ui.Inset.Tag">7,0</Thickness>
   <Thickness x:Key="Ui.Gap.Tag">0,0,8,0</Thickness>
-  <Thickness x:Key="Ui.Inset.Kbd">5,1</Thickness>
+  <Thickness x:Key="Ui.Inset.Kbd">4,0</Thickness>
   <Thickness x:Key="Ui.Gap.TitleDivider">4,0</Thickness>
   <Thickness x:Key="Ui.Gap.Left.Dot">5,0,0,0</Thickness>
   <Thickness x:Key="Ui.Gap.Right.Title">0,0,6,0</Thickness>
@@ -121,7 +121,14 @@
   <Thickness x:Key="Ui.Inset.FilterFieldEnd">0,4,0,4</Thickness>
   <Thickness x:Key="Ui.Gap.Banner">16,8,16,0</Thickness>
   <Thickness x:Key="Ui.Gap.LogBanner">16,8,16,0</Thickness>
-  <Thickness x:Key="Ui.Gap.CommandPalette">0,72,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.CommandPalette">0,56,0,0</Thickness>
+  <!-- Workbench 4.0 shell: the brand mark, the title bar divider, the status bar's separator and the session popover. -->
+  <Thickness x:Key="Ui.Gap.Horizontal.XS">6,0</Thickness>
+  <Thickness x:Key="Ui.Gap.SessionPopover">12,0,0,32</Thickness>
+  <Thickness x:Key="Ui.Inset.TitleDivider">6,0,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.TitleDivider.Outer">4,0,0,0</Thickness>
+  <Thickness x:Key="Ui.Inset.Popover">16</Thickness>
+  <Thickness x:Key="Ui.Inset.PopoverTile">12,8</Thickness>
   <Thickness x:Key="Ui.Inset.CommandSearch">12,12</Thickness>
   <Thickness x:Key="Ui.Inset.CommandList">8</Thickness>
   <Thickness x:Key="Ui.Inset.ListCard">12,12</Thickness>

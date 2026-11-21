@@ -7,14 +7,14 @@ using EplanMcp.Workbench.Shell;
 namespace EplanMcp.Workbench.Tests.Shell;
 
 /// <summary>
-/// The font tokens: the design's Inter and JetBrains Mono from the assembly, Microsoft YaHei UI for Chinese (ADR-0034 decision 3 as revised 2026-11-20), and the ligatures (TYP-11).
+/// The font tokens: Windows' own Segoe UI Variable and Cascadia Mono as the Workbench 4.0 design names them, Microsoft YaHei UI for Chinese (ADR-0034 decision 3), and the ligatures (TYP-11).
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Medium")]
 public sealed class WorkbenchFontsTests(WpfContext wpf)
 {
     [Fact]
-    public void TheTokensNameTheBundledFonts_WithMicrosoftYaHeiUiForChinese()
+    public void TheTokensNameWindowsOwnFonts_WithMicrosoftYaHeiUiForChinese()
     {
         wpf.Run(() =>
         {
@@ -22,29 +22,10 @@ public sealed class WorkbenchFontsTests(WpfContext wpf)
 
             WorkbenchFonts.Apply(resources);
 
-            Assert.Equal("./Fonts/#Inter, Microsoft YaHei UI, Segoe UI Variable Text, Segoe UI", ((FontFamily)resources["Ui.Font"]).Source);
-            Assert.Equal("./Fonts/#JetBrains Mono, Cascadia Mono, Consolas, Microsoft YaHei UI", ((FontFamily)resources["Ui.FontMono"]).Source);
-            Assert.Equal(WorkbenchFonts.BaseUri, ((FontFamily)resources["Ui.Font"]).BaseUri);
+            Assert.Equal("Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI", ((FontFamily)resources["Ui.Font"]).Source);
+            Assert.Equal("Cascadia Mono, Consolas, Microsoft YaHei UI", ((FontFamily)resources["Ui.FontMono"]).Source);
         });
     }
-
-    [Theory]
-    [InlineData("Ui.Font", "Inter")]
-    [InlineData("Ui.FontMono", "JetBrains Mono")]
-    public void TheBundledFonts_AreFoundInTheAssembly(string token, string family)
-    {
-        wpf.Run(() =>
-        {
-            var resources = new ResourceDictionary();
-            WorkbenchFonts.Apply(resources);
-
-            // The first family resolves to a typeface from the assembly, not to a fallback.
-            Typeface face = ((FontFamily)resources[token]).GetTypefaces().First();
-            Assert.True(face.TryGetGlyphTypeface(out GlyphTypeface glyphs));
-            Assert.Equal(family, glyphs.FamilyNames[new System.Globalization.CultureInfo("en-US")]);
-        });
-    }
-
     [Fact]
     public void TheApplication_OverridesTheVendoredThemesFonts()
     {
