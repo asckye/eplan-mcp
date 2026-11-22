@@ -2,7 +2,7 @@
 
 # EplanMcp 中文入门指南
 
-本指南面向 ZIP 预览版，以 [GitHub Releases](https://github.com/asckye/eplan-mcp/releases) 实际提供的文件为准。尚无 ZIP 时，请等待后续发布；源码构建见仓库 README。
+本指南面向 ZIP 发布包，以 [GitHub Releases](https://github.com/asckye/eplan-mcp/releases) 实际提供的文件为准。尚无 ZIP 时，请等待后续发布；源码构建见仓库 README。
 
 EPLAN 在虚拟机中、AI 客户端在宿主机上时，见[虚拟机部署](#10-虚拟机部署)。
 
@@ -23,7 +23,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath '.\EplanMcp-<version>.zip'
 
 把输出的 `Hash` 与校验和文件中**这个文件名**对应的 64 位十六进制值逐字比对（大小写不影响结果）。不一致就停止，不运行文件，重新从发布页下载。离线电脑可先在联网电脑下载两份文件，再一起带过去校验。
 
-校验后，右键 ZIP →“属性”→ 如有“解除锁定”，勾选并应用，再解压。**0.x 程序不做代码签名**；若被 SmartScreen、企业策略或智能应用控制阻止，请按组织规定联系管理员，不修改系统安全设置。EPLAN 插件的加载仍取决于上述授权。
+校验后，右键 ZIP →“属性”→ 如有“解除锁定”，勾选并应用，再解压。**程序不做代码签名**；若被 SmartScreen、企业策略或智能应用控制阻止，请按组织规定联系管理员，不修改系统安全设置。EPLAN 插件的加载仍取决于上述授权。
 
 ## 3. 安装与注册 EPLAN 插件
 

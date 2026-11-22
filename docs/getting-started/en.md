@@ -2,7 +2,7 @@
 
 # EplanMcp English Getting Started Guide
 
-This guide covers ZIP preview releases. Use the files actually available on [GitHub Releases](https://github.com/asckye/eplan-mcp/releases). If no ZIP is available yet, wait for a later release; see the repository README for building from source.
+This guide covers the ZIP releases. Use the files actually available on [GitHub Releases](https://github.com/asckye/eplan-mcp/releases). If no ZIP is available yet, wait for a later release; see the repository README for building from source.
 
 If EPLAN runs in a VM and the AI client runs on the host computer, see [VM deployment](#10-vm-deployment).
 
@@ -23,7 +23,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath '.\EplanMcp-<version>.zip'
 
 Compare the output `Hash` character by character with the 64-digit hexadecimal value for **that filename** in the checksum file (letter case does not matter). If they differ, stop, do not run the file, and download it again from the release page. For an offline computer, download both files on a connected computer first, then transfer them together for verification.
 
-After verification, right-click the ZIP → Properties → select **Unblock**, if shown, and Apply before extracting. **The 0.x programs are not code-signed.** If SmartScreen, enterprise policy, or Smart App Control blocks execution, contact your administrator under your organisation's rules; do not change system security settings. The add-in still requires the EPLAN licence described above.
+After verification, right-click the ZIP → Properties → select **Unblock**, if shown, and Apply before extracting. **The programs are not code-signed.** If SmartScreen, enterprise policy, or Smart App Control blocks execution, contact your administrator under your organisation's rules; do not change system security settings. The add-in still requires the EPLAN licence described above.
 
 ## 3. Install and Register the EPLAN Add-in
 
