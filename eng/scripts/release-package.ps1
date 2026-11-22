@@ -12,7 +12,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidatePattern('^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$')]
+    [ValidatePattern('^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$')]
     [string] $Tag,
     [Parameter(Mandatory)]
     [string] $Worktree
