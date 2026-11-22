@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds the complete preview package locally from a release tag and uploads it to the draft release.
+    Builds the complete release package locally from a release tag and uploads it to the draft release.
 
 .DESCRIPTION
     Owner decision 2026-11-05: release packages are built on the maintainer's machine, not by release.yml. Run it after
@@ -42,7 +42,7 @@ $env:DOTNET_GENERATE_ASPNET_CERTIFICATE = 'false'
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = 'true'
 
 # Check the draft's add-in against the hash in its notes and the tag.
-if ($env:TAG -cnotmatch '^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Invalid preview tag.' }
+if ($env:TAG -cnotmatch '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Invalid release tag.' }
 $draft = gh release view $env:TAG --repo $repository --json isDraft,tagName,body | ConvertFrom-Json
 if (-not $draft.isDraft -or $draft.tagName -cne $env:TAG) { throw 'Create the draft, run release-addin.ps1, record its hash in the notes, then rerun this workflow.' }
 $zipName = "EplanMcp-addin-$env:TAG.zip"

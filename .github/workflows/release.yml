@@ -36,7 +36,7 @@ jobs:
           global-json-file: global.json
       - name: Check tag and main ancestry
         run: |
-          if ($env:TAG -cnotmatch '^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Only unsigned 0.x vX.Y.Z tags are supported.' }
+          if ($env:TAG -cnotmatch '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Only vX.Y.Z tags are supported; the programs are unsigned.' }
           git merge-base --is-ancestor HEAD origin/main
           if ($LASTEXITCODE) { throw 'Release tags must point to main history.' }
       - name: Build and test without EPLAN
@@ -116,7 +116,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
-          if ($env:TAG -cnotmatch '^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Invalid preview tag.' }
+          if ($env:TAG -cnotmatch '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Invalid release tag.' }
           $draft = gh release view $env:TAG --repo $env:GITHUB_REPOSITORY --json isDraft,tagName,body | ConvertFrom-Json
           if (-not $draft.isDraft -or $draft.tagName -cne $env:TAG) { throw 'Create the draft, run release-addin.ps1, record its hash in the notes, then rerun this workflow.' }
           $zipName = "EplanMcp-addin-$env:TAG.zip"
