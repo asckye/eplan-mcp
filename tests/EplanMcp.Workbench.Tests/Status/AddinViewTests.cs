@@ -51,6 +51,29 @@ public sealed class AddinViewTests(WpfContext wpf)
     }
 
     [Fact]
+    public async Task ARefusal_NamesItsReasonFirst_AndAVersionNoteAfterIt()
+    {
+        // EPLAN 2025 in a VM, 2026-11-21: "已拒绝 这个版本…尚未实测 EPLAN 正在运行…" read as if the note were the reason.
+        const string refused = """
+            {"schemaVersion":1,"action":"install","dll":"D:\\EplanMcp\\bridge\\net481\\EplanMcp.Bridge.Eplan.dll","problem":null,"results":[
+              {"eplan":"C:\\Program Files\\EPLAN\\Platform\\2025.0.3\\Bin\\EPLAN.exe","version":"2025.0.3.23406","variant":"Electric P8","result":"refused","processId":null,
+               "notes":[{"code":"version_untested","zh":"这个版本在支持范围内，但尚未实测","en":"This version is supported but not yet verified"}],
+               "problem":{"code":"eplan_running","zh":"EPLAN 正在运行（进程 5228）","en":"EPLAN is running (process 5228)"}}]}
+            """;
+        var view = new StatusView(new HostCommands(_host), () => true);
+        await view.RunAsync(Token);
+        view.Variants[0].IsSelected = true;
+        _host.Answer = _ => new(1, refused);
+
+        await view.RegisterAsync(false, Token);
+
+        wpf.RunWithLanguage(AppLanguage.Chinese, () =>
+        {
+            string line = Assert.Single(view.Groups.Single(g => g.Key == "Addin.Results").Lines).Text;
+            Assert.Equal("EPLAN 2025.0.3.23406 Electric P8：已拒绝：EPLAN 正在运行（进程 5228） 提示：这个版本在支持范围内，但尚未实测", line);
+        });
+    }
+    [Fact]
     public async Task NoSelectionDoesNotAccidentallyRegisterAll_AndAnOngoingCommandCannotBeStartedTwice()
     {
         var view = new StatusView(new HostCommands(_host), () => true);

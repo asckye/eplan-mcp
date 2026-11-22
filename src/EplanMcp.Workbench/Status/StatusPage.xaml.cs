@@ -127,11 +127,13 @@ public partial class StatusPage : UserControl, IWorkbenchPage
     }
 
     /// <summary>The add-in's fix: register it for the variants chosen, all of them when none is.</summary>
-    private void OnFix(object sender, RoutedEventArgs e)
+    private void OnFix(object sender, RoutedEventArgs e) => _ = FixAsync();
+
+    internal Task FixAsync()
     {
         if (_view is not { } view)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         if (!view.Variants.Any(v => v.IsSelected))
@@ -142,15 +144,31 @@ public partial class StatusPage : UserControl, IWorkbenchPage
             }
         }
 
-        _ = view.RegisterAsync(false, CancellationToken.None);
+        return RegisterAsync(false);
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
 
-
     private void OnVariantChanged(object sender, RoutedEventArgs e) => Dispatcher.BeginInvoke(Show);
 
-    private void OnRegister(object sender, RoutedEventArgs e) => _ = _view?.RegisterAsync(false, CancellationToken.None);
+    private void OnRegister(object sender, RoutedEventArgs e) => _ = RegisterAsync(false);
 
-    private void OnUnregister(object sender, RoutedEventArgs e) => _ = _view?.RegisterAsync(true, CancellationToken.None);
+    private void OnUnregister(object sender, RoutedEventArgs e) => _ = RegisterAsync(true);
+
+    /// <summary>Registers or unregisters, then says in a toast what it came to; the per-variant lines stay below.</summary>
+    internal async Task RegisterAsync(bool uninstall)
+    {
+        if (_view is not { } view)
+        {
+            return;
+        }
+
+        await view.RegisterAsync(uninstall, CancellationToken.None).ConfigureAwait(true);
+        if (view.State == StatusState.Ready && view.Outcome is { } outcome)
+        {
+            Loc loc = Loc.Current;
+            string text = Approvals.ProjectText.Line(loc.Language == AppLanguage.Chinese ? outcome.Zh : outcome.En, 300);
+            Toasts.Show(outcome.Failed ? loc.T("Addin.Toast.Failed", text) : text, outcome.Failed ? ToastTone.Error : ToastTone.Success);
+        }
+    }
 }

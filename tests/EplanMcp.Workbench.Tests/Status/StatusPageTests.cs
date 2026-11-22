@@ -55,6 +55,37 @@ public sealed class StatusPageTests(WpfContext wpf)
     }
 
     [Fact]
+    public void RegisteringWhileEplanRuns_SaysWhyInAToast_AndKeepsTheLinesOnThePage()
+    {
+        const string refused = """
+            {"schemaVersion":1,"action":"install","dll":"D:\\EplanMcp\\bridge\\net481\\EplanMcp.Bridge.Eplan.dll","problem":null,"results":[
+              {"eplan":"C:\\Program Files\\EPLAN\\Platform\\2026.0.3\\Bin\\EPLAN.exe","version":"2026.0.3.25421","variant":"Pro Panel","result":"refused","processId":null,"notes":[],
+               "problem":{"code":"eplan_running","zh":"EPLAN 正在运行（进程 5228）：请先关闭所有 EPLAN","en":"EPLAN is running (process 5228): close every EPLAN"}}]}
+            """;
+        _host.Answer = args => args[0] == "install-addin" ? new(1, refused) : Reply(args, 0, Snapshots.Read("doctor-json"));
+        var toasts = new List<(string Text, ToastTone Tone)>();
+        void Seen(string text, ToastTone tone) => toasts.Add((text, tone));
+        Toasts.Wanted += Seen;
+        try
+        {
+            wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
+            {
+                window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
+                Until(() => _host.Runs.Count >= 2 && ((ItemsControl)page.FindName("PassRows")).Items.Count > 0);
+
+                page.FixAsync().GetAwaiter().GetResult();
+                WpfContext.Drain();
+
+                Assert.Contains(("未完成：EPLAN 正在运行（进程 5228）：请先关闭所有 EPLAN", ToastTone.Error), toasts);
+                Assert.Contains(((ItemsControl)page.FindName("FailRows")).Items.Cast<CheckRow>(), r => r.Text.Contains("已拒绝：EPLAN 正在运行", StringComparison.Ordinal));
+            }));
+        }
+        finally
+        {
+            Toasts.Wanted -= Seen;
+        }
+    }
+    [Fact]
     public void F5_AndOpeningAgain_RunDoctorAgain()
     {
         _host.Answer = args => Reply(args, 0, Snapshots.Read("doctor-json"));

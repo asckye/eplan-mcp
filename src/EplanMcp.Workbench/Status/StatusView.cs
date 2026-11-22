@@ -158,6 +158,7 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
         {
             _addins = await host.RegisterAsync(selected, uninstall, cancellationToken).ConfigureAwait(true);
             State = StatusState.Ready;
+            Outcome = OutcomeOf(_addins, uninstall);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
@@ -167,6 +168,26 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
         {
             Changed();
         }
+    }
+
+    /// <summary>
+    /// The last register or unregister in one sentence, for a toast (owner, 2026-11-20: every message is a toast): how
+    /// many variants it did, or the first reason it did not. The per-variant lines stay on the page.
+    /// </summary>
+    public RegistrationOutcome? Outcome { get; private set; }
+
+    private static RegistrationOutcome OutcomeOf(AddinReport report, bool uninstall)
+    {
+        HostText? reason = report.Problem ?? report.Results.Select(r => r.Problem).FirstOrDefault(p => p is not null);
+        bool failed = reason is not null || report.Results.Any(r => r.Result is AddinResultKind.Failed or AddinResultKind.Refused or AddinResultKind.NotConfirmed);
+        if (failed)
+        {
+            return new RegistrationOutcome(true, reason?.Zh ?? Catalogue.Chinese["Addin.Toast.SeeBelow"], reason?.En ?? Catalogue.English["Addin.Toast.SeeBelow"]);
+        }
+
+        string key = uninstall ? "Addin.Toast.Unregistered" : "Addin.Toast.Registered";
+        int count = report.Results.Count;
+        return new RegistrationOutcome(false, string.Format(CultureInfo.CurrentCulture, Catalogue.Chinese[key], count), string.Format(CultureInfo.CurrentCulture, Catalogue.English[key], count));
     }
 
     private List<StatusLine> AddinLines()
@@ -184,8 +205,19 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
 
         foreach (AddinResult result in _addins?.Results ?? [])
         {
-            string Text(IReadOnlyDictionary<string, string> texts, bool zh) => string.Format(CultureInfo.CurrentCulture, texts["Addin.Line"], result.Version, result.Variant, texts["Addin.Result." + result.Result])
-                + " " + string.Join(" ", result.Notes.Concat(result.Problem is { } issue ? [issue] : []).Select(t => zh ? t.Zh : t.En));
+            // The reason first, right after the result; notes such as "not yet verified on this version" follow, labelled,
+            // so that a refusal never reads as if the note were its reason.
+            string Text(IReadOnlyDictionary<string, string> texts, bool zh)
+            {
+                string line = string.Format(CultureInfo.CurrentCulture, texts["Addin.Line"], result.Version, result.Variant, texts["Addin.Result." + result.Result]);
+                if (result.Problem is { } issue)
+                {
+                    line += texts["Addin.Reason"] + (zh ? issue.Zh : issue.En);
+                }
+
+                return result.Notes.Count == 0 ? line : line + " " + texts["Addin.NoteLabel"] + string.Join(texts["Addin.NoteSeparator"], result.Notes.Select(t => zh ? t.Zh : t.En));
+            }
+
             CheckStatus status = result.Result switch
             {
                 AddinResultKind.NotConfirmed => CheckStatus.Warning,
@@ -210,3 +242,6 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
 
     private void Changed() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
 }
+
+/// <summary>What a register or unregister came to, in both languages: a failure carries the Host's first reason.</summary>
+internal sealed record RegistrationOutcome(bool Failed, string Zh, string En);
