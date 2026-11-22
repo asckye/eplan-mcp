@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-21
+
 ### 破坏性变化
 
 - 删除 `vm-key` 命令，以及 `client-config --vm` 和 `vm-test` 的 `--key-stdin` 参数。v0.9.0 起虚拟机连接不再使用共享密钥（ADR-0062），它们已经不起作用；现在写上会被当作错误的命令行。`client-config` 的 JSON 输出不再有 `invalid_vm_key` 这个问题代码。旧版本留下的 `vm-key.dpapi` 文件不再被读取，可以删除。
