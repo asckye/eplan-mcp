@@ -153,14 +153,14 @@ claude plugin marketplace remove eplanmcp-local
 
 客户端须支持 Streamable HTTP：Claude Code、Codex、Gemini CLI、Qwen Code、Kimi Code CLI、CodeBuddy Code、OpenCode、Qwen Agent、Cursor、VS Code Copilot。Claude 桌面版不能用：其配置文件只支持本机 stdio，远程连接器由 Anthropic 后端通过 HTTPS 连接，无法访问这里的私有虚拟机 HTTP 地址。spike S19 只实测了 Claude Code 的连接；其他客户端尚未逐个实机验收，Qwen Agent 还缺少官方配置文档核对，跨机器连接与 UAC 仍待实机验证。
 
-**只在宿主机与虚拟机之间的私有网络使用。HTTP 不加密，也没有密钥：项目数据在网络上是明文，凡是能连到这个端口的程序都可以调用工具。访问只靠下面建立的 Windows 防火墙规则限制，规则不在或被改动时不要启动服务。** 下例用虚拟机 `192.168.56.2`、宿主机 `192.168.56.1`，请换成两端实际可互通的 IPv4；不要用 `0.0.0.0` 或回环地址。
+**只在宿主机与虚拟机之间的私有网络使用。HTTP 不加密，也没有密钥：项目数据在网络上是明文，凡是能连到这个端口的程序都可以调用工具。访问只靠下面建立的 Windows 防火墙规则限制，规则不在或被改动时不要启动服务。** 下例用虚拟机 `192.168.56.2`，请换成宿主机能访问到的虚拟机 IPv4；不要用 `0.0.0.0` 或回环地址。不需要填宿主机地址，也不需要先启动 EPLAN（[ADR-0067](../adr/0067-vm-connection-mcp-address-only.md)）。
 
 ### 虚拟机中：启动服务
 
 1. 按[下载与校验](#2-下载与-sha-256-校验)、[安装与注册](#3-安装与注册-eplan-插件)解压整个 ZIP、注册插件，再启动 EPLAN。打开 Workbench →“MCP 服务”，找到“虚拟机连接”。
-2. 在“虚拟机 IPv4(I)”选择虚拟机的地址，“端口(P)”默认 `8766`；“宿主机 IPv4(H)”填运行 AI 客户端的宿主机地址。
-3. 点击“允许网络访问”，在 Windows 弹出的 UAC 对话框中由管理员同意。入站规则只允许所选 TCP 端口、当前 `eplanmcp.exe`、宿主机这一个 IPv4，且只在域/专用网络配置文件中生效。**这条规则是唯一的访问控制**：建好后核对页面上显示的“实际规则”与你填写的一致。
-4. 有多个 EPLAN 时，在“EPLAN 实例（进程号）(I)”选择目标；未列出时点“刷新实例”。点击“启动服务”，确认出现 `正在监听 http://<虚拟机 IPv4>:<端口>/mcp。请保持工作台运行。` 的提示。一个服务固定对应一个实例；该实例退出后不会自动换连其他实例。
+2. 在“虚拟机 IPv4(I)”选择虚拟机的地址，“端口(P)”默认 `8766`。
+3. 点击“允许网络访问”，在 Windows 弹出的 UAC 对话框中由管理员同意。入站规则只允许所选 TCP 端口、当前 `eplanmcp.exe` 和**本地子网**内的电脑（宿主机和虚拟机通常在同一子网），且只在域/专用网络配置文件中生效。**这条规则是唯一的访问控制**：同一子网里的其他电脑也能连上，只在你信任的私有网络中使用；建好后核对页面上显示的“实际规则”。
+4. 点击“启动服务”，确认出现 `正在监听 http://<虚拟机 IPv4>:<端口>/mcp。请保持工作台运行。` 的提示，再点“复制”，把 MCP 地址交给宿主机上的 AI 客户端。服务不绑定 EPLAN 实例：没有 EPLAN 在运行时也能启动；AI 可以用 `eplan_session_start` 启动 EPLAN，有多个实例时用 `eplan_session_select` 选择，也可以关闭或重启 EPLAN（只开着 scratch 项目时）。
 
 服务不会随安装或登录自动启动。Workbench 启动的服务随 Workbench 退出停止；关闭窗口只是缩到托盘，需从托盘退出才停止。
 
@@ -168,20 +168,19 @@ claude plugin marketplace remove eplanmcp-local
 
 ```powershell
 $eplanMcp = 'D:\EplanMcp\eplanmcp.exe'
-& $eplanMcp vm-instances --format json
-& $eplanMcp vm-firewall show --port 8766 --host-address 192.168.56.1
+& $eplanMcp vm-firewall show --port 8766
 ```
 
 另开“以管理员身份运行”的 PowerShell，只用它建立规则（调整程序路径）：
 
 ```powershell
-& 'D:\EplanMcp\eplanmcp.exe' vm-firewall add --port 8766 --host-address 192.168.56.1
+& 'D:\EplanMcp\eplanmcp.exe' vm-firewall add --port 8766
 ```
 
-回到普通窗口启动；单实例可省略 `--process`，多实例把 `1234` 换成 `vm-instances` 列出的目标进程号。此命令保持前台运行，用 Ctrl+C 停止。
+回到普通窗口启动。此命令保持前台运行，用 Ctrl+C 停止。
 
 ```powershell
-& $eplanMcp serve --http --address 192.168.56.2 --port 8766 --process 1234
+& $eplanMcp serve --http --address 192.168.56.2 --port 8766
 ```
 
 ### 宿主机上：连接客户端
@@ -216,21 +215,21 @@ $vmUrl = 'http://192.168.56.2:8766/mcp'
 
 | 失败代码 | 怎么处理 |
 |---|---|
-| `unreachable` | 确认虚拟机服务正在监听；核对防火墙规则、宿主机来源 IPv4、虚拟机 IPv4 和端口，确保两端私有网络互通。 |
+| `unreachable` | 确认虚拟机服务正在监听；核对防火墙规则、虚拟机 IPv4 和端口，确保宿主机和虚拟机在同一私有子网且互通。 |
 | `timed_out` | 单次请求等待超过 10 秒；检查虚拟机是否暂停、服务是否响应、网络是否丢包或被防火墙丢弃，再测试。 |
 | `forbidden`（403） | 请求携带不允许的 `Origin` 头，常见于浏览器客户端；由工程师核对虚拟机 `config.json` 的 `httpAllowedOrigins`，只添加可信的实际 Origin，再重启服务。允许列表默认空；`vm-test` 不发送 Origin。 |
 | `protocol_error` | 核对 URL 为 `http://<IPv4>:<端口>/mcp`；检查协议和两端版本，使用同版本 ZIP 后重试。0.8.0 及更早的客户端连不上 0.9.0 的服务时，两端换成同一版本。 |
 
-在**虚拟机**运行 `& $eplanMcp doctor`：`http.service` 列出本数据目录的服务及绑定地址/端口，`vm.firewall` 列出规则是否存在和实际放行范围。核对程序路径、TCP 端口、宿主机地址及域/专用配置文件；这些检查不修改规则，也不代替宿主机连接测试。
+在**虚拟机**运行 `& $eplanMcp doctor`：`http.service` 列出本数据目录的服务及绑定地址/端口，`vm.firewall` 列出规则是否存在和实际放行范围。核对程序路径、TCP 端口、放行范围（本地子网）及域/专用配置文件；这些检查不修改规则，也不代替宿主机连接测试。
 
 ### 移除虚拟机连接
 
 在宿主机的“虚拟机 ↔ 宿主机”模式勾选客户端，点击“移除配置”，确认移除 `eplan-vm`，再重启客户端；或运行 `& $eplanMcp client-config --vm --remove`，清理记录中的远程条目，无需地址。虚拟机中依次点击“停止服务”→“移除网络权限”（需 UAC）。
 
-命令行方式：先在虚拟机停止前台服务（Ctrl+C），再在管理员 PowerShell 中移除规则；使用建立规则时的相同端口、宿主机 IPv4 和程序路径。
+命令行方式：先在虚拟机停止前台服务（Ctrl+C），再在管理员 PowerShell 中移除规则；使用建立规则时的相同端口和程序路径；旧版本按宿主机 IPv4 建的规则也能这样移除。
 
 ```powershell
-& 'D:\EplanMcp\eplanmcp.exe' vm-firewall remove --port 8766 --host-address 192.168.56.1
+& 'D:\EplanMcp\eplanmcp.exe' vm-firewall remove --port 8766
 ```
 
 ---

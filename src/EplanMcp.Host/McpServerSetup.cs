@@ -235,7 +235,7 @@ internal static class McpServerSetup
 
     /// <summary>Starting and closing EPLAN (ADR-0058) with the window watch's setting and audit (ADR-0063).</summary>
     private static Addin.EplanLifecycle Lifecycle(IServiceProvider services) => Addin.EplanLifecycle.ForMachine(
-        pinned: services.GetService<HttpCaller>() is not null,
+        pinned: services.GetService<HttpPinned>() is not null, // ADR-0067: only an HTTP service given --process is pinned
         closeHarmless: services.GetRequiredService<HostConfig>().EplanWindowWatch == EplanWindowWatch.Close,
         watch: services.GetRequiredService<Addin.WindowWatch>());
 }

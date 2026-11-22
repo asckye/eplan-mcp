@@ -3,7 +3,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace EplanMcp.Host.Http;
 
-/// <summary>Every HTTP path passes this gate: Host header (DNS rebinding) and Origin validation. Network access is gated by the host-only IPv4 Windows Firewall rule.</summary>
+/// <summary>Every HTTP path passes this gate: Host header (DNS rebinding) and Origin validation. Network access is gated by the Windows Firewall rule for the local subnet (ADR-0067).</summary>
 internal sealed class HttpGate(IEnumerable<string> origins)
 {
     private readonly HashSet<string> _origins = new(origins, StringComparer.Ordinal);

@@ -24,7 +24,7 @@ public partial class VmPanel : UserControl
             if (IsVisible && !_loaded && _view is { Reason.Length: 0 } view)
             {
                 _loaded = true;
-                _ = view.RunAsync("instances", Confirm, CopyText, CancellationToken.None);
+                _ = view.RunAsync("refresh", Confirm, CopyText, CancellationToken.None); // the firewall rule as it is now
             }
         };
     }
@@ -38,19 +38,9 @@ public partial class VmPanel : UserControl
         Address.ItemsSource = view.Addresses;
         Address.SelectedItem = view.Address;
         Port.Text = view.Port;
-        HostAddress.Text = view.HostAddress;
         _view = view;
         view.PropertyChanged += (_, _) => Show();
         Show();
-    }
-
-    private void OnInstance(object sender, SelectionChangedEventArgs e)
-    {
-        if (_view is { } view)
-        {
-            view.SelectedProcess = Instance.SelectedItem as int?;
-            Show();
-        }
     }
 
     private void OnLanguage(object? sender, EventArgs e) => Show();
@@ -59,7 +49,7 @@ public partial class VmPanel : UserControl
     {
         if (_view is { } view)
         {
-            (view.Address, view.Port, view.HostAddress) = (Address.SelectedItem as string ?? string.Empty, Port.Text, HostAddress.Text);
+            (view.Address, view.Port) = (Address.SelectedItem as string ?? string.Empty, Port.Text);
             Show();
         }
     }
@@ -82,12 +72,12 @@ public partial class VmPanel : UserControl
 
         IsEnabled = true;
         foreach ((FrameworkElement field, string key) in new (FrameworkElement, string)[]
-            { (Address, "Vm.Address"), (Instance, "Vm.Instance"), (Port, "Vm.Port"), (HostAddress, "Vm.Host"), (FirewallValue, "Vm.Network") })
+            { (Address, "Vm.Address"), (Port, "Vm.Port"), (FirewallValue, "Vm.Network") })
         {
             AutomationProperties.SetName(field, WorkbenchDialog.Plain(Loc.Current[key]));
         }
 
-        foreach (ButtonBase button in new ButtonBase[] { Allow, Remove, Refresh, Instances, Start, Stop })
+        foreach (ButtonBase button in new ButtonBase[] { Allow, Remove, Refresh, Copy, Start, Stop })
         {
             string reason = view.DisabledReason((string)button.Tag);
             button.IsEnabled = reason.Length == 0;
@@ -97,9 +87,9 @@ public partial class VmPanel : UserControl
         }
 
         FirewallValue.Text = view.Firewall;
-        // The design's code line: where the clients reach the service; no key, the firewall rule decides (ADR-0062).
-        Endpoint.Text = Loc.Current.T("Vm.Endpoint", view.Address, view.Port);
-        foreach ((Control field, TextBlock error, string text) in new[] { ((Control)Address, AddressError, view.AddressError), (Port, PortError, view.PortError), (HostAddress, HostError, view.HostError) })
+        // The design's code line: the MCP address the clients are given, all they need (ADR-0062, ADR-0067).
+        Endpoint.Text = view.McpUrl;
+        foreach ((Control field, TextBlock error, string text) in new[] { ((Control)Address, AddressError, view.AddressError), (Port, PortError, view.PortError) })
         {
             if (error.Text != text)
             {
@@ -107,21 +97,13 @@ public partial class VmPanel : UserControl
                 AccessibleStatus.Announce(error);
             }
 
-            string help = field != HostAddress && view.Running ? Loc.Current["Vm.StopFirst"] : text;
+            string help = view.Running ? Loc.Current["Vm.StopFirst"] : text;
             AutomationProperties.SetHelpText(field, help);
             field.ToolTip = help;
             field.SetResourceReference(BorderBrushProperty, text.Length > 0 ? "State.Warning.Text" : "Border.Control");
         }
 
-        if (!ReferenceEquals(Instance.ItemsSource, view.Processes))
-        {
-            Instance.ItemsSource = view.Processes;
-        }
-
-        Instance.IsEnabled = Address.IsEnabled = Port.IsEnabled = !view.Busy && !view.Running;
-        AutomationProperties.SetHelpText(Instance, view.Running ? Loc.Current["Vm.StopFirst"] : view.DisabledReason("start"));
-        Instance.ToolTip = AutomationProperties.GetHelpText(Instance);
-        HostAddress.IsEnabled = !view.Busy;
+        Address.IsEnabled = Port.IsEnabled = !view.Busy && !view.Running;
         // One place for start or stop, as the design's single service button.
         Start.Visibility = view.Running ? Visibility.Collapsed : Visibility.Visible;
         Stop.Visibility = view.Running ? Visibility.Visible : Visibility.Collapsed;

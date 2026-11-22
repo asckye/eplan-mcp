@@ -15,10 +15,10 @@ namespace EplanMcp.Workbench.Tests.Vm;
 [Trait("Size", "Medium")]
 public sealed class VmPanelTests(WpfContext wpf)
 {
-    private static readonly string[] _inputs = ["Address", "Port", "HostAddress", "FirewallValue", "Instance"];
-    private static readonly string[] _commands = ["Allow", "Remove", "Refresh", "Instances", "Start", "Stop"];
-    private static readonly string[] _locked = ["Address", "Port", "Instance", "Instances", "Start"];
-    private static readonly string[] _available = ["HostAddress", "Allow", "Remove", "Refresh"];
+    private static readonly string[] _inputs = ["Address", "Port", "FirewallValue"];
+    private static readonly string[] _commands = ["Allow", "Remove", "Refresh", "Copy", "Start", "Stop"];
+    private static readonly string[] _locked = ["Address", "Port", "Start"];
+    private static readonly string[] _available = ["Allow", "Remove", "Refresh", "Copy"];
 
     [Theory]
     [InlineData(AppLanguage.Chinese)]
@@ -28,7 +28,6 @@ public sealed class VmPanelTests(WpfContext wpf)
         {
             var fake = new FakeVm();
             VmView view = fake.Create();
-            view.HostAddress = string.Empty;
             VmPanel panel = Attach(window, view);
             Assert.Null(panel.FindName("KeyValue"));
             Assert.Equal("8766", ((TextBox)panel.FindName("Port")).Text);
@@ -39,11 +38,11 @@ public sealed class VmPanelTests(WpfContext wpf)
                 Assert.False(string.IsNullOrWhiteSpace(UIElementAutomationPeer.CreatePeerForElement(input)!.GetName()), name);
             }
 
+            // ADR-0067: no host address and no EPLAN instance; the MCP address is shown, selectable, with a copy button.
+            Assert.Null(panel.FindName("HostAddress"));
+            Assert.Null(panel.FindName("Instance"));
+            Assert.Equal("http://192.168.56.2:8766/mcp", ((TextBox)panel.FindName("Endpoint")).Text);
             var allow = (Button)panel.FindName("Allow");
-            Assert.False(allow.IsEnabled);
-            Assert.Equal(Loc.Current["Vm.HostError"], AutomationProperties.GetHelpText(allow));
-            ((TextBox)panel.FindName("HostAddress")).Text = "192.168.56.1";
-            WpfContext.Drain();
             Assert.True(allow.IsEnabled);
             Assert.Equal(Loc.Current["Vm.Uac"], allow.ToolTip);
             ((TextBox)panel.FindName("Port")).Text = "65536";
@@ -136,36 +135,6 @@ public sealed class VmPanelTests(WpfContext wpf)
             Assert.Equal(Loc.Current["Vm.Stopped"], status.Text);
             Assert.True(((Control)panel.FindName("Port")).IsEnabled);
             Assert.Single(launcher.Starts);
-        }));
-
-    [Theory]
-    [InlineData(AppLanguage.Chinese, "[]", "Vm.NoEplan")]
-    [InlineData(AppLanguage.English, "[]", "Vm.NoEplan")]
-    [InlineData(AppLanguage.Chinese, "[100,200]", "Vm.PickInstance")]
-    [InlineData(AppLanguage.English, "[100,200]", "Vm.PickInstance")]
-    public void Service_PrerequisitesAndExplicitInstanceSelection_HaveLocalizedReasons(AppLanguage language, string processes, string reason) =>
-        wpf.RunWithLanguage(language, () => With(window =>
-        {
-            var fake = new FakeVm { Instances = "{\"schemaVersion\":1,\"processes\":" + processes + "}" };
-            var launcher = new FakeVmLauncher();
-            using VmView view = fake.Create(launcher: launcher);
-            VmPanel panel = Attach(window, view);
-            var start = (Button)panel.FindName("Start");
-            Assert.False(start.IsEnabled);
-            Assert.Equal(Loc.Current[reason], AutomationProperties.GetHelpText(start));
-            Assert.Empty(launcher.Starts);
-            if (reason == "Vm.PickInstance")
-            {
-                var instance = (ComboBox)panel.FindName("Instance");
-                Assert.Equal(-1, instance.SelectedIndex);
-                instance.SelectedItem = 200;
-                WpfContext.Drain();
-                Assert.True(start.IsEnabled);
-                Click(start);
-                Assert.Equal(200, Assert.Single(launcher.Starts).Process);
-                Click((Button)panel.FindName("Stop"));
-                WpfContext.DrainUntil(() => !view.Running, "The stopped child did not reach the page.");
-            }
         }));
 
     [Theory]

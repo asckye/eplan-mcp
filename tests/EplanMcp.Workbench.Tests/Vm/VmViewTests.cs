@@ -63,8 +63,8 @@ public sealed class VmViewTests
         var fake = new FakeVm { ExitCode = exit };
         using VmView view = fake.Create();
         await fake.RunAsync(view, action);
-        Assert.Equal((fake.Host.Executable, action == "remove", "8766", "192.168.56.1"), Assert.Single(fake.Elevated));
-        Assert.Equal(["vm-firewall", "show", "--port", "8766", "--host-address", "192.168.56.1", "--format", "json"], Assert.Single(fake.Host.Runs).Arguments);
+        Assert.Equal((fake.Host.Executable, action == "remove", "8766"), Assert.Single(fake.Elevated));
+        Assert.Equal(["vm-firewall", "show", "--port", "8766", "--format", "json"], Assert.Single(fake.Host.Runs).Arguments);
         Assert.Equal(Loc.Current[exit is null ? "Vm.Cancelled" : exit == 0 ? "Vm.Done" : "Vm.Failed"], view.Message);
         Assert.Equal(Loc.Current["Vm.Absent"], view.Firewall);
         Assert.False(view.Busy);
@@ -99,15 +99,13 @@ public sealed class VmViewTests
     {
         var fake = new FakeVm();
         using VmView unavailable = fake.Create(available: false);
-        await fake.RunAsync(unavailable, "instances");
+        await fake.RunAsync(unavailable, "refresh");
         Assert.NotEmpty(unavailable.Reason);
         using VmView view = fake.Create();
         view.Address = "10.0.0.3";
         Assert.NotEmpty(view.AddressError);
         view.Port = "65536";
         await fake.RunAsync(view, "allow");
-        view.Port = "8766";
-        view.HostAddress = "192.168.56.1/24";
         await fake.RunAsync(view, "remove");
         await fake.RunAsync(view, "refresh");
         Assert.NotEmpty(view.DisabledReason("allow"));
@@ -121,11 +119,12 @@ public sealed class VmViewTests
         var fake = new FakeVm();
         using VmView view = fake.Create();
         TaskCompletionSource<HostRun> held = fake.Host.Hold();
-        Task pending = fake.RunAsync(view, "instances");
+        Task pending = fake.RunAsync(view, "refresh");
         Assert.True(view.Busy);
-        await fake.RunAsync(view, "refresh");
+        await fake.RunAsync(view, "allow");
         Assert.Single(fake.Host.Runs);
-        held.SetResult(new HostRun(0, "{\"schemaVersion\":1,\"processes\":[100]}"));
+        Assert.Empty(fake.Elevated);
+        held.SetResult(new HostRun(0, FakeVm.EmptyRules));
         await pending;
         Assert.False(view.Busy);
     }

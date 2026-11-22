@@ -17,11 +17,13 @@ internal static class VmHttp
 {
     public static WebApplication Build(HttpArguments options, HostDataLocations locations, HostConfig config, IBridgeDiscovery discovery)
     {
-        // Pin the exact pipe, not just the PID: a restarted EPLAN must never become an implicit replacement.
-        BridgeEndpoint[] candidates = [.. discovery.Discover().Where(e => options.ProcessId is null || e.ProcessId == options.ProcessId)];
-        if (candidates.Length != 1)
+        // ADR-0067: without --process the service is bound to no EPLAN; it finds, starts, selects and closes EPLAN as the
+        // stdio Host does. With --process it is pinned to that exact pipe, not just the PID, as before (ADR-0018 item 8).
+        BridgeEndpoint? pinned = null;
+        if (options.ProcessId is { } processId)
         {
-            throw new HttpStartException("HTTP requires exactly one EPLAN instance; use --process <pid> when several are running.");
+            BridgeEndpoint[] candidates = [.. discovery.Discover().Where(e => e.ProcessId == processId)];
+            pinned = candidates.Length == 1 ? candidates[0] : throw new HttpStartException($"No EPLAN instance with process {processId} was found.");
         }
 
         WebApplicationBuilder builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions { Args = [], ContentRootPath = AppContext.BaseDirectory });
@@ -42,9 +44,18 @@ internal static class VmHttp
         builder.Services.AddSingleton<IHostedService, HttpServiceStateStore>();
         builder.Services.AddEplanMcp().WithHttpTransport(http => http.SessionMode = HttpServerSessionMode.Stateless)
             .WithRequestFilters(filters => filters.AddCallToolFilter(caller.Capture));
-        builder.Services.AddSingleton<IBridgeDiscovery>(new PinnedDiscovery(discovery, candidates[0]));
-        // The pinned client replaces AddEplanMcp's, behind the same window watch; the container still disposes it.
-        builder.Services.AddSingleton(services => new BridgeClient(services.GetRequiredService<IBridgeDiscovery>(), services.GetRequiredService<IBridgeConnector>(), services.GetRequiredService<ILogger<BridgeClient>>()) { FixedProcessId = candidates[0].ProcessId });
+        if (pinned is not { } target)
+        {
+            builder.Services.AddSingleton(discovery); // every EPLAN this discovery finds, as over stdio
+        }
+        else
+        {
+            builder.Services.AddSingleton(new HttpPinned(target.ProcessId));
+            builder.Services.AddSingleton<IBridgeDiscovery>(new PinnedDiscovery(discovery, target));
+
+            // The pinned client replaces AddEplanMcp's, behind the same window watch; the container still disposes it.
+            builder.Services.AddSingleton(services => new BridgeClient(services.GetRequiredService<IBridgeDiscovery>(), services.GetRequiredService<IBridgeConnector>(), services.GetRequiredService<ILogger<BridgeClient>>()) { FixedProcessId = target.ProcessId });
+        }
         WebApplication app = builder.Build();
         var gate = new HttpGate(config.HttpAllowedOrigins);
         app.Use(async (context, next) =>
@@ -77,3 +88,6 @@ internal static class VmHttp
         public IReadOnlyList<BridgeEndpoint> Discover() => [.. discovery.Discover().Where(e => e == target)];
     }
 }
+
+/// <summary>The HTTP service is pinned to one EPLAN process (<c>--process</c>): EPLAN cannot be started, closed or switched (ADR-0018 item 8).</summary>
+internal sealed record HttpPinned(int ProcessId);

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace EplanMcp.Host.ClientConfig;
 
-/// <summary>A key-free VM HTTP endpoint; network access is gated by the host-only IPv4 Windows Firewall rule.</summary>
+/// <summary>A key-free VM HTTP endpoint; network access is gated by the Windows Firewall rule for the local subnet (ADR-0067).</summary>
 internal sealed partial class RemoteServer(string url)
 {
     public const string Name = "eplan-vm";

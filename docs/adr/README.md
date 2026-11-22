@@ -73,3 +73,4 @@
 | [0064](0064-approval-target-fields.md) | 审批问题带上结构化的目标和动作，破坏性确认改为输入目标标识（落实 ADR-0035 第 2 条） | Accepted（2026-11-21） | 双向门 |
 | [0065](0065-workbench-as-host-client.md) | Workbench 作为 Host 的一个客户端，读取项目数据并执行工程师发起的操作 | Accepted（2026-11-21） | 双向门 |
 | [0066](0066-manual-update-check.md) | Workbench 只在工程师点击时检查更新，只读版本号，不下载 | Accepted（2026-11-21） | 双向门 |
+| [0067](0067-vm-connection-mcp-address-only.md) | 虚拟机连接只需 MCP 地址：防火墙放行本地子网，服务不绑定 EPLAN 进程 | Accepted（2026-11-21） | 单向门（安全面） |

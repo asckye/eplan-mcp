@@ -153,14 +153,14 @@ Use this when EPLAN runs in a VM and the AI client runs on the host computer. Ho
 
 Clients must support Streamable HTTP: Claude Code, Codex, Gemini CLI, Qwen Code, Kimi Code CLI, CodeBuddy Code, OpenCode, Qwen Agent, Cursor, and VS Code Copilot. Claude Desktop cannot use this connection: its configuration file supports only local stdio servers, while remote connectors use HTTPS from Anthropic's backend and cannot reach this private VM HTTP address. Spike S19 tested the connection only with Claude Code; the other clients still need individual acceptance testing. Qwen Agent's configuration could not be verified against official documentation. Cross-machine connections and UAC still need testing on real machines.
 
-**Use only a private network between the host and VM. HTTP is unencrypted and there is no key: project data travels in plaintext, and any program that can reach the port can call the tools. Access is limited only by the Windows Firewall rule created below; do not start the service when that rule is missing or was changed.** The examples use `192.168.56.2` for the VM and `192.168.56.1` for the host. Replace these with mutually reachable IPv4 addresses on your network; do not use `0.0.0.0` or loopback addresses.
+**Use only a private network between the host and VM. HTTP is unencrypted and there is no key: project data travels in plaintext, and any program that can reach the port can call the tools. Access is limited only by the Windows Firewall rule created below; do not start the service when that rule is missing or was changed.** The examples use `192.168.56.2` for the VM. Replace it with a VM IPv4 the host can reach; do not use `0.0.0.0` or loopback addresses. No host address is needed, and EPLAN need not be running first ([ADR-0067](../adr/0067-vm-connection-mcp-address-only.md)).
 
 ### In the VM: start the service
 
 1. Follow [Download and Verification](#2-download-and-sha-256-verification) and [Install and Register](#3-install-and-register-the-eplan-add-in) to extract the entire ZIP and register the add-in, then start EPLAN. Open Workbench → "MCP Server" and find "VM connection".
-2. Select the VM's address in "VM IPv4". "Port" defaults to `8766`; enter the AI client's host computer address in "Host computer IPv4".
-3. Choose "Allow network access" and have an administrator consent in the Windows UAC dialog. The inbound rule allows only the selected TCP port, this `eplanmcp.exe`, and the single host IPv4, on Domain and Private profiles only. **This rule is the only access control**: once it exists, check that the rule the page shows matches what you entered.
-4. If several EPLAN instances are running, select the target in "EPLAN instance (PID)"; use "Refresh instances" if it is missing. Choose "Start service" and check for `Listening at http://<VM IPv4>:<port>/mcp. Keep the Workbench running.` Each service stays bound to one instance; it will not switch to another if that instance exits.
+2. Select the VM's address in "VM IPv4". "Port" defaults to `8766`.
+3. Choose "Allow network access" and have an administrator consent in the Windows UAC dialog. The inbound rule allows only the selected TCP port, this `eplanmcp.exe`, and computers on the **local subnet** (the host and the VM are usually on the same one), on Domain and Private profiles only. **This rule is the only access control**: other computers on that subnet can connect too, so use it only on a private network you trust; once it exists, check the rule the page shows.
+4. Choose "Start service", check for `Listening at http://<VM IPv4>:<port>/mcp. Keep the Workbench running.`, then choose "Copy" and give the MCP address to the AI client on the host. The service is bound to no EPLAN instance: it starts with no EPLAN running, and the AI can start EPLAN with `eplan_session_start`, pick one of several with `eplan_session_select`, and close or restart EPLAN (while only scratch projects are open).
 
 The service never starts automatically during installation or at sign-in. A service started by Workbench stops when Workbench exits. Closing the window only minimises it to the tray; exit from the tray to stop it.
 
@@ -168,20 +168,19 @@ CLI alternative (do not start a second service alongside Workbench's): first run
 
 ```powershell
 $eplanMcp = 'D:\EplanMcp\eplanmcp.exe'
-& $eplanMcp vm-instances --format json
-& $eplanMcp vm-firewall show --port 8766 --host-address 192.168.56.1
+& $eplanMcp vm-firewall show --port 8766
 ```
 
 Open a separate PowerShell window with "Run as administrator" to create the rule only (adjust the program path):
 
 ```powershell
-& 'D:\EplanMcp\eplanmcp.exe' vm-firewall add --port 8766 --host-address 192.168.56.1
+& 'D:\EplanMcp\eplanmcp.exe' vm-firewall add --port 8766
 ```
 
-Return to the ordinary window to start the service. Omit `--process` for a single instance; with several, replace `1234` with the target PID from `vm-instances`. This command stays in the foreground; stop it with Ctrl+C.
+Return to the ordinary window to start the service. This command stays in the foreground; stop it with Ctrl+C.
 
 ```powershell
-& $eplanMcp serve --http --address 192.168.56.2 --port 8766 --process 1234
+& $eplanMcp serve --http --address 192.168.56.2 --port 8766
 ```
 
 ### On the host computer: connect clients
@@ -216,21 +215,21 @@ Run the `vm-test` command above on the host and check its failure code. Add `--f
 
 | Failure code | What to do |
 |---|---|
-| `unreachable` | Confirm the VM service is listening. Check the firewall rule, host source IPv4, VM IPv4, and port, and that the private network connects both machines. |
+| `unreachable` | Confirm the VM service is listening. Check the firewall rule, VM IPv4, and port, and that the host and the VM share a private subnet and reach each other. |
 | `timed_out` | A request exceeded 10 seconds. Check whether the VM is paused, the service is responsive, or network packets are being lost or dropped by the firewall, then test again. |
 | `forbidden` (403) | The request has an unapproved `Origin` header, often from a browser-based client. Have the engineer check `httpAllowedOrigins` in the VM's `config.json`, add only the actual trusted Origin, then restart the service. The list is empty by default; `vm-test` sends no Origin. |
 | `protocol_error` | Check that the URL is `http://<IPv4>:<port>/mcp`. Check protocol and software versions; retry with the same ZIP version on both machines. A client of 0.8.0 or earlier that cannot reach a 0.9.0 service needs the same version on both sides. |
 
-Run `& $eplanMcp doctor` **in the VM**: `http.service` lists services for this data root and their bound addresses/ports; `vm.firewall` reports whether the rule exists and its actual scope. Check the program path, TCP port, host address, and Domain/Private profiles. These checks do not change rules or replace a connection test from the host.
+Run `& $eplanMcp doctor` **in the VM**: `http.service` lists services for this data root and their bound addresses/ports; `vm.firewall` reports whether the rule exists and its actual scope. Check the program path, TCP port, scope (local subnet), and Domain/Private profiles. These checks do not change rules or replace a connection test from the host.
 
 ### Remove the VM connection
 
 On the host, select clients in "VM ↔ host" mode, choose "Remove entry", confirm removal of `eplan-vm`, then restart the clients. Alternatively, run `& $eplanMcp client-config --vm --remove` to remove recorded remote entries; no address is needed. In the VM, choose "Stop service" → "Remove network access" (requires UAC consent).
 
-For the CLI alternative, stop the foreground service in the VM with Ctrl+C, then remove the rule in administrator PowerShell. Use the same port, host IPv4, and program path used to create the rule.
+For the CLI alternative, stop the foreground service in the VM with Ctrl+C, then remove the rule in administrator PowerShell. Use the same port and program path used to create the rule; a rule an older version made for the host IPv4 is removed this way too.
 
 ```powershell
-& 'D:\EplanMcp\eplanmcp.exe' vm-firewall remove --port 8766 --host-address 192.168.56.1
+& 'D:\EplanMcp\eplanmcp.exe' vm-firewall remove --port 8766
 ```
 
 ---

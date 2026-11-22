@@ -4,8 +4,15 @@ using System.Net.Sockets;
 
 namespace EplanMcp.Host.Http;
 
+/// <summary>
+/// One vm-firewall command. <see cref="HostAddress"/> is the rule's remote address: the host's IPv4 when given, else
+/// <see cref="LocalSubnet"/>, so that a VM connection needs only its MCP address (ADR-0067).
+/// </summary>
 internal sealed record VmFirewallRequest(string Action, int Port, string HostAddress, bool Json = false)
 {
+    /// <summary>Windows Firewall's keyword for the subnets of the computer's own network adapters.</summary>
+    public const string LocalSubnet = "LocalSubnet";
+
     public static VmFirewallRequest? Parse(string action, string[] options)
     {
         var values = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -20,9 +27,9 @@ internal sealed record VmFirewallRequest(string Action, int Port, string HostAdd
 
         return action is "show" or "add" or "remove" && values.TryGetValue("--port", out string? number)
             && int.TryParse(number, NumberStyles.None, CultureInfo.InvariantCulture, out int port) && port is > 0 and <= 65535
-            && values.TryGetValue("--host-address", out string? address) && IsHostAddress(address)
+            && (!values.TryGetValue("--host-address", out string? address) || IsHostAddress(address))
             && (!values.TryGetValue("--format", out string? format) || (action == "show" && format == "json"))
-            ? new(action, port, address, values.ContainsKey("--format")) : null;
+            ? new(action, port, address ?? LocalSubnet, values.ContainsKey("--format")) : null;
     }
 
     private static bool IsHostAddress(string address) => IPAddress.TryParse(address, out IPAddress? ip)

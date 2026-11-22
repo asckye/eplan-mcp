@@ -23,16 +23,6 @@
           <TextBox x:Name="Port" Width="72" Style="{StaticResource Primer.Input}" FontFamily="{DynamicResource Ui.FontMono}" AutomationProperties.LabeledBy="{Binding ElementName=PortLabel}" TextChanged="OnInput" />
           <TextBlock x:Name="PortError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" MaxWidth="72" AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
-        <StackPanel Margin="{StaticResource Ui.Gap.Wrap.XS}">
-          <Label x:Name="HostLabel" Content="{l:Tr Vm.Host}" Target="{Binding ElementName=HostAddress}" Style="{StaticResource Workbench.FieldLabel}" />
-          <TextBox x:Name="HostAddress" Width="130" Style="{StaticResource Primer.Input}" FontFamily="{DynamicResource Ui.FontMono}" AutomationProperties.LabeledBy="{Binding ElementName=HostLabel}" TextChanged="OnInput" />
-          <TextBlock x:Name="HostError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" MaxWidth="130" AutomationProperties.LiveSetting="Polite" />
-        </StackPanel>
-        <StackPanel Margin="{StaticResource Ui.Gap.Wrap.XS}">
-          <Label x:Name="InstanceLabel" Content="{l:Tr Vm.Instance}" Target="{Binding ElementName=Instance}" Style="{StaticResource Workbench.FieldLabel}" />
-          <ComboBox x:Name="Instance" Width="100" Style="{StaticResource Primer.Select}" FontFamily="{DynamicResource Ui.FontMono}" FocusVisualStyle="{StaticResource Primer.Focus}" AutomationProperties.LabeledBy="{Binding ElementName=InstanceLabel}" SelectionChanged="OnInstance" />
-        </StackPanel>
-        <Button x:Name="Instances" Tag="instances" Content="{l:Tr Vm.CheckInstances}" Style="{StaticResource Workbench.ButtonMd}" Click="OnAction" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.VmButton}" />
         <Button x:Name="Allow" Tag="allow" Content="{l:Tr Vm.Allow}" Style="{StaticResource Workbench.ButtonMd}" Click="OnAction" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.VmButton}" />
       </WrapPanel>
     </DockPanel>
@@ -44,11 +34,13 @@
           <Path x:Name="ServiceIcon" Style="{StaticResource Primer.AlertIcon.Info}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Right.XXS}" />
           <TextBlock x:Name="ServiceStatus" Style="{StaticResource Workbench.CellMono}" Foreground="{DynamicResource Text.Secondary}" TextWrapping="Wrap" MaxWidth="360" AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
-        <TextBlock x:Name="Endpoint" Style="{StaticResource Workbench.CellMono}" Foreground="{DynamicResource Text.Secondary}" VerticalAlignment="Center" />
+        <Button x:Name="Copy" DockPanel.Dock="Left" Tag="copy" Content="{l:Tr Vm.Copy}" Style="{StaticResource Workbench.ButtonSm}" Click="OnAction" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.XS}" />
+        <!-- ADR-0067: the MCP address is all a client needs; selectable, and the button copies it. -->
+        <TextBox x:Name="Endpoint" Style="{StaticResource Workbench.CodeValue}" IsReadOnly="True" VerticalAlignment="Center" AutomationProperties.Name="{l:Tr Vm.McpAddress}" />
       </DockPanel>
     </Border>
 
-    <!-- The firewall rule that lets only the host in. -->
+    <!-- The firewall rule that lets the local subnet in (ADR-0067). -->
     <DockPanel Margin="{StaticResource Ui.Gap.Top.SM}">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="{StaticResource Ui.Gap.Left.SM}">
         <Button x:Name="Remove" Tag="remove" Content="{l:Tr Vm.Remove}" Style="{StaticResource Workbench.ButtonSm}" Click="OnAction" Margin="{StaticResource Ui.Gap.Right.XXS}" />

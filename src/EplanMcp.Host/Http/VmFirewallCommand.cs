@@ -26,7 +26,10 @@ internal sealed class VmFirewallCommand(IVmFirewall firewall, Func<bool> elevate
             }
 
             VmFirewallRule expected = request.Definition(program());
-            if (existing.Count > 1 || existing.Any(r => !r.Matches(expected)))
+
+            // Removing takes the rule whatever its remote address, so that a rule made for the host's IPv4 by an older
+            // version can be removed now that the address is no longer asked for (ADR-0067).
+            if (existing.Count > 1 || existing.Any(r => !r.Matches(request.Action == "remove" ? expected with { RemoteAddress = r.RemoteAddress } : expected)))
             {
                 output.WriteLine("The named rule differs from the requested rule. No changes made; use vm-firewall show to inspect it and supply its original port, host address and executable.");
                 return 1;

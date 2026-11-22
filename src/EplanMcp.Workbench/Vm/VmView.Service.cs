@@ -8,11 +8,9 @@ namespace EplanMcp.Workbench.Vm;
 internal sealed partial class VmView
 {
     private IVmChild? _child;
-    private bool _instancesKnown, _stopping, _disposed;
+    private bool _stopping, _disposed;
     private string _serviceState = "Vm.Stopped", _serviceError = string.Empty;
     private VmEndpoint? _bound;
-    public IReadOnlyList<int> Processes { get; private set; } = [];
-    public int? SelectedProcess { get; set; }
     public bool Running => _child is not null;
     public bool Starting => _serviceState == "Vm.Starting";
     public string ServiceStatus => _serviceState == "Vm.Listening" && _bound is { } bound
@@ -28,7 +26,7 @@ internal sealed partial class VmView
         limit.CancelAfter(TimeSpan.FromSeconds(30));
         try
         {
-            _child = (launcher ?? new VmProcess()).Start(host!.Executable, Address, Port, Processes.Count > 1 ? SelectedProcess : null);
+            _child = (launcher ?? new VmProcess()).Start(host!.Executable, Address, Port, null); // no pinned EPLAN (ADR-0067)
             Changed();
             Task<VmEndpoint> listening = _child.ListeningAsync(limit.Token);
             Task first = await Task.WhenAny(listening, _child.Completion).ConfigureAwait(true);
@@ -67,5 +65,4 @@ internal sealed partial class VmView
     }
 
     public void Dispose() { _disposed = true; StopService(); }
-    internal sealed record InstanceReport(int SchemaVersion, IReadOnlyList<int> Processes);
 }

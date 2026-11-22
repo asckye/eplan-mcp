@@ -14,14 +14,13 @@ public sealed class VmServiceTests
         var fake = new FakeVm();
         var launcher = new FakeVmLauncher();
         using VmView view = fake.Create(launcher: launcher);
-        await fake.RunAsync(view, "instances");
         Assert.Empty(launcher.Starts);
         Task running = fake.RunAsync(view, "start");
         Assert.True(view.Running);
         Assert.True(view.Starting);
         Assert.Equal(Loc.Current["Vm.Starting"], view.ServiceStatus);
         Assert.Equal((fake.Host.Executable, "192.168.56.2", "8766", (int?)null), Assert.Single(launcher.Starts));
-        foreach (string action in new[] { "start", "settings", "instances" })
+        foreach (string action in new[] { "start", "settings" })
         {
             Assert.Equal(Loc.Current["Vm.StopFirst"], view.DisabledReason(action));
         }
@@ -54,7 +53,6 @@ public sealed class VmServiceTests
         var fake = new FakeVm();
         var launcher = new FakeVmLauncher();
         using VmView view = fake.Create(launcher: launcher);
-        await fake.RunAsync(view, "instances");
         Task running = fake.RunAsync(view, "start");
         if (afterListening)
         {
@@ -73,39 +71,34 @@ public sealed class VmServiceTests
         Assert.DoesNotContain('\u202E', view.ServiceStatus);
     }
 
-    [Theory]
-    [InlineData("[]", "Vm.NoEplan")]
-    [InlineData("[100,200]", "Vm.PickInstance")]
-    public async Task MissingPrerequisite_DisablesStartWithReason(string processes, string reason)
+    [Fact]
+    public async Task Start_NeedsNoEplanInstance_AndNeverPinsOne()
     {
-        var fake = new FakeVm { Instances = "{\"schemaVersion\":1,\"processes\":" + processes + "}" };
+        // ADR-0067: the service starts with no EPLAN running and is bound to none; the AI starts or selects EPLAN.
+        var fake = new FakeVm();
         var launcher = new FakeVmLauncher();
         using VmView view = fake.Create(launcher: launcher);
-        await fake.RunAsync(view, "instances");
-        Assert.Equal(Loc.Current[reason], view.DisabledReason("start"));
-        await fake.RunAsync(view, "start");
-        Assert.Empty(launcher.Starts);
+        Assert.Empty(view.DisabledReason("start"));
+
+        Task running = fake.RunAsync(view, "start");
+
+        Assert.Null(Assert.Single(launcher.Starts).Process);
+        Assert.DoesNotContain(fake.Host.Runs, r => r.Arguments[0] == "vm-instances");
+        await fake.RunAsync(view, "stop");
+        await running;
     }
 
     [Fact]
-    public async Task MultipleInstances_RequiresAnExplicitCurrentChoice_ThenPassesOnlyChosenPid()
+    public async Task Copy_PutsTheMcpAddressOnTheClipboard()
     {
-        var fake = new FakeVm { Instances = "{\"schemaVersion\":1,\"processes\":[100,200]}" };
-        var launcher = new FakeVmLauncher();
-        using VmView view = fake.Create(launcher: launcher);
-        await fake.RunAsync(view, "instances");
-        Assert.Null(view.SelectedProcess);
-        view.SelectedProcess = 300;
-        Assert.Equal(Loc.Current["Vm.PickInstance"], view.DisabledReason("start"));
-        view.SelectedProcess = 200;
-        Task running = fake.RunAsync(view, "start");
-        Assert.Equal(200, Assert.Single(launcher.Starts).Process);
-        await fake.RunAsync(view, "stop");
-        await running;
-        await fake.RunAsync(view, "instances");
-        Assert.Null(view.SelectedProcess);
-    }
+        var fake = new FakeVm();
+        using VmView view = fake.Create();
 
+        await fake.RunAsync(view, "copy");
+
+        Assert.Equal(["http://192.168.56.2:8766/mcp"], fake.Clipboard);
+        Assert.Equal(Loc.Current["Vm.Copied"], view.Message);
+    }
     [Theory]
     [InlineData(null)]
     [InlineData(200)]
@@ -125,7 +118,6 @@ public sealed class VmServiceTests
         var fake = new FakeVm();
         var launcher = new FakeVmLauncher();
         using VmView view = fake.Create(launcher: launcher);
-        await fake.RunAsync(view, "instances");
         Task running = fake.RunAsync(view, "start");
         launcher.Child.Listening.SetCanceled(TestContext.Current.CancellationToken);
         await running;

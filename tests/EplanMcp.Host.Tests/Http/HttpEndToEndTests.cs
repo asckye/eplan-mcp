@@ -169,9 +169,12 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
-    public void Startup_RefusesMissingOrAmbiguousSelection()
+    public async Task Startup_WithoutAProcess_IsBoundToNoEplan_AndAnUnknownProcessIsRefused()
     {
-        Assert.Throws<HttpStartException>(() => VmHttp.Build(new HttpArguments(IPAddress.Loopback, 0, null), _locations, HostConfig.Defaults(_locations), _discovery));
+        // ADR-0067: without --process the service starts whatever EPLAN runs, none or several, and is not pinned.
+        await using WebApplication unpinned = VmHttp.Build(new HttpArguments(IPAddress.Loopback, 0, null), _locations, HostConfig.Defaults(_locations), _discovery);
+        Assert.Null(unpinned.Services.GetService<HttpPinned>());
+        Assert.False(unpinned.Services.GetRequiredService<EplanMcp.Host.Addin.EplanLifecycle>().Pinned);
         Assert.Throws<HttpStartException>(() => VmHttp.Build(new HttpArguments(IPAddress.Loopback, 0, 999), _locations, HostConfig.Defaults(_locations), _discovery));
     }
 

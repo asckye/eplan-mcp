@@ -67,7 +67,8 @@ public sealed class VmFirewallTests
         Assert.Null(CliArguments.Parse(["vm-firewall"]));
         Assert.Null(CliArguments.Parse(["vm-firewall", "show"]));
         Assert.Null(CliArguments.Parse(["vm-firewall", "enable", .. valid]));
-        Assert.Null(CliArguments.Parse(["vm-firewall", "add", "--port", "8766"]));
+        // ADR-0067: without --host-address the rule is for the local subnet.
+        Assert.Equal(VmFirewallRequest.LocalSubnet, CliArguments.Parse(["vm-firewall", "add", "--port", "8766"])!.Firewall!.HostAddress);
         Assert.Null(CliArguments.Parse(["vm-firewall", "remove", "--host-address", "192.168.56.1"]));
         foreach (string[] extra in new[]
         {
@@ -151,6 +152,21 @@ public sealed class VmFirewallTests
         Assert.Equal(1, firewall.Reads);
     }
 
+    [Fact]
+    public void WithoutAHostAddress_TheRuleIsForTheLocalSubnet_AndAnOlderHostOnlyRuleCanStillBeRemoved()
+    {
+        // ADR-0067: the VM connection needs only its MCP address.
+        var empty = new FakeVmFirewall { Records = true };
+        using var added = new StringWriter(CultureInfo.InvariantCulture);
+        Assert.Equal(0, new VmFirewallCommand(empty, () => true, () => ProgramPath).Run(CliArguments.Parse(["vm-firewall", "add", "--port", "8766"])!.Firewall!, added));
+        Assert.Equal(["add LocalSubnet"], empty.Changes);
+
+        VmFirewallRule older = new VmFirewallRequest("add", 8766, "192.168.56.1").Definition(ProgramPath);
+        var firewall = new FakeVmFirewall { Rules = [older], Records = true };
+        using var removed = new StringWriter(CultureInfo.InvariantCulture);
+        Assert.Equal(0, new VmFirewallCommand(firewall, () => true, () => ProgramPath).Run(CliArguments.Parse(["vm-firewall", "remove", "--port", "8766"])!.Firewall!, removed));
+        Assert.Equal(["remove EplanMcp.Vm.Http"], firewall.Changes);
+    }
     [Fact]
     public void Matches_HandlesWindowsHostMaskAndPathCaseButRejectsBroaderRules()
     {

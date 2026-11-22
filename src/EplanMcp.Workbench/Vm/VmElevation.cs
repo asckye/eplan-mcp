@@ -7,21 +7,21 @@ namespace EplanMcp.Workbench.Vm;
 
 internal interface IVmElevation
 {
-    public Task<int?> RunAsync(string executable, bool remove, string port, string hostAddress, CancellationToken cancellationToken);
+    public Task<int?> RunAsync(string executable, bool remove, string port, CancellationToken cancellationToken);
 }
 
 internal sealed class VmElevation : IVmElevation
 {
-    internal static ProcessStartInfo StartInfo(string executable, bool remove, string port, string hostAddress)
+    internal static ProcessStartInfo StartInfo(string executable, bool remove, string port)
     {
         if (!Path.IsPathFullyQualified(executable) || !string.Equals(Path.GetFileName(executable), "eplanmcp.exe", StringComparison.OrdinalIgnoreCase)
-            || !VmNetwork.IsPort(port) || !VmNetwork.IsAddress(hostAddress))
+            || !VmNetwork.IsPort(port))
         {
-            throw new ArgumentException("An absolute Host path, port and canonical IPv4 are required.");
+            throw new ArgumentException("An absolute Host path and a port are required.");
         }
 
         var start = new ProcessStartInfo(executable) { UseShellExecute = true, Verb = "runas", WorkingDirectory = Path.GetDirectoryName(executable)!, WindowStyle = ProcessWindowStyle.Hidden };
-        foreach (string argument in new[] { "vm-firewall", remove ? "remove" : "add", "--port", int.Parse(port, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture), "--host-address", hostAddress })
+        foreach (string argument in new[] { "vm-firewall", remove ? "remove" : "add", "--port", int.Parse(port, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture) })
         {
             start.ArgumentList.Add(argument);
         }
@@ -29,11 +29,11 @@ internal sealed class VmElevation : IVmElevation
         return start;
     }
 
-    public async Task<int?> RunAsync(string executable, bool remove, string port, string hostAddress, CancellationToken cancellationToken)
+    public async Task<int?> RunAsync(string executable, bool remove, string port, CancellationToken cancellationToken)
     {
         try
         {
-            using Process process = Process.Start(StartInfo(executable, remove, port, hostAddress)) ?? throw new InvalidOperationException("Host did not start.");
+            using Process process = Process.Start(StartInfo(executable, remove, port)) ?? throw new InvalidOperationException("Host did not start.");
             await process.WaitForExitAsync(cancellationToken).WaitAsync(TimeSpan.FromMinutes(2), cancellationToken).ConfigureAwait(false);
             return process.ExitCode;
         }
