@@ -23,7 +23,7 @@ internal sealed class CableReassignTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(CableReassignResult))]
-    [Description("Lets EPLAN assign the connections of cables to matching core templates, as its Reassign all command does; cable diagrams then list cores with their connections. Previews by default. Execution always requires engineer approval, including scratch, and a project backup. One undo.")]
+    [Description("Lets EPLAN assign the connections of cables to matching core templates, as its Reassign all command does; cable diagrams then list cores with their connections. A connection designation that only repeats the core's colour or number is cleared, so the core is not labelled twice. Previews by default. Execution always requires engineer approval, including scratch, and a project backup. One undo.")]
     public static async Task<CallToolResult> ReassignAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,

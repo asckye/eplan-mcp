@@ -32,7 +32,7 @@
 | EPLAN_OPERATION_FAILED | EPLAN 拒绝 | rolled_back |
 
 ## 5. 实现要点
-一次改很多连接，和 `eplan_cable_renumber` 一样是 Destructive。Bridge 用 `CableService.DoReassignWires`：全部电缆用项目重载，指定电缆时逐个用功能重载。官方说明：连接和芯线模板的电位类型相同才会分配，模板的识别属性会复制到连接上。前后读 `Cable.CableConnections` 的芯线代号、颜色、截面对比。整个调用一次撤销。
+一次改很多连接，和 `eplan_cable_renumber` 一样是 Destructive。Bridge 用 `CableService.DoReassignWires`：全部电缆用项目重载，指定电缆时逐个用功能重载。官方说明：连接和芯线模板的电位类型相同才会分配，模板的识别属性会复制到连接上。分配后，连接代号（31011）和芯线的颜色或编号（31004）完全相同的，清掉代号：两者都会显示在连接定义点上，图上同一根芯会出现两个一样的标签（2026-11-22 重画，每个电缆页多一行“1 2 3 GNYE”）。连接定义点上的代号不能直接设置（S063113），所以在连接上清。前后读 `Cable.CableConnections` 的芯线代号、颜色、截面对比。整个调用一次撤销。
 
 ## 6. 测试
 - Small：`CableReassignOperationTests`。

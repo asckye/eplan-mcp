@@ -4211,7 +4211,7 @@
     {
       "name": "eplan_cable_reassign",
       "title": "Assign cable connections to their cores",
-      "description": "Lets EPLAN assign the connections of cables to matching core templates, as its Reassign all command does; cable diagrams then list cores with their connections. Previews by default. Execution always requires engineer approval, including scratch, and a project backup. One undo.",
+      "description": "Lets EPLAN assign the connections of cables to matching core templates, as its Reassign all command does; cable diagrams then list cores with their connections. A connection designation that only repeats the core's colour or number is cleared, so the core is not labelled twice. Previews by default. Execution always requires engineer approval, including scratch, and a project backup. One undo.",
       "inputSchema": {
         "type": "object",
         "properties": {
