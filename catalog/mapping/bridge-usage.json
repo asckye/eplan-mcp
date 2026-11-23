@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
-  "scannedOn": "2026-11-20",
-  "scannedSources": "eed3e08d",
-  "sourceHash": "sha256:bf2f0638bab6bd659845d996f6ad6700db35b926d784440acc786aa6fd29bfd1",
+  "scannedOn": "2026-11-23",
+  "scannedSources": "552082242",
+  "sourceHash": "sha256:7f8e21af5f2467a81c32abf1bf85a153f5695f1d453e3a1da4a06447d8d6c666",
   "operations": [
     {
       "name": "action.execute",
@@ -156323,6 +156323,17 @@
         ]
       },
       {
+        "adapter": "EplanCableReassigner",
+        "member": "Text",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.cs",
@@ -173907,6 +173918,17 @@
         ]
       },
       {
+        "adapter": "EplanCableReassigner",
+        "member": "Text",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
         "adapter": "EplanDevicePartAssigner",
         "member": "ReadMainFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
@@ -174626,6 +174648,17 @@
         ],
         "operations": [
           "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.reassign.execute"
         ]
       },
       {
@@ -192380,6 +192413,17 @@
         ]
       },
       {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageReviewReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Pages/EplanPageReviewReader.cs",
@@ -193905,6 +193949,17 @@
           "plc.rack.execute",
           "plc.rack.plan"
         ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "Text",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ConnectionPropertyList.Property(Eplan.EplApi.DataModel.Properties.Connection)": [
@@ -193928,6 +193983,17 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "cable.reassign.execute"
         ]
       }
     ],
@@ -198463,6 +198529,17 @@
           "cable.get",
           "cable.reassign.execute",
           "cable.reassign.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.reassign.execute"
         ]
       },
       {
@@ -230802,6 +230879,17 @@
         ]
       },
       {
+        "adapter": "EplanCableReassigner",
+        "member": "Text",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
         "adapter": "EplanDevicePartAssigner",
         "member": "ReadMainFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
@@ -250968,6 +251056,17 @@
         ]
       },
       {
+        "adapter": "EplanCableReassigner",
+        "member": "Text",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "ReadDisplays",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Displays.cs",
@@ -252522,6 +252621,17 @@
         ]
       },
       {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Connections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanPlcReader.cs",
@@ -253440,6 +253550,28 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "Text",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
         ]
       },
       {
@@ -261625,6 +261757,28 @@
         ]
       },
       {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "Reassign",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageReviewReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Pages/EplanPageReviewReader.cs",
@@ -263566,17 +263720,6 @@
           "cable.get",
           "cable.reassign.execute",
           "cable.reassign.plan"
-        ]
-      },
-      {
-        "adapter": "EplanCableReassigner",
-        "member": "Reassign",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "cable.reassign.execute"
         ]
       },
       {
@@ -284843,6 +284986,17 @@
         ]
       },
       {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.cs",
@@ -284998,6 +285152,17 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "DropEchoedDesignations",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
         ]
       }
     ],
@@ -286227,6 +286392,17 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableReassigner",
+        "member": "Text",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableReassigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.reassign.execute"
         ]
       },
       {

@@ -1020,10 +1020,10 @@
         "cable.reassign.execute",
         "cable.reassign.plan"
       ],
-      "apiIds": 116,
-      "operationGroups": 55,
+      "apiIds": 123,
+      "operationGroups": 58,
       "dataDictionary": 2,
-      "dependencies": 52,
+      "dependencies": 55,
       "actions": 0,
       "spec": "docs/tools/eplan_cable_reassign.md",
       "small": 0,
@@ -9315,6 +9315,7 @@
       "partial": true,
       "tools": [
         "eplan_api_try",
+        "eplan_cable_reassign",
         "eplan_connection_create",
         "eplan_connection_list",
         "eplan_device_place",
