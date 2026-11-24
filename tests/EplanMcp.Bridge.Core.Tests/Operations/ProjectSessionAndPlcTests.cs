@@ -241,12 +241,12 @@ public sealed class ProjectSessionAndPlcTests : IDisposable
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => ReaddressPlan(args)).Error.Reason);
     }
 
-    private static PlcReaddressArgs Readdress() => new()
+    private PlcReaddressArgs Readdress() => new()
     {
         Project = "Line1",
         DigitalInput = "I0.0",
         Sorting = "connection_point",
-        Backup = new BackupTarget { Path = Path.Combine(Directory.CreateTempSubdirectory("eplanmcp-plc-").FullName, "Line1.elk"), MaxSeconds = 60 },
+        Backup = new BackupTarget { Path = Path.Combine(Directory.CreateDirectory(Path.Combine(_folder, Guid.NewGuid().ToString("N"))).FullName, "Line1.elk"), MaxSeconds = 60 },
     };
 
     private WritePlan ReaddressPlan(PlcReaddressArgs args) => (WritePlan)new PlcReaddressPlanOperation(Catalog, _addressing).Execute(args)!;

@@ -5,7 +5,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 /// <summary>plc.generate.plan and plc.generate.execute against fakes.</summary>
 [Trait("Size", "Small")]
-public sealed class PlcGenerateOperationTests
+public sealed class PlcGenerateOperationTests : IDisposable
 {
     private const string Device = "=F+A1-A1";
     private const string Target = "=F+A1&EFS1/9";
@@ -15,6 +15,8 @@ public sealed class PlcGenerateOperationTests
     private readonly Schematics _schematics = new();
     private readonly string _macroRoot = Directory.CreateTempSubdirectory("eplanmcp-plc-").FullName;
     private readonly FakeMacroReader _macros;
+
+    public void Dispose() => Directory.Delete(_macroRoot, recursive: true);
 
     public PlcGenerateOperationTests()
     {

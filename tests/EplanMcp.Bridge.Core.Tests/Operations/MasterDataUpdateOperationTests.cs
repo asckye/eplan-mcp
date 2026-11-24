@@ -5,11 +5,14 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 /// <summary>masterdata.update.plan and masterdata.update.execute against fakes.</summary>
 [Trait("Size", "Small")]
-public sealed class MasterDataUpdateOperationTests
+public sealed class MasterDataUpdateOperationTests : IDisposable
 {
+    private readonly string _folder = Directory.CreateTempSubdirectory("eplanmcp-masterdata-").FullName;
     private readonly FakeCatalog _catalog = new(new OpenProject { Name = "Line1", Path = @"D:\Scratch\Line1", Current = true });
     private readonly MasterData _masterData = new();
     private readonly FakePageReader _pages = new();
+
+    public void Dispose() => Directory.Delete(_folder, recursive: true);
 
     [Fact]
     public void Plan_GivesTheScope_AndWritesNothing()
@@ -53,7 +56,7 @@ public sealed class MasterDataUpdateOperationTests
         Assert.Equal(0, _masterData.Updates);
     }
 
-    private static BackupTarget Backup() => new() { Path = Path.Combine(Directory.CreateTempSubdirectory("eplanmcp-masterdata-").FullName, "Line1.elk"), MaxSeconds = 60 };
+    private BackupTarget Backup() => new() { Path = Path.Combine(Directory.CreateDirectory(Path.Combine(_folder, Guid.NewGuid().ToString("N"))).FullName, "Line1.elk"), MaxSeconds = 60 };
 
     private WritePlan Plan(MasterDataUpdateArgs args) => (WritePlan)new MasterDataUpdatePlanOperation(_catalog, _masterData).Execute(args)!;
 

@@ -229,7 +229,13 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
             {
                 await _client.DisposeAsync();
             }
-            TestContext.Current.TestOutputHelper!.WriteLine($"Retained audit and backups: {_home}; scratch: {_folder}; retained for unsettled write or unsafe navigation: {!_safeToClean || _navigationFailed}");
+            bool keep = !_safeToClean || _navigationFailed;
+            if (!keep)
+            {
+                // The audit stays; the project backups take hundreds of megabytes a run.
+                TestFolders.Delete(Path.Combine(_home, "backups"));
+            }
+            TestContext.Current.TestOutputHelper!.WriteLine($"Retained audit (and backups after a failure): {_home}; scratch: {_folder}; retained for unsettled write or unsafe navigation: {keep}");
         }
     }
 

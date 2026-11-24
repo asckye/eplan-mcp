@@ -5,12 +5,15 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 /// <summary>The structure.* operations against a fake project.</summary>
 [Trait("Size", "Small")]
-public sealed class StructureOperationTests
+public sealed class StructureOperationTests : IDisposable
 {
+    private readonly string _folder = Directory.CreateTempSubdirectory("eplanmcp-structure-").FullName;
     private readonly FakeCatalog _catalog = new(new OpenProject { Name = "Line1", Path = @"D:\Scratch\Line1", Current = true });
     private readonly Identifiers _identifiers = new();
     private readonly FakeTransactions _transactions = new();
     private readonly FakePageReader _pages = new();
+
+    public void Dispose() => Directory.Delete(_folder, recursive: true);
 
     [Fact]
     public void List_FiltersByBlockAndUse_TellingSingleFromDoublePrefixes()
@@ -185,7 +188,7 @@ public sealed class StructureOperationTests
         Assert.Equal(1, _transactions.Calls.Count(c => c == "Commit"));
     }
 
-    private static BackupTarget Backup() => new() { Path = Path.Combine(Directory.CreateTempSubdirectory("eplanmcp-structure-").FullName, "Line1.elk"), MaxSeconds = 60 };
+    private BackupTarget Backup() => new() { Path = Path.Combine(Directory.CreateDirectory(Path.Combine(_folder, Guid.NewGuid().ToString("N"))).FullName, "Line1.elk"), MaxSeconds = 60 };
 
     private static StructureUpdateArgs Update(params (string Name, string? Description)[] items) => new()
     {

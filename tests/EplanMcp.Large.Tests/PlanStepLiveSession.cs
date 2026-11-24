@@ -262,6 +262,7 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
         {
             // An unknown/modal/timed-out trial must not trigger cleanup writes or project switching.
             await bridge.DisposeAsync();
+            TestContext.Current.TestOutputHelper?.WriteLine("Retained backups: " + _backups);
             return;
         }
         try
@@ -301,6 +302,9 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
             {
                 await bridge.DisposeAsync();
             }
+
+            // Only after a clean end: a failed restore keeps the backups. Each holds a full copy of the project (about 200 MB).
+            TestFolders.Delete(_backups);
         }
     }
 

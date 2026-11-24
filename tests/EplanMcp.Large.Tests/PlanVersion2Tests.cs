@@ -199,8 +199,9 @@ public sealed class PlanVersion2Tests(LiveEplan eplan)
                     await bridge.InvokeWriteAsync<PageDeleteArgs, JsonElement>(OperationNames.PageDeleteExecute, delete, Guid.NewGuid().ToString("N"), TimeSpan.FromSeconds(120), null, Token);
                 }
                 Assert.DoesNotContain((await new PlanNamesReader(bridge).ReadAsync(project, Token)).Names, n => n.Name == page);
+                TestFolders.Delete(Path.Combine(home, "backups"));
             }
-            Print("Retained test audit and backups: " + home);
+            Print("Retained test audit (and backups after a failure): " + home);
         }
     }
 

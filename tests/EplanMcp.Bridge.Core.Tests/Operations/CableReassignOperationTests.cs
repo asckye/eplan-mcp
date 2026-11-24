@@ -5,12 +5,15 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 /// <summary>cable.reassign.plan and cable.reassign.execute against fakes.</summary>
 [Trait("Size", "Small")]
-public sealed class CableReassignOperationTests
+public sealed class CableReassignOperationTests : IDisposable
 {
+    private readonly string _folder = Directory.CreateTempSubdirectory("eplanmcp-cable-").FullName;
     private readonly FakeCatalog _catalog = new(new OpenProject { Name = "Line1", Path = @"D:\Scratch\Line1", Current = true });
     private readonly Cables _cables = new();
     private readonly FakeTransactions _transactions = new();
     private readonly FakePageReader _pages = new();
+
+    public void Dispose() => Directory.Delete(_folder, recursive: true);
 
     [Fact]
     public void Plan_GivesTheScope_AndWritesNothing()
@@ -50,7 +53,7 @@ public sealed class CableReassignOperationTests
         Assert.Empty(_cables.Reassigned);
     }
 
-    private static BackupTarget Backup() => new() { Path = Path.Combine(Directory.CreateTempSubdirectory("eplanmcp-cable-").FullName, "Line1.elk"), MaxSeconds = 60 };
+    private BackupTarget Backup() => new() { Path = Path.Combine(Directory.CreateDirectory(Path.Combine(_folder, Guid.NewGuid().ToString("N"))).FullName, "Line1.elk"), MaxSeconds = 60 };
 
     private WritePlan Plan(CableReassignArgs args) => (WritePlan)new CableReassignPlanOperation(_catalog, _cables, _cables).Execute(args)!;
 
