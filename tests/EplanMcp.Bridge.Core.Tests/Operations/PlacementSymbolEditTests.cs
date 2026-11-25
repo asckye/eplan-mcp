@@ -70,6 +70,57 @@ public sealed class PlacementSymbolEditTests
         Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => Run()).Error.Execution);
         Assert.Equal(baseline, fake.Data.ToString());
     }
+    [Fact]
+    public void MainFunction_IsSetAndReadBack_InOneTransaction()
+    {
+        PlacementEditFixture fake = Function(false);
+        JObject request = MainRequest(fake, true);
+        JObject preview = (JObject)new PlacementEditOperation(fake, fake, false, fake.Backup).Execute(request)!;
+        fake.Mutation = () => fake.Data["objects"]![0]!["mainFunction"] = true;
+        JObject result = (JObject)new PlacementEditExecuteOperation(fake, fake, fake.Backup).Execute(new JObject { ["request"] = request, ["fingerprint"] = preview["fingerprint"] })!;
+        Assert.True((bool)result["predicted"]![0]!["mainFunction"]!);
+        Assert.Equal((1, 1), (fake.Transactions, fake.Closed));
+    }
+    [Fact]
+    public void MainFunction_Cleared_Warns_AndUnchangedReadbackRollsBack()
+    {
+        PlacementEditFixture fake = Function(true);
+        JObject request = MainRequest(fake, false);
+        JObject preview = (JObject)new PlacementEditOperation(fake, fake, false, fake.Backup).Execute(request)!;
+        Assert.Contains("parts lists", preview.ToString(), StringComparison.Ordinal);
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => new PlacementEditExecuteOperation(fake, fake, fake.Backup)
+            .Execute(new JObject { ["request"] = request, ["fingerprint"] = preview["fingerprint"] })).Error.Execution);
+    }
+    [Theory]
+    [InlineData("second")]
+    [InlineData("text")]
+    [InlineData("not_boolean")]
+    public void MainFunction_Invalid_IsRefusedBeforeTransaction(string scenario)
+    {
+        PlacementEditFixture fake = Function(false);
+        JObject request = MainRequest(fake, true);
+        if (scenario == "second")
+        { fake.Mains["=A+B-K8"] = 1; }
+        if (scenario == "text")
+        { ((JObject)fake.Data["objects"]![0]!).Remove("mainFunction"); }
+        if (scenario == "not_boolean")
+        { request["main_function"] = "yes"; }
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => new PlacementEditOperation(fake, fake, false, fake.Backup).Execute(request)).Error.Reason);
+        Assert.Equal(0, fake.Transactions);
+    }
+    private static PlacementEditFixture Function(bool main)
+    {
+        PlacementEditFixture fake = Symbol("PLC");
+        fake.Data["objects"]![0]!["functionName"] = "=A+B-K8";
+        fake.Data["objects"]![0]!["mainFunction"] = main;
+        return fake;
+    }
+    private static JObject MainRequest(PlacementEditFixture fake, bool main)
+    {
+        JObject request = fake.Input("set_main_function");
+        request["main_function"] = main;
+        return request;
+    }
     internal static PlacementEditFixture Symbol(string name)
     {
         var fake = new PlacementEditFixture();

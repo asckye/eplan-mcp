@@ -19,6 +19,7 @@
 | `dissect_assemblies` | boolean | 否 | 不改 | 列出部件组内的部件 |
 | `include_terminal_strip_parts` | boolean | 否 | 不改 | 列出端子排定义上的部件，比如端支架 |
 | `include_plug_strip_parts` | boolean | 否 | 不改 | 列出插头排定义上的部件 |
+| `single_line_cross_references` | boolean | 否 | 不改 | 多线页是否显示指向单线页的交叉引用 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false |
 
 ## 3. 输出
@@ -32,7 +33,7 @@
 | EPLAN_OPERATION_FAILED | EPLAN 拒绝，或读回不一致，已恢复旧值 | rolled_back |
 
 ## 5. 实现要点
-走 `WritePipeline`，scratch 内自动执行。设置名来自 `Cfg/PartsListGui.xml` 的 PROJECT 类别，只开放上面 4 个，契约里是封闭清单。用 `ProjectSettings` 读写，和语言设置相同。项目设置不被 `SafetyPoint` 回滚（A28），也不进撤销列表，所以读回不符时由 Bridge 写回旧值。
+走 `WritePipeline`，scratch 内自动执行。部件列表的设置名来自 `Cfg/PartsListGui.xml` 的 PROJECT 类别，交叉引用是列表设置 `EsCrossReference.Function.ShowCrossReference.Circuit`（含文档类型 2 即显示；关闭时把 2 写成 0，打开时把 2 写进第一个值为 0 的位置），只开放上面的设置，契约里是封闭清单。用 `ProjectSettings` 读写，和语言设置相同。项目设置不被 `SafetyPoint` 回滚（A28），也不进撤销列表，所以读回不符时由 Bridge 写回旧值。
 
 ## 6. 测试
 - Small：`ReportSettingsOperationTests`。

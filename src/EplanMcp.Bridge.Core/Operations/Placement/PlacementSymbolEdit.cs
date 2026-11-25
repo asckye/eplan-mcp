@@ -9,8 +9,11 @@ internal static class PlacementSymbolEdit
     {
         bool arrangement = (string?)input["operation"] == "set_arrangement";
         bool rename = (string?)input["operation"] == "rename";
-        string field = rename ? "name" : arrangement ? "property_arrangement" : "symbol_variant";
+        bool main = (string?)input["operation"] == PlacementMainFunction.Operation;
+        string field = rename ? "name" : main ? PlacementMainFunction.Field : arrangement ? "property_arrangement" : "symbol_variant";
         Validate(input, before, field, rename, arrangement);
+        if (main)
+        { Require(input[field]?.Type == JTokenType.Boolean, "main_function must be boolean."); }
         string hash = Fingerprint.Of([input.ToString(Formatting.None), before.ToString(Formatting.None)]);
         if (fingerprint is not null && fingerprint != hash)
         { throw new BridgeErrorException(ErrorReason.PlanStale, "Object evidence changed; find and preview again."); }
@@ -25,12 +28,15 @@ internal static class PlacementSymbolEdit
             if (counts is null)
             { warning = "Project interruption point counts could not be read."; }
         }
+        IReadOnlyDictionary<string, int>? mains = main && (bool)input[field]! ? editor.MainFunctionCounts((string)before["scene"]!["project"]!["path"]!) : null;
         foreach (JToken locator in input["locators"]!)
         {
-            JToken root = Resolve(input, before, locator, predicted, rename);
+            JToken root = Resolve(input, before, locator, predicted, rename || main);
             var row = (JObject)root.DeepClone();
             if (rename)
             { PlacementRename.Predict(row, (string)input["page"]!, fullName!, counts); }
+            else if (main)
+            { PlacementMainFunction.Predict(row, (bool)input[field]!, mains, predicted); }
             else if (arrangement)
             {
                 string[]? names = (root["arrangements"] as JArray)?.Values<string>().Select(n => n!).ToArray();
@@ -53,6 +59,8 @@ internal static class PlacementSymbolEdit
             predicted.Add(row);
         }
         bool noOp = rename ? predicted.All(p => (bool)p["noOp"]!) : predicted.All(p => before["objects"]!.Any(o => JToken.DeepEquals(p, o)));
+        if (main && !(bool)input[field]! && !noOp)
+        { warning = PlacementMainFunction.ClearedWarning; }
         var plan = new JObject
         {
             ["project"] = before["scene"]!["project"]!["name"]!.DeepClone(),
@@ -63,7 +71,7 @@ internal static class PlacementSymbolEdit
             ["removedConnections"] = new JArray(),
             ["newLocators"] = new JArray(),
             ["noOp"] = noOp,
-            ["warning"] = arrangement || rename ? warning ?? string.Empty : warning + " Symbol connection directions may change; call eplan_connection_generate if needed."
+            ["warning"] = arrangement || rename || main ? warning ?? string.Empty : warning + " Symbol connection directions may change; call eplan_connection_generate if needed."
         };
         if (rename)
         { plan["hint"] = "Call eplan_connection_generate for the page so the interruption point's connections and cross-references follow."; }
@@ -83,17 +91,17 @@ internal static class PlacementSymbolEdit
         Require((string?)input["project"] == (string?)before["scene"]!["project"]!["name"] || ProjectResolver.SamePath((string)input["project"]!, (string)before["scene"]!["project"]!["path"]!), "Use the explicit open project.");
         Require(input["dry_run"] is null || input["dry_run"]!.Type == JTokenType.Boolean, "dry_run must be boolean.");
         Require(input["response_format"] is null || (string?)input["response_format"] is "concise" or "detailed", "Use concise or detailed.");
-        Require(rename || arrangement || input["symbol_variant"]?.Type == JTokenType.Integer && input["symbol_variant"]!.Value<double>() is >= 0 and <= int.MaxValue, "symbol_variant must be a nonnegative integer.");
+        Require(rename || arrangement || field == PlacementMainFunction.Field || input["symbol_variant"]?.Type == JTokenType.Integer && input["symbol_variant"]!.Value<double>() is >= 0 and <= int.MaxValue, "symbol_variant must be a nonnegative integer.");
         Require(!arrangement || input[field]?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)input[field]), "property_arrangement must be a nonempty exact name.");
     }
 
-    private static JToken Resolve(JObject input, JObject before, JToken locator, JArray predicted, bool rename)
+    private static JToken Resolve(JObject input, JObject before, JToken locator, JArray predicted, bool withoutSymbol)
     {
         ConnectionCreatePlanner.Members(locator, "/locators", "project page type oid digest", "");
         Require(locator["type"]?.Type == JTokenType.Integer && locator["oid"]?.Type == JTokenType.Integer && locator["digest"]?.Type == JTokenType.String && (string?)locator["page"] == (string?)input["page"] && locator["project"]?.Type == JTokenType.String && ProjectResolver.SamePath((string)locator["project"]!, (string)before["scene"]!["project"]!["path"]!), "Supply exact same-page find locators.");
         JToken root = before["objects"]!.SingleOrDefault(o => JToken.DeepEquals(o["locator"], locator)) ?? throw new BridgeErrorException(ErrorReason.PlanStale, "Refresh the exact find locator.");
         Require(!predicted.Any(p => JToken.DeepEquals(p["locator"], locator)), "Remove duplicate locators.");
-        Require(rename || root["symbol"] is JObject, "The selected object has no symbol.");
+        Require(withoutSymbol || root["symbol"] is JObject, "The selected object has no symbol.");
         return root;
     }
 
@@ -124,6 +132,12 @@ internal static class PlacementSymbolEdit
                     row["locator"] = actual["locator"]!.DeepClone();
                     structureWarning ??= name.StructureWarning;
                 }
+                continue;
+            }
+            if ((string?)plan["operation"] == PlacementMainFunction.Operation)
+            {
+                original["mainFunction"] = row["mainFunction"]!.DeepClone();
+                original["locator"] = actual["locator"]!.DeepClone();
                 continue;
             }
             if ((string?)plan["operation"] == "set_arrangement")

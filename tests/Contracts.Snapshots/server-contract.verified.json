@@ -19504,7 +19504,7 @@
     {
       "name": "eplan_placement_edit",
       "title": "Edit placements on one EPLAN page",
-      "description": "Edits symbols, renames interruption points, or transforms/deletes placements on one Circuit page. Move to a position: eplan_placement_update; graphic geometry: eplan_graphic_edit. mm, bottom left, y up. Rotation: 90-degree steps, positive counterclockwise. Copy preserves tags and may associate devices. Delete always needs approval and backup; other edits need approval outside scratch. Denial: APPROVAL_DENIED. Omit dry_run to preview; false executes. One undo. See eplan_tool_usage.",
+      "description": "Edits symbols and main functions, renames interruption points, or transforms/deletes placements on one Circuit page. Move to a position: eplan_placement_update; graphic geometry: eplan_graphic_edit. mm, bottom left, y up. Rotation: 90-degree steps, positive counterclockwise. Copy preserves tags and may associate devices. Delete always needs approval and backup; other edits need approval outside scratch. Denial: APPROVAL_DENIED. Omit dry_run to preview; false executes. One undo. See eplan_tool_usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -19536,6 +19536,7 @@
               "distribute",
               "set_variant",
               "set_arrangement",
+              "set_main_function",
               "rename"
             ]
           },
@@ -19552,6 +19553,10 @@
             "description": "Interruption name for rename.",
             "type": "string",
             "minLength": 1
+          },
+          "main_function": {
+            "description": "Make main or not.",
+            "type": "boolean"
           },
           "property_arrangement": {
             "description": "Exact arrangement name.",
@@ -19733,6 +19738,7 @@
               "distribute",
               "set_variant",
               "set_arrangement",
+              "set_main_function",
               "rename"
             ]
           },
@@ -24336,7 +24342,7 @@
     {
       "name": "eplan_report_configure",
       "title": "Set how parts list reports are built",
-      "description": "Sets the project's parts list settings; reports change after eplan_report_update. Previews by default. Approval outside scratch. Not on EPLAN's undo list: call again with the old value.",
+      "description": "Sets parts list and single-line cross-reference settings; reports change after eplan_report_update. Previews by default. Approval outside scratch. No undo: call again with the old value.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -24370,6 +24376,14 @@
           },
           "include_plug_strip_parts": {
             "description": "List plug strip parts",
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "default": null
+          },
+          "single_line_cross_references": {
+            "description": "Show single-line references",
             "type": [
               "boolean",
               "null"

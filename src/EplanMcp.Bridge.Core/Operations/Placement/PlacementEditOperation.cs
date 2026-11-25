@@ -10,7 +10,7 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
     {
         JObject input = execute ? args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["Supply request."])) : args;
         bool rename = (string?)input["operation"] == "rename";
-        bool symbolEdit = (string?)input["operation"] is "set_variant" or "set_arrangement" or "rename";
+        bool symbolEdit = (string?)input["operation"] is "set_variant" or "set_arrangement" or "set_main_function" or "rename";
         JObject before, plan;
         try
         {
@@ -84,6 +84,18 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
                 Property = "name",
                 OldValue = (string?)row["oldName"],
                 NewValue = (string?)row["name"]
+            };
+        }
+        if (operation == PlacementMainFunction.Operation)
+        {
+            return new PlannedChange
+            {
+                Action = "update",
+                Kind = "function",
+                Name = target,
+                Property = PlacementMainFunction.Field,
+                OldValue = (bool)row["mainFunction"]! ? "false" : "true",
+                NewValue = (bool)row["mainFunction"]! ? "true" : "false"
             };
         }
         return new PlannedChange

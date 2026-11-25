@@ -33,6 +33,11 @@ internal sealed partial class EplanPlacementEditor
                 row["name"] = point.Name;
                 row["visibleName"] = point.VisibleName;
             }
+            if (root is Function owner)
+            {
+                row["functionName"] = owner.Name;
+                row["mainFunction"] = owner.IsMainFunction;
+            }
             if (root is SymbolReference reference)
             {
                 row["arrangement"] = EplanSymbolArrangement.SelectedName(reference);
@@ -62,6 +67,15 @@ internal sealed partial class EplanPlacementEditor
         }
     }
 
+    /// <summary>Main functions per device tag, placed or not. The complete read (A170): the unfiltered one omits placed functions.</summary>
+    public IReadOnlyDictionary<string, int> MainFunctionCounts(string projectPath)
+    {
+        MainThread.Assert();
+        using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
+        return EplanDeviceReader.AllFunctions(finder).Where(f => f.IsMainFunction).GroupBy(f => f.Name ?? string.Empty, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+    }
+
     private static void EditSymbols(JObject input, JObject before)
     {
         Project project = EplanProjects.ByPath((string)before["scene"]!["project"]!["path"]!);
@@ -84,6 +98,13 @@ internal sealed partial class EplanPlacementEditor
                 continue;
             }
             EplanNativePreconditions.Writable(root);
+            if ((string?)input["operation"] == "set_main_function")
+            {
+                var owner = (Function)root;
+                if (owner.IsMainFunction != (bool)input["main_function"]!)
+                { owner.IsMainFunction = (bool)input["main_function"]!; }
+                continue;
+            }
             if ((string?)input["operation"] == "set_arrangement")
             { EplanSymbolArrangement.Select(root, (string)input["property_arrangement"]!); continue; }
             SymbolVariant current = root.SymbolVariant;

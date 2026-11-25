@@ -25,7 +25,7 @@ internal sealed class ReportSettingsTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(ReportSettingsResult))]
-    [Description("Sets the project's parts list settings; reports change after eplan_report_update. Previews by default. Approval outside scratch. Not on EPLAN's undo list: call again with the old value.")]
+    [Description("Sets parts list and single-line cross-reference settings; reports change after eplan_report_update. Previews by default. Approval outside scratch. No undo: call again with the old value.")]
     public static async Task<CallToolResult> UpdateAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,
@@ -33,6 +33,7 @@ internal sealed class ReportSettingsTools
         [Description("List an assembly's parts")] bool? dissect_assemblies = null,
         [Description("List terminal strip parts")] bool? include_terminal_strip_parts = null,
         [Description("List plug strip parts")] bool? include_plug_strip_parts = null,
+        [Description("Show single-line references")] bool? single_line_cross_references = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -47,6 +48,7 @@ internal sealed class ReportSettingsTools
         Add("PartsListGui.DissectAssemblies", dissect_assemblies);
         Add("PartsListGui.IncludeTerminalStripParts", include_terminal_strip_parts);
         Add("PartsListGui.IncludePlugStripParts", include_plug_strip_parts);
+        Add(ReportSettingsArgs.SingleLineCrossReferences, single_line_cross_references);
         var args = new ReportSettingsArgs { Project = project, Settings = settings };
         var request = new WriteRequest<ReportSettingsArgs, ReportSettingsArgs>(
             Tool, ToolTier.Write, OperationNames.ReportSettingsPlan, OperationNames.ReportSettingsExecute, args,

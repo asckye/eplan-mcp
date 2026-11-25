@@ -19,6 +19,7 @@ Set it:
 - `summarize_parts_of_same_device`: true sums devices with the same tag and part number into one row; false lists each, such as every terminal of a strip.
 - `dissect_assemblies`: lists the parts of an assembly.
 - `include_terminal_strip_parts`, `include_plug_strip_parts`: list the parts on strip definitions, such as end brackets.
+- `single_line_cross_references`: false hides references to single-line pages on multi-line pages; true shows them again.
 - `changes`: the settings whose value changes, with `oldValue` and `newValue`.
 
 ## Errors

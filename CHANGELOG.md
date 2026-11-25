@@ -5,6 +5,10 @@
 
 ## [Unreleased]
 
+### 新增
+
+- `eplan_placement_edit` 新操作 `set_main_function`：设定或取消功能的主功能，以前只能用每次审批的 `eplan_api_try`。`eplan_report_configure` 新参数 `single_line_cross_references`：多线页是否显示指向单线页的交叉引用。两者都是普通写入。
+
 ## [1.1.0] - 2026-11-21
 
 ### 变更
