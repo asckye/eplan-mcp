@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 2817,
-      "byTools": 2810,
+      "implemented": 2818,
+      "byTools": 2811,
       "partial": 202,
-      "automatedTest": 2810,
+      "automatedTest": 2811,
       "liveVerified": 1332,
       "envBlocked": 15,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 1017,
-      "byTools": 1010,
+      "implemented": 1018,
+      "byTools": 1011,
       "partial": 103,
-      "automatedTest": 1010,
+      "automatedTest": 1011,
       "liveVerified": 180,
       "envBlocked": 12,
       "undocumented": 66
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 947,
+      "implemented": 948,
       "liveVerified": 557
     },
     {
@@ -3036,8 +3036,8 @@
         "report.settings.execute",
         "report.settings.plan"
       ],
-      "apiIds": 16,
-      "operationGroups": 8,
+      "apiIds": 19,
+      "operationGroups": 11,
       "dataDictionary": 0,
       "dependencies": 8,
       "actions": 0,
@@ -27777,9 +27777,10 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_report_configure"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ProjectSettings.GetDoubleSetting",
@@ -27817,9 +27818,10 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_report_configure"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ProjectSettings.GetStringSetting",
@@ -27861,6 +27863,16 @@
       "tools": [
         "eplan_language_remove",
         "eplan_language_set",
+        "eplan_report_configure"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectSettings.SetNumericSetting",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
         "eplan_report_configure"
       ],
       "route": "dedicated"
@@ -72883,7 +72895,7 @@
   "reachability": {
     "operation": {
       "denominator": 4014,
-      "tools": 2817,
+      "tools": 2818,
       "apiTry": 2610,
       "callable": 2828,
       "outsideDenominator": {},
@@ -72989,7 +73001,7 @@
   },
   "routes": {
     "api_try_only": {
-      "count": 2066,
+      "count": 2064,
       "live_verified": 907
     },
     "declined": {
@@ -72997,7 +73009,7 @@
       "live_verified": 0
     },
     "dedicated": {
-      "count": 629,
+      "count": 632,
       "live_verified": 425
     },
     "generic_read": {
@@ -73009,7 +73021,7 @@
       "live_verified": 0
     },
     "other": {
-      "count": 11,
+      "count": 10,
       "live_verified": 0
     },
     "state_only": {
@@ -73045,7 +73057,7 @@
       "denominator": 5983,
       "routes": {
         "api_try_only": {
-          "count": 2328,
+          "count": 2326,
           "live_verified": 914
         },
         "declined": {
@@ -73053,7 +73065,7 @@
           "live_verified": 0
         },
         "dedicated": {
-          "count": 841,
+          "count": 844,
           "live_verified": 505
         },
         "generic_read": {
@@ -73065,7 +73077,7 @@
           "live_verified": 0
         },
         "other": {
-          "count": 15,
+          "count": 14,
           "live_verified": 0
         },
         "state_only": {
@@ -73078,7 +73090,7 @@
       "denominator": 3109,
       "routes": {
         "api_try_only": {
-          "count": 975,
+          "count": 973,
           "live_verified": 85
         },
         "declined": {
@@ -73086,7 +73098,7 @@
           "live_verified": 0
         },
         "dedicated": {
-          "count": 405,
+          "count": 408,
           "live_verified": 175
         },
         "generic_read": {
@@ -73098,7 +73110,7 @@
           "live_verified": 0
         },
         "other": {
-          "count": 15,
+          "count": 14,
           "live_verified": 0
         },
         "state_only": {

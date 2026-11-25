@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
-  "scannedOn": "2026-11-23",
-  "scannedSources": "552082242",
-  "sourceHash": "sha256:7f8e21af5f2467a81c32abf1bf85a153f5695f1d453e3a1da4a06447d8d6c666",
+  "scannedOn": "2026-11-25",
+  "scannedSources": "cbea922e7",
+  "sourceHash": "sha256:ab8895e1392e045f824f01055fbdef9cfe568077b1bee84328b598f0f412e161",
   "operations": [
     {
       "name": "action.execute",
@@ -158265,6 +158265,17 @@
       },
       {
         "adapter": "EplanPlacementEditor",
+        "member": "MainFunctionCounts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.cs",
         "access": [
@@ -172912,6 +172923,18 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanReportSettings",
+        "member": "Values",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Exchange/EplanReportSettings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "report.settings.execute",
+          "report.settings.plan"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.ProjectSettings.GetDoubleSetting(System.String,System.Int32)": [
@@ -173007,6 +173030,18 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanReportSettings",
+        "member": "Values",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Exchange/EplanReportSettings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "report.settings.execute",
+          "report.settings.plan"
         ]
       }
     ],
@@ -173140,6 +173175,19 @@
         "operations": [
           "language.remove.execute",
           "language.set.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.ProjectSettings.SetNumericSetting(System.String,System.Int32,System.Int32)": [
+      {
+        "adapter": "EplanReportSettings",
+        "member": "WriteSingleLine",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Exchange/EplanReportSettings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "report.settings.execute"
         ]
       }
     ],
@@ -201453,6 +201501,40 @@
       },
       {
         "adapter": "EplanPlacementEditor",
+        "member": "EditSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InspectSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "MainFunctionCounts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.cs",
         "access": [
@@ -203472,6 +203554,17 @@
       {
         "adapter": "EplanPlacementEditor",
         "member": "InterruptionCounts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "MainFunctionCounts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
         "access": [
           "get"
@@ -255192,6 +255285,17 @@
       },
       {
         "adapter": "EplanPlacementEditor",
+        "member": "MainFunctionCounts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.cs",
         "access": [
@@ -264453,6 +264557,17 @@
       {
         "adapter": "EplanPlacementEditor",
         "member": "EditSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InspectSymbols",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
         "access": [
           "type"
@@ -284803,7 +284918,30 @@
       },
       {
         "adapter": "EplanReportSettings",
+        "member": "Values",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Exchange/EplanReportSettings.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "report.settings.execute",
+          "report.settings.plan"
+        ]
+      },
+      {
+        "adapter": "EplanReportSettings",
         "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Exchange/EplanReportSettings.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "report.settings.execute"
+        ]
+      },
+      {
+        "adapter": "EplanReportSettings",
+        "member": "WriteSingleLine",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Exchange/EplanReportSettings.cs",
         "access": [
           "type"

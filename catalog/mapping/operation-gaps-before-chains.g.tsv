@@ -593,7 +593,6 @@ O:Eplan.EplApi.DataModel.ProjectSettings.DeleteSetting	Eplan.EplApi.DataModel	T:
 O:Eplan.EplApi.DataModel.ProjectSettings.ReadSettings	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ProjectSettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ProjectSettings.SetDoubleSetting	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ProjectSettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ProjectSettings.SetMultiLangStringSetting	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ProjectSettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
-O:Eplan.EplApi.DataModel.ProjectSettings.SetNumericSetting	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ProjectSettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Properties.AllArcPropIDs	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.Properties	property	static_or_nonpublic	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Properties.AllAreaPropIDs	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.Properties	property	static_or_nonpublic	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Properties.AllArticlePropIDs	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.Properties	property	static_or_nonpublic	No unique supported compiled member shape
