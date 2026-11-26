@@ -9,6 +9,10 @@
 
 - `eplan_placement_edit` 新操作 `set_main_function`：设定或取消功能的主功能，以前只能用每次审批的 `eplan_api_try`。`eplan_report_configure` 新参数 `single_line_cross_references`：多线页是否显示指向单线页的交叉引用。两者都是普通写入。
 
+### 修复
+
+- `eplan_device_update` 给电缆加或替换部件时，同一步里接着传部件数据，导线随即分配到部件的芯线上。以前要再单独调用一次 `update_from_parts`，漏掉时检查报“该设备使用的功能多于部件提供的功能”（通过式烘芯炉 WG3–WG7）。
+
 ## [1.1.0] - 2026-11-21
 
 ### 变更

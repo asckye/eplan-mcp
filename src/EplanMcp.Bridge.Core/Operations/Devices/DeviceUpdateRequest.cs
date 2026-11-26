@@ -171,6 +171,9 @@ internal sealed class DeviceUpdateRequest
             .Concat(ReplacePart is null ? [] : ["replace_part " + ReplacePart])
             .Concat(UpdateFromParts ? ["update from parts"] : []));
 
+    /// <summary>A part added to or replaced on a cable: its wires reach the part's cores only with the part data (A167).</summary>
+    internal static bool TransfersCableCores(DeviceUpdateRequest request) => request.Part is not null && request.Main?.Category == "Cable";
+
     internal static bool SameReferences(IEnumerable<DevicePart> actual, IEnumerable<DevicePart> expected)
     {
         static (string Part, string? Variant, int Count) Identity(DevicePart reference) =>

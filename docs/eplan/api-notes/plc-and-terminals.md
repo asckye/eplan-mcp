@@ -8,7 +8,7 @@
 - **现象（再调用 `eplan_cable_reassign`）：** 返回 `committed`，`changed` 为空，`FunctionTemplates` 和检查消息都不变。
 - **现象（再调用 `update_from_parts`）：** 页上的芯线回到 `FunctionTemplates` 里。部件 `LAPP.00100234`（4G0,75，四根芯线）时三根导线都分配上，剩一个未放置的模板，检查消息消失；部件 `LAPP.00100224`（3G0,75，三根芯线）时只分配上两根，剩一个未放置的模板，检查消息仍在。
 - **结论：** 给电缆挂部件只加了引用，芯线要靠传部件数据这一步才分配到部件的芯线上；导线找不到合适的芯线时保持未分配，检查就报这条消息。3G 部件剩下的那根芯线为什么不接第三根导线没有读到（三根导线都没有 PE 电位，推测剩下的是 PE 芯线，未证实）。
-- **工具行为：** `eplan_device_update` 给电缆加或替换部件时，结果的 `hint` 写明还要对这根电缆调用一次 `update_from_parts`，`eplan_cable_reassign` 不能代替。
+- **工具行为：** `eplan_device_update` 给电缆加或替换部件时，提交后在同一个撤销步骤里接着传部件数据（2026-11-25 起；此前只在 `hint` 里提醒另调 `update_from_parts`）。`eplan_cable_reassign` 不能代替。2026-11-25 实机（Electric P8，scratch 副本 验证主功能 `=+S1-W6` 换部件；通过式烘芯炉 WG3–WG7 手动传部件数据）：传完后检查消息消失。11-19 怀疑的连接定义点功能定义不是原因，工具画的定义点本来就是 `Wire/1/4`（芯线/导线），2026-11-25 再次读到。
 - **证据：** `CablePartFunctionsSpikeTests`（探针，`Spike=C7`）两次运行的输出。
 ### A164. 删除接在 PLC 端子上的器件后，EPLAN 会改动相邻的 PLC 端子（2026-11-19，EPLAN 2026.0.3.25421，Pro Panel，B 槽，LargeWrite scratch 新页）
 - **现象：** 页上一个 PLC 卡的端子 `=GAA+A1-KF103:X10:2` 接着一个器件。删除这个器件（`Remove()`）并提交后，页面快照里除了被删的对象，这个 PLC 端子的内容也变了；它的对象标识和类型没有变，没有别的对象出现或消失。

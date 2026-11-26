@@ -22,13 +22,21 @@ public sealed partial class DevicePartAssignmentTests
     [Theory]
     [InlineData("Cable", true)]
     [InlineData("BusBarDefText", false)]
-    public void PartOnACable_PlanSaysTheCoresStillNeedThePartData(string category, bool expected)
+    public void PartOnACable_TransfersThePartDataInTheSameStep(string category, bool expected)
     {
         const string part = "LAPP.00100234";
         _store.Targets[0].Category = category;
         _store.Database.Parts.Add(new PartSearchItem { PartNumber = part, Variant = "1" });
-        WritePlan plan = Plan(new DeviceUpdateArgs { Project = "Line1", Tag = Tag, Part = part });
+        var args = new DeviceUpdateArgs { Project = "Line1", Tag = Tag, Part = part };
+        WritePlan plan = Plan(args);
         Assert.Equal(expected, plan.Details!.ContainsKey("cableCores"));
+        Assert.Equal(expected, plan.Changes.Any(c => c.Kind == "part data"));
+        args.Fingerprint = plan.Fingerprint;
+        Execute(args);
+        if (expected)
+        { Assert.Equal(_store.Targets[0].Id, Assert.Single(_store.Transfers)); }
+        else
+        { Assert.Empty(_store.Transfers); }
     }
     [Theory]
     [InlineData(null, 1)]

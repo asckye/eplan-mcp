@@ -95,12 +95,15 @@ internal sealed class DeviceWriteTools
                 ? "The response was lost, but EPLAN reported the update as committed; check the device with eplan_device_get."
                 : ResultShaper.CleanText(outcome.Data?.Warning),
         };
-        if (outcome.Plan.Details?.GetValueOrDefault("cableCores") is { Length: > 0 } cores)
+        string? cores = outcome.Plan.Details?.GetValueOrDefault("cableCores");
+        if (cores is { Length: > 0 })
         { result.Hint = string.IsNullOrEmpty(result.Hint) ? cores : result.Hint + " " + cores; }
         if (replace_part is not null)
         {
             string? warning = outcome.Plan.Details?.GetValueOrDefault("warning");
-            result.Hint = string.Join(" ", new[] { result.Hint, warning, "Call eplan_device_update separately with update_from_parts to transfer the part data." }.Where(h => !string.IsNullOrEmpty(h)));
+            // A cable already got its part data in the same step (cableCores).
+            string? transfer = cores is { Length: > 0 } ? null : "Call eplan_device_update separately with update_from_parts to transfer the part data.";
+            result.Hint = string.Join(" ", new[] { result.Hint, warning, transfer }.Where(h => !string.IsNullOrEmpty(h)));
             return ToolResults.Success(committed ? "Replaced one part reference. Ctrl+Z restores the update." : "Dry run: would replace one part reference.", result);
         }
         string what = $"a device and its {ToolResults.Count(Math.Max(0, result.Device.Functions - 1), "auxiliary function")}";

@@ -46,7 +46,10 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
         // A93: part transfer and template assignment need fresh transactions inside the same undo step; a further
         // part still needs the SafetyPoint (S063074 otherwise), and the first part already brought the templates.
         bool assignTemplates = request.Part is not null && request.Main!.Parts.Count == 0;
-        ITransactionScopeFactory scope = request.UpdateFromParts || assignTemplates ? assigner!.PartTransactions(request.Project.Path) : transactions;
+        // A167/通过式烘芯炉 2026-11-25: a part on a cable leaves its wires off the part's cores (check: more functions than the
+        // part provides) until the part data is transferred, so the same call transfers it.
+        bool cableCores = DeviceUpdateRequest.TransfersCableCores(request);
+        ITransactionScopeFactory scope = request.UpdateFromParts || assignTemplates || cableCores ? assigner!.PartTransactions(request.Project.Path) : transactions;
         int assignedFunctions = 0;
         string? assignmentWarning = null;
         Committed<RenameReadBack> committed = TransactionRunner.Run(scope, Tool, () =>
@@ -87,6 +90,13 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             { throw InvalidArgument("The committed function or its part references did not match the plan; the change was rolled back."); }
             if (assignTemplates)
             { (assignedFunctions, assignmentWarning) = assigner!.AssignUnplacedFunctions(request.Project.Path, request.NewTag); }
+            if (cableCores)
+            {
+                assigner!.TransferPartData(request.Project.Path, main.Id);
+                if (!DeviceUpdateRequest.SameReferences(DeviceUpdateRequest.MainFunction(assigner, request.Project.Path, request.NewTag, includeTerminals: !request.Rename).Parts,
+                    request.ExpectedReferences()))
+                { throw InvalidArgument("EPLAN changed the cable's part references while transferring the part data; the change was rolled back."); }
+            }
         }, verifyRollback: () =>
         {
             if (request.Rename && renamer.ReadDevice(request.Project.Path, request.Device.Tag) is null)

@@ -32,7 +32,7 @@ To rename an interruption point use eplan_placement_edit with operation rename.
 ## 3. 输出
 替换计划按原位置列出旧、新部件号、变体和数量。若有后续引用，计划会提示其覆盖属性将随重新添加而恢复为部件值。一次 SafetyPoint 和一次撤销涵盖完整替换；提交后按顺序核对每个引用。结果的可选顶层 `replacedPart` 含原 `partNumber`、`variant` 和 `count`。需传递部件数据时另行调用 `update_from_parts`。
 
-目标是电缆时（加部件或替换部件），结果的 `hint` 会写明：部件挂上后导线还没有分配到部件的芯线上，检查会报“该设备使用的功能多于部件提供的功能”；要对这根电缆再单独调用一次 `update_from_parts`，`eplan_cable_reassign` 不能代替。传完部件数据仍有这条消息，说明有导线在部件里找不到合适的芯线，要换芯数合适的部件（A167）。
+目标是电缆时（加部件或替换部件），同一次调用在提交后接着传部件数据，仍在同一个撤销步骤里：只挂部件引用时导线不会分配到部件的芯线上，检查会报“该设备使用的功能多于部件提供的功能”（A167）。计划里因此多一条 `part data` 变更，结果的 `hint` 说明已传部件数据。传完仍有这条消息，说明有导线在部件里找不到合适的芯线，要换芯数合适的部件。
 省略或 `dry_run: true` 返回设备变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 ```json
 {
