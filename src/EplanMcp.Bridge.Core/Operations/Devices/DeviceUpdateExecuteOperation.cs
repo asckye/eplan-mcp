@@ -91,12 +91,7 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             if (assignTemplates)
             { (assignedFunctions, assignmentWarning) = assigner!.AssignUnplacedFunctions(request.Project.Path, request.NewTag); }
             if (cableCores)
-            {
-                assigner!.TransferPartData(request.Project.Path, main.Id);
-                if (!DeviceUpdateRequest.SameReferences(DeviceUpdateRequest.MainFunction(assigner, request.Project.Path, request.NewTag, includeTerminals: !request.Rename).Parts,
-                    request.ExpectedReferences()))
-                { throw InvalidArgument("EPLAN changed the cable's part references while transferring the part data; the change was rolled back."); }
-            }
+            { TransferCableCores(request, main.Id); }
         }, verifyRollback: () =>
         {
             if (request.Rename && renamer.ReadDevice(request.Project.Path, request.Device.Tag) is null)
@@ -122,6 +117,14 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             AssignedFunctions = assignedFunctions,
             Warning = warning.Length == 0 ? null : warning,
         };
+    }
+
+    private void TransferCableCores(DeviceUpdateRequest request, string mainId)
+    {
+        assigner!.TransferPartData(request.Project.Path, mainId);
+        if (!DeviceUpdateRequest.SameReferences(DeviceUpdateRequest.MainFunction(assigner, request.Project.Path, request.NewTag, includeTerminals: !request.Rename).Parts,
+            request.ExpectedReferences()))
+        { throw InvalidArgument("EPLAN changed the cable's part references while transferring the part data; the change was rolled back."); }
     }
 
     private void VerifyRename(DeviceUpdateRequest request, RenameReadBack back)
